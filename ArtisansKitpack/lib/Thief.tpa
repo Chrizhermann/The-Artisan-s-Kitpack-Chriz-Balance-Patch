@@ -326,12 +326,19 @@ BUT_ONLY
 COPY ~%MOD_FOLDER%/Thief/spells/EEex~ ~OVERRIDE~
 
 COPY_EXISTING ~C0TH-E1B.spl~ ~override~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 STR_VAR resource = C0TH-E1B END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 STR_VAR resource = C0TH-E1C END
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_THIEF_UMD~) parameter1 = 0 parameter2 = 1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 1 timing = 9 STR_VAR resource = C0TH-E1B END
 
 COPY_EXISTING ~C0TH-E1C.spl~ ~override~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 STR_VAR resource = C0TH-E1B END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 STR_VAR resource = C0TH-E1C END
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_THIEF_UMD~) parameter1 = 1 parameter2 = 1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 1 timing = 9 STR_VAR resource = C0TH-E1C END
 
 COPY_EXISTING ~C0TH-E1C.spl~ ~override/C0TH-E2.SPL~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 STR_VAR resource = C0TH-E2 END
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_THIEF_UMD~) parameter1 = 1 parameter2 = 1 END
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 target = 1 timing = 9 STR_VAR resource = C0TH-E1 END
 
