@@ -1,0 +1,278 @@
+COPY_EXISTING ~enginest.2da~ ~override~
+  COUNT_2DA_ROWS 2 rows
+  FOR (row = 0 ; row < rows ; ++row) BEGIN
+    READ_2DA_ENTRY row 0 2 entry
+    PATCH_IF (("%entry%" STRING_COMPARE_CASE "STRREF_GUI_MIXED_KIT_MAGESCHOOL_GENERALIST"      = 0)) BEGIN
+      FOR (col = 1; col < 2 ; ++col) BEGIN
+        READ_2DA_ENTRY row 1 2 name
+          GET_STRREF %name% mage_name
+    END
+    END
+  END
+  PRETTY_PRINT_2DA
+  BUT_ONLY
+
+COPY_EXISTING ~CLASTEXT.2DA~ ~override~
+      COUNT_2DA_COLS col_count
+      COUNT_2DA_ROWS col_count rows
+  READ_2DA_ENTRIES_NOW ~clastext~ 10
+      FOR (index = 0; index < rows; ++index) BEGIN
+  READ_2DA_ENTRY_FORMER ~clastext~ index 0 class_id
+  READ_2DA_ENTRY_FORMER ~clastext~ index 5 class_name
+
+PATCH_IF 
+				("%class_id%" STRING_EQUAL_CASE "CLERIC") BEGIN
+GET_STRREF %class_name% cleric_name
+END
+
+PATCH_IF 
+				("%class_id%" STRING_EQUAL_CASE "THIEF") BEGIN
+GET_STRREF %class_name% thief_name
+END
+
+PATCH_IF 
+				("%class_id%" STRING_EQUAL_CASE "RANGER") BEGIN
+GET_STRREF %class_name% ranger_name
+END
+
+PATCH_IF 
+				("%class_id%" STRING_EQUAL_CASE "DRUID") BEGIN
+GET_STRREF %class_name% druid_name
+END
+
+END
+
+COPY_EXISTING ~KITLIST.2DA~ ~override~
+  READ_2DA_ENTRIES_NOW ~fig_kitlist~ 10
+  FOR (row = 1; row < fig_kitlist; row += 1) BEGIN
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 5 kit_clab
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 0 kit_number
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 1 kit_label
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 3 kit_mixed
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 8 kit_class
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 9 kit_ids
+
+PATCH_IF FILE_EXISTS_IN_GAME ~%kit_clab%.2da~ BEGIN
+  PATCH_IF ((kit_class = 2) OR (kit_class = 3) OR (kit_class = 4) OR (kit_class = 11) OR (kit_class = 12)) BEGIN
+  INNER_ACTION BEGIN
+COPY ~ArtisansKitpack/spells/C0KT#NA.SPL~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "SPL" base = EVAL "C0KT_%kit_number%" RET abil_new_name = filename END
+    INNER_PATCH_SAVE abil_new_name "%abil_new_name%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+COPY_EXISTING ~%kit_clab%.2DA~ override
+        REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
+        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = EVAL ~AP_%abil_new_name%~ END
+        PRETTY_PRINT_2DA
+
+COPY_EXISTING ~C0KT#NA.SPL~ ~override/%abil_new_name%.SPL~
+  
+END
+
+// FIGHTER
+PATCH_IF (kit_class = 2) BEGIN
+  INNER_ACTION BEGIN
+
+COPY ~ArtisansKitpack/spells/C0KT#NA.EFF~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_MAGE" RET abil_new_name_f_m = filename END
+    INNER_PATCH_SAVE abil_new_name_f_m "%abil_new_name_f_m%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_CLERIC" RET abil_new_name_f_c = filename END
+    INNER_PATCH_SAVE abil_new_name_f_c "%abil_new_name_f_c%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_THIEF" RET abil_new_name_f_t = filename END
+    INNER_PATCH_SAVE abil_new_name_f_t "%abil_new_name_f_t%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_DRUID" RET abil_new_name_f_d = filename END
+    INNER_PATCH_SAVE abil_new_name_f_d "%abil_new_name_f_d%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_MAGE_THIEF" RET abil_new_name_f_m_t = filename END
+    INNER_PATCH_SAVE abil_new_name_f_m_t "%abil_new_name_f_m_t%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_FIGHTER_MAGE_CLERIC" RET abil_new_name_f_m_c = filename END
+    INNER_PATCH_SAVE abil_new_name_f_m_c "%abil_new_name_f_m_c%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_m%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %mage_name%~)
+WRITE_LONG 0x48 7
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_c%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %cleric_name%~)
+WRITE_LONG 0x48 8
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_t%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %thief_name%~)
+WRITE_LONG 0x48 9
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_d%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %druid_name%~)
+WRITE_LONG 0x48 16
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_m_t%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %mage_name% / %thief_name%~)
+WRITE_LONG 0x48 10
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_f_m_c%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %mage_name% / %cleric_name%~)
+WRITE_LONG 0x48 17
+
+COPY_EXISTING ~%abil_new_name%.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 321 timing = 1 STR_VAR resource = EVAL ~%SOURCE_RES%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 7 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_m%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 8 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_c%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 9 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_t%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 16 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_d%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 10 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_m_t%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 17 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_f_m_c%~ END
+  
+END
+END
+
+/////////////////////////////////////////////////////////////////
+
+// RANGER
+PATCH_IF (kit_class = 12) BEGIN
+  INNER_ACTION BEGIN
+
+COPY ~ArtisansKitpack/spells/C0KT#NA.EFF~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_RANGER_CLERIC" RET abil_new_name_r_c = filename END
+    INNER_PATCH_SAVE abil_new_name_r_c "%abil_new_name_r_c%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_r_c%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%cleric_name% / %kit_name%~)
+WRITE_LONG 0x48 18
+
+COPY_EXISTING ~%abil_new_name%.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 321 timing = 1 STR_VAR resource = EVAL ~%SOURCE_RES%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 19 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_r_c%~ END
+  
+END
+END
+
+/////////////////////////////////////////////////////////////////
+
+// CLERIC
+PATCH_IF (kit_class = 3) BEGIN
+  INNER_ACTION BEGIN
+
+COPY ~ArtisansKitpack/spells/C0KT#NA.EFF~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_CLERIC_FIGHTER" RET abil_new_name_c_f = filename END
+    INNER_PATCH_SAVE abil_new_name_c_f "%abil_new_name_c_f%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_CLERIC_RANGER" RET abil_new_name_c_r = filename END
+    INNER_PATCH_SAVE abil_new_name_c_r "%abil_new_name_c_r%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_CLERIC_MAGE" RET abil_new_name_c_m = filename END
+    INNER_PATCH_SAVE abil_new_name_c_m "%abil_new_name_c_m%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_CLERIC_THIEF" RET abil_new_name_c_t = filename END
+    INNER_PATCH_SAVE abil_new_name_c_t "%abil_new_name_c_t%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_CLERIC_FIGHTER_MAGE" RET abil_new_name_c_f_m = filename END
+    INNER_PATCH_SAVE abil_new_name_c_t "%abil_new_name_c_t%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_c_f%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~Fighter / %kit_name%~)
+WRITE_LONG 0x48 8
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_c_r%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %ranger_name%~)
+WRITE_LONG 0x48 18
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_c_m%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %mage_name%~)
+WRITE_LONG 0x48 14
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_c_t%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%kit_name% / %thief_name%~)
+WRITE_LONG 0x48 15
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_c_f_m%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~Fighter / %mage_name% / %kit_name%~)
+WRITE_LONG 0x48 17
+
+COPY_EXISTING ~%abil_new_name%.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 321 timing = 1 STR_VAR resource = EVAL ~%SOURCE_RES%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 8 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_c_f%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 18 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_c_r%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 14 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_c_m%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 15 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_c_t%~ END
+  
+END
+END
+
+/////////////////////////////////////////////////////////////////
+
+// THIEF
+PATCH_IF (kit_class = 4) BEGIN
+  INNER_ACTION BEGIN
+
+COPY ~ArtisansKitpack/spells/C0KT#NA.EFF~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_THIEF_FIGHTER" RET abil_new_name_t_f = filename END
+    INNER_PATCH_SAVE abil_new_name_t_f "%abil_new_name_t_f%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_THIEF_CLERIC" RET abil_new_name_t_c = filename END
+    INNER_PATCH_SAVE abil_new_name_t_c "%abil_new_name_t_c%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_THIEF_MAGE" RET abil_new_name_t_m = filename END
+    INNER_PATCH_SAVE abil_new_name_t_m "%abil_new_name_t_m%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_THIEF_FIGHTER_MAGE" RET abil_new_name_t_f_m = filename END
+    INNER_PATCH_SAVE abil_new_name_t_f_m "%abil_new_name_t_f_m%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_t_f%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~Fighter / %kit_name%~)
+WRITE_LONG 0x48 9
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_t_c%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%cleric_name% / %kit_name%~)
+WRITE_LONG 0x48 15
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_t_m%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~%mage_name% / %kit_name%~)
+WRITE_LONG 0x48 13
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_t_f_m%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~Fighter / %mage_name% / %kit_name%~)
+WRITE_LONG 0x48 10
+
+COPY_EXISTING ~%abil_new_name%.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 321 timing = 1 STR_VAR resource = EVAL ~%SOURCE_RES%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 9 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_t_f%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 15 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_t_c%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 13 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_t_m%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 10 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_t_f_m%~ END
+  
+END
+END
+
+/////////////////////////////////////////////////////////////////
+
+// DRUID
+PATCH_IF (kit_class = 11) BEGIN
+  INNER_ACTION BEGIN
+
+COPY ~ArtisansKitpack/spells/C0KT#NA.EFF~ ~override~
+    LPF GET_UNIQUE_FILE_NAME STR_VAR extension = "EFF" base = EVAL "C0KT_%kit_number%_DRUID_FIGHTER" RET abil_new_name_d_f = filename END
+    INNER_PATCH_SAVE abil_new_name_d_f "%abil_new_name_d_f%" BEGIN REPLACE_TEXTUALLY CASE_INSENSITIVE EXACT_MATCH ~__~ ~C0KT~ END
+
+COPY_EXISTING ~C0KT#NA.EFF~ ~override/%abil_new_name_d_f%.EFF~
+GET_STRREF %kit_mixed% kit_name
+WRITE_LONG 0x1c RESOLVE_STR_REF (~Fighter / %kit_name%~)
+WRITE_LONG 0x48 16
+
+COPY_EXISTING ~%abil_new_name%.SPL~ ~override~
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 321 timing = 1 STR_VAR resource = EVAL ~%SOURCE_RES%~ END
+  LPF ADD_SPELL_EFFECT INT_VAR target = 1 opcode = 177 parameter1 = 16 parameter2 = 5 timing = 9 STR_VAR resource = EVAL ~%abil_new_name_d_f%~ END
+  
+END
+END
+
+/////////////////////////////////////////////////////////////////
+
+      END
+      END
+  END
+  
