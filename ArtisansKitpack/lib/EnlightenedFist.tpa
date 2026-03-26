@@ -186,6 +186,19 @@ LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Arcane Fist~) STR_VAR
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Fist of Energy~) STR_VAR bam_file = C0EFN2I RET C0EFN2I = icon END
 
 // WISDOM
+APPEND ~splprot.2da~ ~C0_KIT_CHECK 152 -1 1~ UNLESS ~C0_KIT_CHECK~
+COPY_EXISTING ~splprot.2da~ ~override~
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_KIT_CHECK~ BEGIN
+	    SET C0_KIT_CHECK = %row%
+	  END
+	PRETTY_PRINT_2DA
+	END
+
+// WISDOM
 APPEND ~splprot.2da~ ~C0HTWIS 39 -1 1~ UNLESS ~C0HTWIS~
 COPY_EXISTING ~splprot.2da~ ~override~
 	COUNT_2DA_COLS cols // amount of columns
@@ -195,6 +208,7 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0HTWIS~ BEGIN
 	    SET C0HTWIS = %row%
 	  END
+	PRETTY_PRINT_2DA
 	END
 	
 COPY_EXISTING ~C0EFN1.SPL~ OVERRIDE
@@ -218,7 +232,7 @@ The Enlightened Fist may choose to expend one of their uses of Stunning Fist to 
 /// CHILL TOUCH
 
 COPY_EXISTING ~SPWI117.SPL~ ~OVERRIDE~
-LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter2 = 109 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_ENLIGHTENED_FIST~) STR_VAR resource = C0EFNS1 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter2 = C0_KIT_CHECK parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_ENLIGHTENED_FIST~) STR_VAR resource = C0EFNS1 END
 
 COPY_EXISTING ~C0EFNS1.SPL~ ~OVERRIDE~
   LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0EFNSI END
@@ -226,7 +240,7 @@ COPY_EXISTING ~C0EFNS1.SPL~ ~OVERRIDE~
 /// SHOCKING GRASP
 
 COPY_EXISTING ~SPWI115.SPL~ ~OVERRIDE~
-LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter2 = 109 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_ENLIGHTENED_FIST~) STR_VAR resource = C0EFNS2 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter2 = C0_KIT_CHECK parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_ENLIGHTENED_FIST~) STR_VAR resource = C0EFNS2 END
 
 COPY_EXISTING ~C0EFNS2.SPL~ ~OVERRIDE~
   LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0EFNSI END
