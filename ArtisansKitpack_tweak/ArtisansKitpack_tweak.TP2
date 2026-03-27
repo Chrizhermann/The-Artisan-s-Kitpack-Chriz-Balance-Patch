@@ -331,15 +331,31 @@ ACTION_FOR_EACH description IN
 				("%row_name%" STRING_EQUAL_CASE "TRANSMUTER") OR
 				("%row_name%" STRING_EQUAL_CASE "C0_FIGHTER_MAGE_BARD")
 														 ) BEGIN
+          READ_2DA_ENTRY index 3 col_count kit_lower
           READ_2DA_ENTRY index 4 col_count kit_desc
+          READ_2DA_ENTRY index 5 col_count kit_mixed
+          GET_STRREF %kit_lower% lower_text
           GET_STRREF %kit_desc% desc_text
+          GET_STRREF %kit_mixed% mixed_text
+          INNER_PATCH_SAVE lower_text ~%lower_text%~ BEGIN
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^MAGE~ ~WIZARD~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Mage~ ~Wizard~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^mage~ ~wizard~
+          END
           INNER_PATCH_SAVE desc_text ~%desc_text%~ BEGIN
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~MAGE~ ~WIZARD~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~Mage~ ~Wizard~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~mage~ ~wizard~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^MAGE~ ~WIZARD~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Mage~ ~Wizard~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^mage~ ~wizard~
+          END
+          INNER_PATCH_SAVE mixed_text ~%mixed_text%~ BEGIN
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^MAGE~ ~WIZARD~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Mage~ ~Wizard~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^mage~ ~wizard~
           END
           INNER_ACTION BEGIN
+            STRING_SET_EVALUATE ~%kit_lower%~ ~%lower_text%~
             STRING_SET_EVALUATE ~%kit_desc%~ ~%desc_text%~
+            STRING_SET_EVALUATE ~%kit_mixed%~ ~%mixed_text%~
             STRING_SET 9987 ~Wizard~
             STRING_SET 18039 ~Wizard~
           END
@@ -375,25 +391,25 @@ ACTION_FOR_EACH description IN
           GET_STRREF %kit_desc% desc_text
           GET_STRREF %kit_mixed% mixed_text
           INNER_PATCH_SAVE lower_text ~%lower_text%~ BEGIN
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~THIEF~ ~ROGUE~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~Thief~ ~Rogue~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~thief~ ~rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^THIEF~ ~ROGUE~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Thief~ ~Rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^thief~ ~rogue~
           END
           INNER_ACTION BEGIN
             STRING_SET_EVALUATE ~%kit_lower%~ ~%lower_text%~
           END
           INNER_PATCH_SAVE desc_text ~%desc_text%~ BEGIN
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~THIEF~ ~ROGUE~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~Thief~ ~Rogue~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~thief~ ~rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^THIEF~ ~ROGUE~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Thief~ ~Rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^thief~ ~rogue~
           END
           INNER_ACTION BEGIN
             STRING_SET_EVALUATE ~%kit_desc%~ ~%desc_text%~
           END
           INNER_PATCH_SAVE mixed_text ~%mixed_text%~ BEGIN
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~THIEF~ ~ROGUE~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~Thief~ ~Rogue~
-            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~thief~ ~rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^THIEF~ ~ROGUE~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^Thief~ ~Rogue~
+            REPLACE_TEXTUALLY CASE_SENSITIVE EXACT_MATCH ~^thief~ ~rogue~
           END
           INNER_ACTION BEGIN
             STRING_SET_EVALUATE ~%kit_mixed%~ ~%mixed_text%~
