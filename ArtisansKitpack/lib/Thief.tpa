@@ -58,151 +58,109 @@ ACTION_FOR_EACH description IN
       COUNT_2DA_COLS col_count
       COUNT_2DA_ROWS col_count rows
       FOR (index = 0; index < rows; ++index) BEGIN
-        READ_2DA_ENTRIES_NOW ~rog_clastext~ 10
         READ_2DA_ENTRY index 0 col_count row_name
         READ_2DA_ENTRY index 1 col_count class_id
+//bard
 
-      PATCH_IF (
-				("%row_name%" STRING_EQUAL_CASE "THIEF")
-														 ) BEGIN
+        PATCH_IF "%row_name%" STRING_EQUAL_CASE "THIEF" BEGIN
           READ_2DA_ENTRY index 4 col_count kit_desc
-          SPRINT old_kitdesc ~– Hit Die: d6~
-          SPRINT new_kitdesc_1 ~– 16th level: May use Crippling Strike as a modal ability.
+          SPRINT old_desc ~– Alignment restricted to any except lawful good.~
+          SPRINT new_desc ~– 16th level: May use Crippling Strike as a modal ability.
           
-CRIPPLING STRIKE: The thief may, at the cost of reducing their backstab multiplier by 2, inflict a crippling strike on their target when backstabbing. If the target fails a Save vs. Death at -3, they suffer a -4 penalty to damage and may not make critical hits for the next round.~
-          SPRINT new_kitdesc_2 ~– 20th level: Gains Epic Precision.
-          
-EPIC PRECISION: Upon entering stealth or invisibility, the thief's next attack rolls for maximum damage with an additional +4 modifier. The thief does not regain this modifier until the next time they re-enter stealth.~
+CRIPPLING STRIKE: The thief may, at the cost of reducing their backstab multiplier by 2, inflict a crippling strike on their target when backstabbing. If the target fails a Save vs. Death at -3, they suffer a -4 penalty to damage and may not make critical hits for the next round.
 
+– 20th level: Gains Epic Precision.
+          
+EPIC PRECISION: Upon entering stealth or invisibility, the thief's next attack rolls for maximum damage with an additional +4 modifier. The thief does not regain this modifier until the next time they re-enter stealth.
+~
           GET_STRREF %kit_desc% kit_text
           INNER_PATCH_SAVE kit_text ~%kit_text%~ BEGIN
-            REPLACE_TEXTUALLY ~
-%new_kitdesc_1%~ ~~
-            REPLACE_TEXTUALLY ~
-%new_kitdesc_2%~ ~~
-            REPLACE_TEXTUALLY ~%old_kitdesc%~ ~
-%new_kitdesc_1%
-
-%new_kitdesc_2%
-
-%old_kitdesc%~
+            REPLACE_TEXTUALLY ~%old_desc%~ ~%new_desc%
+%old_desc%~
           END
-          INNER_ACTION BEGIN
-            STRING_SET_EVALUATE ~%kit_desc%~ ~%kit_text%~
-          END
-        END
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%kit_text%~)
+            PRETTY_PRINT_2DA
+		  END
 
-      END
-  BUT_ONLY
-    END
-      
-  END
-  END
-
-///////////////////////////////////////////////////////////////////////////
-// Update Kit Descriptions                                               //
-///////////////////////////////////////////////////////////////////////////
-ACTION_FOR_EACH description IN 
-    clastext  
-  BEGIN
-    ACTION_IF FILE_EXISTS_IN_GAME ~%description%.2da~ BEGIN
-      COPY_EXISTING ~%description%.2DA~ ~override~
-      COUNT_2DA_COLS col_count
-      COUNT_2DA_ROWS col_count rows
-      FOR (index = 0; index < rows; ++index) BEGIN
-        READ_2DA_ENTRIES_NOW ~rog_clastext~ 10
-        READ_2DA_ENTRY index 0 col_count row_name
-        READ_2DA_ENTRY index 1 col_count class_id
-
-  PATCH_IF (%class_id% = 4) BEGIN
-    // Set New Fighter Abilities
-      PATCH_IF !(
+      PATCH_IF (%class_id% = 4) AND !((
 				("%row_name%" STRING_EQUAL_CASE "ASSASIN") OR 
 				("%row_name%" STRING_EQUAL_CASE "ASSASSIN") OR
 				("%row_name%" STRING_EQUAL_CASE "C0ADVENT")
-														 ) BEGIN
+														 )) BEGIN
           READ_2DA_ENTRY index 4 col_count kit_desc
           SPRINT old_kitdesc ~Disadvantages:~
           SPRINT new_kitdesc ~– Does not gain Epic Precision.~
           GET_STRREF %kit_desc% kit_text
           INNER_PATCH_SAVE kit_text ~%kit_text%~ BEGIN
-            REPLACE_TEXTUALLY ~
-%new_kitdesc%~ ~~
             REPLACE_TEXTUALLY ~%old_kitdesc%~ ~%old_kitdesc%
 %new_kitdesc%~
           END
-          INNER_ACTION BEGIN
-            STRING_SET_EVALUATE ~%kit_desc%~ ~%kit_text%~
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%kit_text%~)
+            PRETTY_PRINT_2DA
           END
 
-      PATCH_IF !(
+      PATCH_IF (%class_id% = 4) AND !((
 				("%row_name%" STRING_EQUAL_CASE "ASSASIN") OR 
-				("%row_name%" STRING_EQUAL_CASE "ASSASSIN")
-														 ) BEGIN
+				("%row_name%" STRING_EQUAL_CASE "ASSASSIN") 
+														 )) BEGIN
           READ_2DA_ENTRY index 4 col_count kit_desc
           SPRINT old_kitdesc ~Disadvantages:~
           SPRINT new_kitdesc ~– May not use Crippling Strike.~
           GET_STRREF %kit_desc% kit_text
           INNER_PATCH_SAVE kit_text ~%kit_text%~ BEGIN
-            REPLACE_TEXTUALLY ~
-%new_kitdesc%~ ~~
             REPLACE_TEXTUALLY ~%old_kitdesc%~ ~%old_kitdesc%
 %new_kitdesc%~
           END
-          INNER_ACTION BEGIN
-            STRING_SET_EVALUATE ~%kit_desc%~ ~%kit_text%~
-          END
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%kit_text%~)
+            PRETTY_PRINT_2DA
+            END
+		  END
 
-  END
-        END
-
-  END
-  END
-
-  BUT_ONLY
-  
-  END
-
-///////////////////////////////////////////////////////////////////////////
-// Update Kit Descriptions                                               //
-///////////////////////////////////////////////////////////////////////////
-ACTION_FOR_EACH description IN 
-    clastext  
-  BEGIN
-    ACTION_IF FILE_EXISTS_IN_GAME ~%description%.2da~ BEGIN
-      COPY_EXISTING ~%description%.2DA~ ~override~
+      COPY_EXISTING ~KITLIST.2DA~ ~override~
       COUNT_2DA_COLS col_count
       COUNT_2DA_ROWS col_count rows
-      FOR (index = 0; index < rows; ++index) BEGIN
-        READ_2DA_ENTRIES_NOW ~rog_clastext~ 10
-        READ_2DA_ENTRY index 0 col_count row_name
-        READ_2DA_ENTRY index 1 col_count class_id
-
-      PATCH_IF (
-				("%row_name%" STRING_EQUAL_CASE "SWASHBUCKLER")
-														 ) BEGIN
+      FOR (index = 1; index < rows; ++index) BEGIN
+        READ_2DA_ENTRY index 1 col_count row_name
+        READ_2DA_ENTRY index 8 col_count class_id
+//inspiration
+      PATCH_IF (%class_id% = 4) AND !((
+				("%row_name%" STRING_EQUAL_CASE "ASSASIN") OR 
+				("%row_name%" STRING_EQUAL_CASE "ASSASSIN") OR
+				("%row_name%" STRING_EQUAL_CASE "C0ADVENT")
+														 )) BEGIN
           READ_2DA_ENTRY index 4 col_count kit_desc
           SPRINT old_kitdesc ~Disadvantages:~
-          SPRINT new_kitdesc ~– May not Use Magic Devices.~
+          SPRINT new_kitdesc ~– Does not gain Epic Precision.~
           GET_STRREF %kit_desc% kit_text
           INNER_PATCH_SAVE kit_text ~%kit_text%~ BEGIN
-            REPLACE_TEXTUALLY ~
-%new_kitdesc%~ ~~
             REPLACE_TEXTUALLY ~%old_kitdesc%~ ~%old_kitdesc%
 %new_kitdesc%~
           END
-          INNER_ACTION BEGIN
-            STRING_SET_EVALUATE ~%kit_desc%~ ~%kit_text%~
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%kit_text%~)
+            PRETTY_PRINT_2DA
+		      END
+      PATCH_IF (%class_id% = 4) AND !((
+				("%row_name%" STRING_EQUAL_CASE "ASSASIN") OR 
+				("%row_name%" STRING_EQUAL_CASE "ASSASSIN") 
+														 )) BEGIN
+          READ_2DA_ENTRY index 4 col_count kit_desc
+          SPRINT old_kitdesc ~Disadvantages:~
+          SPRINT new_kitdesc ~– May not use Crippling Strike.~
+          GET_STRREF %kit_desc% kit_text
+          INNER_PATCH_SAVE kit_text ~%kit_text%~ BEGIN
+            REPLACE_TEXTUALLY ~%old_kitdesc%~ ~%old_kitdesc%
+%new_kitdesc%~
           END
-        END
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%kit_text%~)
+            PRETTY_PRINT_2DA
+            END
+		  END
 
-      END
-  BUT_ONLY
+      BUT_ONLY
     END
-      
   END
-  END
-
+END
+  
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon
