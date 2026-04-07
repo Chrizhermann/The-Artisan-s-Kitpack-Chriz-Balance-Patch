@@ -15,7 +15,7 @@ COPY_EXISTING ~enginest.2da~ ~override~
 COPY_EXISTING ~CLASTEXT.2DA~ ~override~
       COUNT_2DA_COLS col_count
       COUNT_2DA_ROWS col_count rows
-  READ_2DA_ENTRIES_NOW ~clastext~ 10
+  READ_2DA_ENTRIES_NOW ~clastext~ 9
       FOR (index = 0; index < rows; ++index) BEGIN
   READ_2DA_ENTRY_FORMER ~clastext~ index 0 class_id
   READ_2DA_ENTRY_FORMER ~clastext~ index 5 class_name
