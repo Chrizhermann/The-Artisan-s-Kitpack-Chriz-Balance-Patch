@@ -243,7 +243,7 @@ CLASS FEATURES:
 – May make 2 attacks per round while unarmed or when wielding a quarterstaff.
 – -1 to Speed Factor per 3 levels.
 
-– Flurry of Blows: The monk, while unarmed or wielding daggers, may make an additional attack at the same time as their first attack each round at the cost of a -5 penalty to THAC0. This extra attack is not subject to the attacks per round limit and may be toggled at will. THAC0 penalty decreases to -2 at 13th level.
+– Flurry of Blows: The monk, while unarmed or wielding daggers or darts, may make an additional attack at the same time as their first attack each round at the cost of a -5 penalty to THAC0. This extra attack is not subject to the attacks per round limit and may be toggled at will. THAC0 penalty decreases to -2 at 13th level.
 
 – The monk's fists deal crushing damage and deal increase damage with level as follows:
   Level 1-2: 1d4
@@ -488,7 +488,7 @@ WRITE_ASCII 0x94 ~C0MN#048~
 COPY_EXISTING ~C0MN#04.SPL~ OVERRIDE
 SAY NAME1 ~Flurry of Blows~
 SAY UNIDENTIFIED_DESC ~Flurry of Blows
-The monk, while unarmed or wielding daggers, may make an additional attack at the same time as their first attack each round at the cost of a -5 penalty to THAC0. This extra attack is not subject to the attacks per round limit and may be toggled at will. THAC0 penalty decreases to -2 at 13th level.~
+The monk, while unarmed or wielding daggers or darts, may make an additional attack at the same time as their first attack each round at the cost of a -5 penalty to THAC0. This extra attack is not subject to the attacks per round limit and may be toggled at will. THAC0 penalty decreases to -2 at 13th level.~
 
 COPY_EXISTING ~C0MN#04B.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 330 parameter1 = RESOLVE_STR_REF (~Flurry of Blows Active~) END
@@ -496,6 +496,8 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0MN#04I END
 
 COPY_EXISTING ~C0MN#04Z.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 330 parameter1 = RESOLVE_STR_REF (~Flurry of Blows Inactive~) END
+COPY_EXISTING ~C0MN#04Z.SPL~ ~OVERRIDE/C0MN#04Y.SPL~
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 324 timing = 0 duration = 6 STR_VAR resource = C0MN#04 END
 
 COPY_EXISTING ~C0MN#05.SPL~ OVERRIDE
 SAY NAME1 ~Empty Body~

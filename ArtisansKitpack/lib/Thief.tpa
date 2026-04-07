@@ -268,8 +268,8 @@ COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
       READ_SHORT    0x1C itemtype 
       PATCH_IF (itemtype = 35) OR (itemtype = 11) BEGIN
         WRITE_BYTE    0x20 (row3 BAND 0b10111111)
-      END
         LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 parameter1 = 0 parameter2 = C0_THIEF_UMD timing = 2 power = 2 special = RESOLVE_STR_REF (~Thief~) END
+      END
     END
   END
 BUT_ONLY
