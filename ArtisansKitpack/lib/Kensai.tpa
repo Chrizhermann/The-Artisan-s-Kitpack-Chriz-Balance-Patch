@@ -112,7 +112,7 @@ LPF patch_add_hla STR_VAR 2da_row = ~C0KN1~ ability = ~AP_C0KN#07~ num_allowed =
 LPF patch_add_hla STR_VAR 2da_row = ~C0KN2~ ability = ~AP_C0KN#08~ num_allowed = 1 END	
 LPF patch_add_hla STR_VAR 2da_row = ~C0KN3~ ability = ~AP_C0KN#09~ num_allowed = 1 prerequisite = ~AP_C0KN#08~ END	
 LPF patch_add_hla STR_VAR 2da_row = ~C0KN4~ ability = ~AP_C0KN#10~ num_allowed = 1 prerequisite = ~AP_C0KN#09~ END	
-REPLACE_TEXTUALLY ~GA_SPCL905~ ~GA_C0KN#07~
+REPLACE_TEXTUALLY ~GA_SPCL905~ ~AP_C0KN#07~
 
 COPY_EXISTING ~SPCL144.SPL~ ~OVERRIDE~
 SAY NAME1 ~Ki Focus~
