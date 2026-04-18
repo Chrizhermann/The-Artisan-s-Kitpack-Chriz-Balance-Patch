@@ -185,18 +185,6 @@ END
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Arcane Fist~) STR_VAR bam_file = C0EFNSI RET C0EFNSI = icon END
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Fist of Energy~) STR_VAR bam_file = C0EFN2I RET C0EFN2I = icon END
 
-APPEND ~splprot.2da~ ~C0_KIT_CHECK 152 -1 1~ UNLESS ~C0_KIT_CHECK~
-COPY_EXISTING ~splprot.2da~ ~override~
-	COUNT_2DA_COLS cols // amount of columns
-	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
-	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
-	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
-	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_KIT_CHECK~ BEGIN
-	    SET C0_KIT_CHECK = %row%
-	  END
-	PRETTY_PRINT_2DA
-	END
-
 // WISDOM
 APPEND ~splprot.2da~ ~C0HTWIS 39 -1 1~ UNLESS ~C0HTWIS~
 COPY_EXISTING ~splprot.2da~ ~override~
