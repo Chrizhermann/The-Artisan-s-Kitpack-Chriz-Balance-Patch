@@ -186,7 +186,11 @@ INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
 INCLUDE ~%MOD_FOLDER%/lib/EnlightenedFist.tpa~
 INCLUDE ~%MOD_FOLDER%/lib/SacredFist.tpa~
 
-EXTEND_TOP ~dplayer3.bcs~ ~%MOD_FOLDER%/MonkRevision/MysticFists/script/c0mn#fi.baf~
+ACTION_FOR_EACH baldur_script IN baldur bdbaldur baldur25 BEGIN
+ACTION_IF FILE_EXISTS_IN_GAME ~%baldur_script%.bcs~ BEGIN
+EXTEND_TOP ~%baldur_script%.bcs~ ~%MOD_FOLDER%/MonkRevision/MysticFists/script/c0mn#fi.baf~
+END
+END
 
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
