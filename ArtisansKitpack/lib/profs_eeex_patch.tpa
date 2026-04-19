@@ -429,6 +429,7 @@ COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
 		LPF DELETE_EFFECT
 			INT_VAR
 				match_opcode = 319
+        match_power = 0
 				match_parameter1 = 21
 				match_parameter2 = 5
 		END

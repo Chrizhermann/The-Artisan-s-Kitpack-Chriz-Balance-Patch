@@ -31,7 +31,8 @@ BUT_ONLY_IF_IT_CHANGES
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
 	READ_BYTE    0x18 flags //reads the byte containing the fighter usability flag
-    PATCH_IF ((flags BAND 0b00000010) = 0b00000010) BEGIN // if it is usable by fighters
+	READ_BYTE    0x1c type //reads the byte containing the fighter usability flag
+    PATCH_IF ((flags BAND 0b00000010) = 0b00000010) AND !(type = 15) AND !(type = 27) BEGIN // if it is usable by fighters
 		LPF ADD_ITEM_EQEFFECT
 			INT_VAR
 				opcode = 177

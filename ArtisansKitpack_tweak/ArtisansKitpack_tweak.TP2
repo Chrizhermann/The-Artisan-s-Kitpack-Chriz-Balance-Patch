@@ -65,7 +65,7 @@ COPY_EXISTING ~clasiskl.2da~ ~override~
 
 OUTER_SET darkhunter_ids = IDS_OF_SYMBOL (~kit~ ~C0DHUNT~)
   
-COPY ~ArtisansKitpack/lua/m_c0mon2.lua~      ~override~ // Lua file read by EEex, provided by Bubbs and further edited by myself
+COPY ~ArtisansKitpack/lua/m_c0ran2.lua~      ~override~ // Lua file read by EEex, provided by Bubbs and further edited by myself
 ///////////////////////////////////////////////////////////////////////////
 // Update lua file                                                       //
 ///////////////////////////////////////////////////////////////////////////
