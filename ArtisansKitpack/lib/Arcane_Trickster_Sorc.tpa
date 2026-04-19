@@ -169,6 +169,15 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Spell
 COPY_EXISTING ~C0ATR02.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Impromptu Sneak Attack~) END
 
+// Stealth Caster: match STATE_INVISIBLE || STATE_IMPROVEDINVISIBILITY (splprot rows 142/143)
+// so the cast-speed cap reapplies under Improved Invisibility after the duplicated
+// normal-invisibility portion breaks on the first spell cast.
+COPY_EXISTING ~C0ATR00A.SPL~ ~override~
+  LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter1 = 0 parameter2 = 142 END
+
+COPY_EXISTING ~C0ATR00B.SPL~ ~override~
+  LPF ALTER_EFFECT INT_VAR match_opcode = 318 parameter1 = 0 parameter2 = 143 END
+
 ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
 
 OUTER_SET sorcerer_trickster = IDS_OF_SYMBOL (~kit~ ~C0_ARCANE_TRICKSTER_SORC~)
