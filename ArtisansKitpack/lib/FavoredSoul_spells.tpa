@@ -1,5 +1,11 @@
+// Pre-pass: clear druid (bit 6) and cleric (bit 7) class bits in byte 0x21
+// for SR's hidden priest HLAs (SPPR724 Summon Elemental Prince, SPPR729).
+// SR writes level=1 at 0x34 for these (HLA-tier convention gated by
+// hidespl.2da). Without this pre-pass the dynamic scans below would treat
+// them as regular L1 priest spells and grant them as free level-1 innates
+// on every druid / cleric / ranger kit via ADD_CLASS_SPELL.
 ACTION_FOR_EACH hlapriest IN SPPR724 SPPR729 BEGIN
-  ACTION_IF FILE_EXISTS_IN_GAME ~%hlapriest%.spl~ THEN BEGIN 
+  ACTION_IF FILE_EXISTS_IN_GAME ~%hlapriest%.spl~ THEN BEGIN
     COPY_EXISTING ~%hlapriest%.spl~ ~override~
         READ_BYTE    0x21 row4
         WRITE_BYTE    0x21 (row4 BAND 0b00111111)
