@@ -1,26 +1,27 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/tweak~
 AUTHOR ~The Artisan~
 ALWAYS
-  INCLUDE ~ArtisansKitpack/lib/alter_script.tpa~
-  INCLUDE ~ArtisansKitpack/lib/ClassSpellTool.tpa~
-  INCLUDE ~ArtisansKitpack/lib/a7#add_kit_ex.tpa~
-  INCLUDE ~ArtisansKitpack/lib/kit_strref.tpa~
-  INCLUDE ~ArtisansKitpack/lib/RA_SPHERE_COMPAT.tpa~
-  INCLUDE ~ArtisansKitpack/lib/eet.tph~
-  INCLUDE ~ArtisansKitpack/lib/functions.tph~
-  INCLUDE ~ArtisansKitpack/lib/hla_actions.tpa~
-  INCLUDE ~ArtisansKitpack/lib/replace_multiline.tpa~
-  INCLUDE ~ArtisansKitpack/lib/x_force.tph~
+  OUTER_SPRINT MOD_FOLDER ArtisansKitpack
+  INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/ClassSpellTool.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/a7#add_kit_ex.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/kit_strref.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/RA_SPHERE_COMPAT.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/eet.tph~
+  INCLUDE ~%MOD_FOLDER%/lib/functions.tph~
+  INCLUDE ~%MOD_FOLDER%/lib/hla_actions.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
 END
-AUTO_TRA ~ArtisansKitpack/tra/%s~
+AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
 BEGIN ~Artisan's Kitpack: Archer - Apply Manyshot to mod-added items (install this after any mods that add mod bows and crossbows)~ DESIGNATED 20101
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2010~ ~The Beastmaster Overhaul must be installed.~
-INCLUDE ~ArtisansKitpack/lib/archer-items.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/archer-items.tpa~
 
 BEGIN ~Artisan's Kitpack: Beastmaster - Modify Restrictions for Mod Items (install this after any mods that add mod axes, daggers, spears, armor, etc.)~ DESIGNATED 12012
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2012~ ~The Beastmaster Overhaul must be installed.~
-INCLUDE ~ArtisansKitpack/lib/beastmaster-items.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/beastmaster-items.tpa~
 
 BEGIN ~Artisan's Kitpack: Dark Hunter - Allow Disarm Traps and Open Locks~ DESIGNATED 20021
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2002~ ~The Dark Hunter must be installed.~
@@ -65,7 +66,7 @@ COPY_EXISTING ~clasiskl.2da~ ~override~
 
 OUTER_SET darkhunter_ids = IDS_OF_SYMBOL (~kit~ ~C0DHUNT~)
   
-COPY ~ArtisansKitpack/lua/m_c0ran2.lua~      ~override~ // Lua file read by EEex, provided by Bubbs and further edited by myself
+COPY ~%MOD_FOLDER%/lua/m_c0mon2.lua~      ~override~ // Lua file read by EEex, provided by Bubbs and further edited by myself
 ///////////////////////////////////////////////////////////////////////////
 // Update lua file                                                       //
 ///////////////////////////////////////////////////////////////////////////
@@ -278,28 +279,28 @@ BUT_ONLY
 BEGIN ~Artisan's Kitpack: Mystic Fire - Allow Wands and Mage Scrolls~ DESIGNATED 3202
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~3002~ ~The Mystic Fire Paladin Kit must be installed.~
 REQUIRE_COMPONENT ~EEEX/EEEX.TP2~ ~0~ ~EEex must be installed.~
-INCLUDE ~ArtisansKitpack/lib/mystic_fire_items.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/mystic_fire_items.tpa~
 
 BEGIN ~Artisan's Kitpack: Mystic Fire - Add spells from HLAs directly to spellbook up to maximum paladin casting level~ DESIGNATED 3302
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~3002~ ~The Mystic Fire Paladin Kit must be installed.~
 REQUIRE_COMPONENT ~EEEX/EEEX.TP2~ ~0~ ~EEex must be installed.~
 
-INCLUDE ~ArtisansKitpack/lib/mystic_fire_spells.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/mystic_fire_spells.tpa~
 
 BEGIN ~Artisan's Kitpack: Trickster - Mimic Mod Kit Abilities (install this after other kits!)~ DESIGNATED 7203
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~7003~ ~The Trickster Kit must be installed.~
-INCLUDE ~ArtisansKitpack/lib/trickster-mods.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/trickster-mods.tpa~
 
 BEGIN ~Artisan's Kitpack: Arcane Trickster (Sorcerer) - Enable Thief Equipment~ DESIGNATED 8204
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~8004~ ~The Arcane Trickster Sorcerer Kit must be installed.~
 REQUIRE_COMPONENT ~EEEX/EEEX.TP2~ ~0~ ~EEex must be installed.~
 
-INCLUDE ~ArtisansKitpack/eeex/profs_eeex.tpa~
+INCLUDE ~%MOD_FOLDER%/eeex/profs_eeex.tpa~
 
-INCLUDE ~ArtisansKitpack/lib/arcane_trickster_items.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/arcane_trickster_items.tpa~
 
 BEGIN ~Artisan's Kitpack: Adjust kit THAC0 progression to match tweaked THAC0 tables~ DESIGNATED 110000
-INCLUDE ~ArtisansKitpack/lib/thac0.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/thac0.tpa~
 
 BEGIN ~Artisan's Kitpack: Mage - Rename to Wizard~ DESIGNATED 0001
 
@@ -423,11 +424,11 @@ ACTION_FOR_EACH description IN
 
   
 BEGIN ~Artisan's Kitpack: Favored Soul - Patch Cleric-exclusive spells from mods~ DESIGNATED 300010
-INCLUDE ~ArtisansKitpack/lib/FavoredSoul_spells.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/FavoredSoul_spells.tpa~
 
 BEGIN ~Artisan's Kitpack: Update EEex-based Weapon Usability Changes~ DESIGNATED 1010000
 REQUIRE_PREDICATE (FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~) ~No EEex-based proficiency changes, component is unneeded~
-INCLUDE ~ArtisansKitpack/lib/profs_eeex_patch.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/profs_eeex_patch.tpa~
 
 BEGIN ~Artisan's Kitpack: Dual-Classes Keep Kit Names in Character Record~ DESIGNATED 1020000
-INCLUDE ~ArtisansKitpack/lib/dual_kit_names.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/dual_kit_names.tpa~

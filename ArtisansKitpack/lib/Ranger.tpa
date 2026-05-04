@@ -7,6 +7,56 @@ COPY_EXISTING ~CLABRN01.2DA~ OVERRIDE
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG00 END // Camouflage
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 5 STR_VAR f_Entry = GA_SPCL412 END // Set Snare
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 1 STR_VAR f_Entry = AP_C0RNG01 END // Set Traps
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1  STR_VAR f_Entry = AP_C0RNH1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 2  STR_VAR f_Entry = AP_C0RNH2 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 3  STR_VAR f_Entry = AP_C0RNH3 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4  STR_VAR f_Entry = AP_C0RNH4 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 5  STR_VAR f_Entry = AP_C0RNH5 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 6  STR_VAR f_Entry = AP_C0RNH6 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7  STR_VAR f_Entry = AP_C0RNH7 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 8  STR_VAR f_Entry = AP_C0RNH8 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9  STR_VAR f_Entry = AP_C0RNH9 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10  STR_VAR f_Entry = AP_C0RNH10 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 11  STR_VAR f_Entry = AP_C0RNH11 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12  STR_VAR f_Entry = AP_C0RNH12 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 13  STR_VAR f_Entry = AP_C0RNH13 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14  STR_VAR f_Entry = AP_C0RNH14 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15  STR_VAR f_Entry = AP_C0RNH15 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16  STR_VAR f_Entry = AP_C0RNH16 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 17  STR_VAR f_Entry = AP_C0RNH17 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 18  STR_VAR f_Entry = AP_C0RNH18 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19  STR_VAR f_Entry = AP_C0RNH19 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10  STR_VAR f_Entry = AP_C0RNH20 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 21  STR_VAR f_Entry = AP_C0RNH21 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 22  STR_VAR f_Entry = AP_C0RNH22 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 23  STR_VAR f_Entry = AP_C0RNH23 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 24  STR_VAR f_Entry = AP_C0RNH24 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 25  STR_VAR f_Entry = AP_C0RNH25 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 26  STR_VAR f_Entry = AP_C0RNH26 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 27  STR_VAR f_Entry = AP_C0RNH27 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 28  STR_VAR f_Entry = AP_C0RNH28 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 29  STR_VAR f_Entry = AP_C0RNH29 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20  STR_VAR f_Entry = AP_C0RNH30 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 31  STR_VAR f_Entry = AP_C0RNH31 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 32  STR_VAR f_Entry = AP_C0RNH32 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 33  STR_VAR f_Entry = AP_C0RNH33 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 34  STR_VAR f_Entry = AP_C0RNH34 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 35  STR_VAR f_Entry = AP_C0RNH35 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 36  STR_VAR f_Entry = AP_C0RNH36 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 37  STR_VAR f_Entry = AP_C0RNH37 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 38  STR_VAR f_Entry = AP_C0RNH38 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 39  STR_VAR f_Entry = AP_C0RNH39 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 40  STR_VAR f_Entry = AP_C0RNH40 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 41  STR_VAR f_Entry = AP_C0RNH41 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 42  STR_VAR f_Entry = AP_C0RNH42 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 43  STR_VAR f_Entry = AP_C0RNH43 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 44  STR_VAR f_Entry = AP_C0RNH44 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 45  STR_VAR f_Entry = AP_C0RNH45 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 46  STR_VAR f_Entry = AP_C0RNH46 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 47  STR_VAR f_Entry = AP_C0RNH47 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 48  STR_VAR f_Entry = AP_C0RNH48 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 49  STR_VAR f_Entry = AP_C0RNH49 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 50  STR_VAR f_Entry = AP_C0RNH50 END
   PRETTY_PRINT_2DA
 BUT_ONLY
 
@@ -33,6 +83,7 @@ CLASS FEATURES:
 – May use the Hide In Shadows ability while wearing no armor, leather armor, or studded leather armor.
 – Woodland Stride: The ranger's movement rate is increased by 2 while outdoors. From 5th level onward, the ranger becomes immune to Entangle and Web effects.
 – Camouflage: The ranger gains a 25% bonus to Hide in Shadows and Move Silently while outdoors.
+– Toughness: +4 maximum Hit Points at level 1, with an additional +1 per level.
 – May use the Set Snare ability once per day. Gains one use at level 1 and an additional use every 5 levels thereafter.
 
 SET SNARE: Set a trap in the chosen location when no hostile creatures are in sight. Traps grow more powerful with the Ranger's level and can only be triggered by enemies. The ranger may set up to a limit of 3 traps per area.
@@ -112,7 +163,156 @@ COPY_EXISTING ~c0rng00a.spl~ ~override~
 COPY_EXISTING ~c0rng00b.spl~ ~override~
 	LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0RNG00I END
 
+ACTION_FOR_EACH hit_points IN 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 BEGIN
+  COPY_EXISTING ~c0rnh2.spl~ ~override/c0rnh%hit_points%.spl~
+    LPF ALTER_EFFECT STR_VAR match_resource = C0RNH_2 resource = EVAL ~C0RNH_%hit_points%~ END
+  COPY_EXISTING ~c0rnh_2.spl~ ~override/c0rnh_%hit_points%.spl~
+    LPF ALTER_EFFECT STR_VAR match_resource = C0RNH_2 resource = EVAL ~C0RNH_%hit_points%~ END
+END
 
+COPY_EXISTING ~KITLIST.2DA~ ~override~
+  READ_2DA_ENTRIES_NOW ~fig_kitlist~ 10
+  FOR (row = 1; row < fig_kitlist; row += 1) BEGIN
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 5 kit_clab
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 1 kit_label
+  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 8 kit_class
+  
+  PATCH_IF (%kit_class% = 12) BEGIN
+    // Set New Fighter Abilities
+    PATCH_IF FILE_EXISTS_IN_GAME ~%kit_clab%.2da~ BEGIN
+      INNER_ACTION BEGIN
+      // Add new abilities to all Fighter kits
+      COPY_EXISTING ~%kit_clab%.2DA~ override
+      PATCH_IF !(
+				("%kit_label%" STRING_EQUAL_CASE "FERALAN")
+        OR
+				("%kit_label%" STRING_EQUAL_CASE "STALKER")
+														 ) BEGIN
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1  STR_VAR f_Entry = AP_C0RNH1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 2  STR_VAR f_Entry = AP_C0RNH2 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 3  STR_VAR f_Entry = AP_C0RNH3 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4  STR_VAR f_Entry = AP_C0RNH4 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 5  STR_VAR f_Entry = AP_C0RNH5 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 6  STR_VAR f_Entry = AP_C0RNH6 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7  STR_VAR f_Entry = AP_C0RNH7 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 8  STR_VAR f_Entry = AP_C0RNH8 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9  STR_VAR f_Entry = AP_C0RNH9 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10  STR_VAR f_Entry = AP_C0RNH10 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 11  STR_VAR f_Entry = AP_C0RNH11 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12  STR_VAR f_Entry = AP_C0RNH12 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 13  STR_VAR f_Entry = AP_C0RNH13 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14  STR_VAR f_Entry = AP_C0RNH14 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15  STR_VAR f_Entry = AP_C0RNH15 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16  STR_VAR f_Entry = AP_C0RNH16 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 17  STR_VAR f_Entry = AP_C0RNH17 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 18  STR_VAR f_Entry = AP_C0RNH18 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19  STR_VAR f_Entry = AP_C0RNH19 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10  STR_VAR f_Entry = AP_C0RNH20 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 21  STR_VAR f_Entry = AP_C0RNH21 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 22  STR_VAR f_Entry = AP_C0RNH22 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 23  STR_VAR f_Entry = AP_C0RNH23 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 24  STR_VAR f_Entry = AP_C0RNH24 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 25  STR_VAR f_Entry = AP_C0RNH25 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 26  STR_VAR f_Entry = AP_C0RNH26 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 27  STR_VAR f_Entry = AP_C0RNH27 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 28  STR_VAR f_Entry = AP_C0RNH28 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 29  STR_VAR f_Entry = AP_C0RNH29 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20  STR_VAR f_Entry = AP_C0RNH30 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 31  STR_VAR f_Entry = AP_C0RNH31 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 32  STR_VAR f_Entry = AP_C0RNH32 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 33  STR_VAR f_Entry = AP_C0RNH33 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 34  STR_VAR f_Entry = AP_C0RNH34 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 35  STR_VAR f_Entry = AP_C0RNH35 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 36  STR_VAR f_Entry = AP_C0RNH36 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 37  STR_VAR f_Entry = AP_C0RNH37 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 38  STR_VAR f_Entry = AP_C0RNH38 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 39  STR_VAR f_Entry = AP_C0RNH39 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 40  STR_VAR f_Entry = AP_C0RNH40 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 41  STR_VAR f_Entry = AP_C0RNH41 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 42  STR_VAR f_Entry = AP_C0RNH42 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 43  STR_VAR f_Entry = AP_C0RNH43 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 44  STR_VAR f_Entry = AP_C0RNH44 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 45  STR_VAR f_Entry = AP_C0RNH45 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 46  STR_VAR f_Entry = AP_C0RNH46 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 47  STR_VAR f_Entry = AP_C0RNH47 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 48  STR_VAR f_Entry = AP_C0RNH48 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 49  STR_VAR f_Entry = AP_C0RNH49 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 50  STR_VAR f_Entry = AP_C0RNH50 END
+        PRETTY_PRINT_2DA
+      END
+      
+      BUT_ONLY
+      END
+    END
+  END
+  END
+
+ACTION_FOR_EACH description IN 
+    clastext  
+  BEGIN
+    ACTION_IF FILE_EXISTS_IN_GAME ~%description%.2da~ BEGIN
+      COPY_EXISTING ~%description%.2DA~ ~override~
+      COUNT_2DA_COLS col_count
+      COUNT_2DA_ROWS col_count rows
+      FOR (index = 0; index < rows; ++index) BEGIN
+        READ_2DA_ENTRY index 0 col_count row_name
+        READ_2DA_ENTRY index 1 col_count class_id
+//inspiration
+        PATCH_IF (
+				("%row_name%" STRING_EQUAL_CASE "FERALAN")
+        OR
+				("%row_name%" STRING_EQUAL_CASE "ARCHER")
+        OR
+				("%row_name%" STRING_EQUAL_CASE "STALKER")
+														 )
+                              BEGIN
+          READ_2DA_ENTRY index 4 col_count kit_desc
+          SPRINT old_inspiration ~Disadvantages:~
+          SPRINT new_inspiration ~– Does not gain Toughness.~
+          SPRINT disadvantages_none ~
+– None.~
+          GET_STRREF %kit_desc% desc_text
+          INNER_PATCH_SAVE desc_text ~%desc_text%~ BEGIN
+            REPLACE_TEXTUALLY ~%old_inspiration%~ ~%old_inspiration%
+%new_inspiration%~
+            REPLACE_TEXTUALLY ~%disadvantages_none%~ ~~
+          END
+            SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%desc_text%~)
+            PRETTY_PRINT_2DA
+		END
+		  END
+
+      COPY_EXISTING ~KITLIST.2DA~ ~override~
+      COUNT_2DA_COLS col_count
+      COUNT_2DA_ROWS col_count rows
+      FOR (index = 1; index < rows; ++index) BEGIN
+        READ_2DA_ENTRY index 1 col_count row_name
+        READ_2DA_ENTRY index 8 col_count class_id
+//inspiration
+        PATCH_IF (
+				("%row_name%" STRING_EQUAL_CASE "FERALAN")
+        OR
+				("%row_name%" STRING_EQUAL_CASE "ARCHER")
+        OR
+				("%row_name%" STRING_EQUAL_CASE "STALKER")
+														 )
+                              BEGIN
+          READ_2DA_ENTRY index 4 col_count kit_desc
+          GET_STRREF %kit_desc% desc_text
+          INNER_PATCH_SAVE desc_text ~%desc_text%~ BEGIN
+            REPLACE_TEXTUALLY ~%old_inspiration%~ ~%old_inspiration%
+%new_inspiration%~
+            REPLACE_TEXTUALLY ~%disadvantages_none%~ ~~
+          END
+          SET_2DA_ENTRY index 4 col_count RESOLVE_STR_REF (~%desc_text%~)
+            PRETTY_PRINT_2DA
+		      END
+		  END
+
+
+      BUT_ONLY
+    END
+  END
 COPY_EXISTING ~thiefscl.2da~ ~override~
   REPLACE_TEXTUALLY ~^\([ %TAB%]*MAGE\)~ ~CD_DELETE_ME \1~ // adding column to header column
   COUNT_2DA_COLS col_count

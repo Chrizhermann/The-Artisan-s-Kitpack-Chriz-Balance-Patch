@@ -133,7 +133,7 @@ Disadvantages:
 	
     // hpclass       = ~HPROG~
 	
-    // numwslot      = ~2~
+    numwslot      = ~3~
 	
 	// METAL, MINOR, MAJOR, LEATHER, ARMOR
 	clascolr = ~192 63 142 83 110~ 

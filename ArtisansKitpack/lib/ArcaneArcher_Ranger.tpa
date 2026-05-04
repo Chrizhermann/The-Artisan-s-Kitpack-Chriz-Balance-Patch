@@ -10,7 +10,6 @@ Advantages:
  Level 1: Magic Missile, Shield, Reflected Image
  Level 2: Blur, Melf's Acid Arrow, Ray of Enfeeblement
  Level 3: Flame Arrow, Protection from Normal Missiles, Melf's Minute Meteors
-RAPID_SHOT
 – Gains the Enhance Arrow ability.
 
 ENHANCE ARROW: The arcane archer passively imbues <PRO_HISHER> arrows with magic. Projectiles launched by the arcane archer are always treated as weapons of +1 enchantment and deal one extra point of magic damage, increasing by one for every five levels gained to a maximum of +5 enchantment and five magic damage at 20th level. Additional damage is affected by the target's magic resistance.
@@ -22,7 +21,7 @@ ENTROPIC SHIELD: A magical field glowing with a multicolored hue appears around 
 – 5th level: May use Imbue Arrow ability three times per day.
 
 IMBUE ARROW: Using arcane magic, the arcane archer enchants <PRO_HISHER> next missile within one round to explode, dealing 1d6 additional fire damage for every five levels gained thereafter in an area of effect.
-
+RAPID_SHOT
 – 9th level: May use Seeker Arrow ability once per day.
 
 SEEKER ARROW: A skilled arcane archer can enchant <PRO_HISHER> arrows to strike its target unerringly. <PRO_HISHER> next missile attack within one round is a guaranteed critical hit and deals two points of extra damage for every five levels gained thereafter.
@@ -47,7 +46,7 @@ ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ THEN BEGIN
 
 OUTER_PATCH_SAVE aa_ranger ~%aa_ranger%~ BEGIN
   REPLACE_TEXTUALLY EXACT_MATCH ~RAPID_SHOT~ ~
-– May use the Rapid Shot modal ability.
+– 6th level: May use the Rapid Shot modal ability.
 
 RAPID SHOT: The archer may make an additional attack per round at a -4 penalty to hit.
 ~

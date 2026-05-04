@@ -10,6 +10,23 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
+OUTER_SET opcode_342_eeex = 0
+ACTION_IF MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~ AND FILE_EXISTS ~EEex_scripts/EEex_Opcode_Patch.lua~ THEN BEGIN
+  
+  PRINT ~EEex_Opcode_Patch exists.~
+
+COPY_EXISTING ~EEex_scripts/EEex_Opcode_Patch.lua~ ~EEex_scripts~
+PATCH_IF ~~ STRING_MATCHES_REGEXP ~Opcode #342~ BEGIN
+  SET opcode_342_eeex = 1
+  END
+
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
+  PRINT ~Opcode #342 has been patched.~
+    END
+
+END
+
+ACTION_IF NOT (opcode_342_eeex = 1) THEN BEGIN
 
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
@@ -1090,3 +1107,212 @@ COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
       END
     END
 BUT_ONLY_IF_IT_CHANGES
+END
+
+END ELSE BEGIN
+
+COPY ~%MOD_FOLDER%/Ranger/Archer/eeex~ ~override~
+
+COPY_EXISTING ~C0ARCP01.EFF~ ~OVERRIDE/C0ARCP02.EFF~
+	WRITE_SHORT 0x1c 1
+	WRITE_ASCII 0x30 ~C0MSHO02~
+COPY_EXISTING ~C0ARCP01.EFF~ ~OVERRIDE/C0ARCP03.EFF~
+	WRITE_SHORT 0x1c 2
+	WRITE_ASCII 0x30 ~C0MSHO03~
+COPY_EXISTING ~C0ARCP01.EFF~ ~OVERRIDE/C0ARCP04.EFF~
+	WRITE_SHORT 0x1c 3
+	WRITE_ASCII 0x30 ~C0MSHO04~
+COPY_EXISTING ~C0ARCP01.EFF~ ~OVERRIDE/C0ARCP05.EFF~
+	WRITE_SHORT 0x1c 4
+	WRITE_ASCII 0x30 ~C0MSHO05~
+
+COPY_EXISTING ~C0ARCP02.EFF~ ~OVERRIDE/C0ARCP06.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO06~
+COPY_EXISTING ~C0ARCP03.EFF~ ~OVERRIDE/C0ARCP07.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO07~
+COPY_EXISTING ~C0ARCP04.EFF~ ~OVERRIDE/C0ARCP08.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO08~
+COPY_EXISTING ~C0ARCP05.EFF~ ~OVERRIDE/C0ARCP09.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO09~
+	
+COPY_EXISTING ~C0ARCP03.EFF~ ~OVERRIDE/C0ARCP10.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO10~
+COPY_EXISTING ~C0ARCP04.EFF~ ~OVERRIDE/C0ARCP11.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO11~
+COPY_EXISTING ~C0ARCP05.EFF~ ~OVERRIDE/C0ARCP12.EFF~
+	WRITE_ASCII 0x30 ~C0MSHO12~
+
+COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
+  PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
+      READ_SHORT    0x1C type //reads the byte containing item type
+	  READ_SHORT    0x22 appearance //reads the byte containing item appearance
+      PATCH_IF (type = 15) OR (type = 27) BEGIN // if it is leather armor
+
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicesize = 7
+			STR_VAR
+				resource = C0ARCP01
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 12
+				dicesize = 7
+			STR_VAR
+				resource = C0ARCP02
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 12
+				dicesize = 7
+			STR_VAR
+				resource = C0ARCP03
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 12
+				dicesize = 7
+			STR_VAR
+				resource = C0ARCP04
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 12
+				dicesize = 7
+			STR_VAR
+				resource = C0ARCP05
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicesize = 13
+			STR_VAR
+				resource = C0ARCP06
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 19
+				dicesize = 13
+			STR_VAR
+				resource = C0ARCP07
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 19
+				dicesize = 13
+			STR_VAR
+				resource = C0ARCP08
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicenumber = 19
+				dicesize = 13
+			STR_VAR
+				resource = C0ARCP09
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicesize = 20
+			STR_VAR
+				resource = C0ARCP10
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicesize = 20
+			STR_VAR
+				resource = C0ARCP11
+		END
+    
+		LPF ADD_ITEM_EQEFFECT
+			INT_VAR
+				silent = 1
+				opcode = 177
+				target = 1
+				parameter1 = IDS_OF_SYMBOL (~KIT~ ~FERALAN~)
+				parameter2 = 9
+				timing = 2
+				dicesize = 20
+			STR_VAR
+				resource = C0ARCP12
+		END
+    
+      END
+    END
+BUT_ONLY_IF_IT_CHANGES
+
+END

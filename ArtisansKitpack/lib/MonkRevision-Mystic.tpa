@@ -198,11 +198,9 @@ SAY UNIDENTIFIED_DESC ~These fists deal 2d8+5 crushing damage and strike as a +5
 
 INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
 
-ACTION_FOR_EACH baldur_script IN baldur bdbaldur baldur25 BEGIN
-ACTION_IF FILE_EXISTS_IN_GAME ~%baldur_script%.bcs~ BEGIN
-EXTEND_TOP ~%baldur_script%.bcs~ ~%MOD_FOLDER%/MonkRevision/MysticFists/script/c0mn#fi.baf~
-END
-END
+INCLUDE ~%MOD_FOLDER%/eeex/on_load_eeex.tpa~
+
+EXTEND_TOP ~C0PR#EF.BCS~ ~%MOD_FOLDER%/MonkRevision/MysticFists/script/C0MN#FI.BAF~
 
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items

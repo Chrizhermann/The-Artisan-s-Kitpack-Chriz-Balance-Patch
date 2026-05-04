@@ -1,6 +1,7 @@
 COPY ~%MOD_FOLDER%/Fighter/Samurai/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/BAMS~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/spells~ ~OVERRIDE~
+COPY ~%MOD_FOLDER%/bmp~ ~OVERRIDE~
 
 INCLUDE ~%MOD_FOLDER%/effects/poison_weapon.tpa~
 
@@ -36,14 +37,30 @@ Disadvantages:
 – May not attain proficiency in any weapon other than katanas, wakizashis and longbows.
 – May not attain proficiency in Sword and Shield style.~
 
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
+OUTER_SET opcode_342_eeex = 0
+ACTION_IF MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~ AND FILE_EXISTS ~EEex_scripts/EEex_Opcode_Patch.lua~ THEN BEGIN
+  
+  PRINT ~EEex_Opcode_Patch exists.~
+
+COPY_EXISTING ~EEex_scripts/EEex_Opcode_Patch.lua~ ~EEex_scripts~
+PATCH_IF ~~ STRING_MATCHES_REGEXP ~Opcode #342~ BEGIN
+  SET opcode_342_eeex = 1
+  END
+
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
+  PRINT ~Opcode #342 has been patched.~
+    END
+
+END
+
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
 
 OUTER_PATCH_SAVE kit_description_1 ~%kit_description_1%~ BEGIN
   REPLACE_TEXTUALLY ~IAIJUTSU_DESCRIPTION~ ~
 
 – 9th level: May use Iaijutsu.
 
-IAIJUTSU: When wielding a one-handed sword, the samurai gains an additional half attack per round, and their first attack at the start of every second round has a speed factor of 0 and is a guaranteed critical hit with a +4 bonus to minimum damage rolls. The samurai loses these bonuses if they wield a two-handed weapon, a ranged weapon, or anything in the offhand.~
+IAIJUTSU: When wielding a one-handed sword, the samurai's first attack at the start of every second round has a speed factor of 0 and strikes twice, with each hit being a guaranteed critical hit. The samurai loses these bonuses if they wield a two-handed weapon, a ranged weapon, or anything in the offhand.~
 
 END
 
@@ -225,7 +242,7 @@ Disadvantages:
 – May not achieve Mastery in any weapon other than katanas, wakizashis and longbows.
 – May not become proficient in Sword and Shield style.~
 
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
 
 OUTER_PATCH_SAVE kit_description_2 ~%kit_description_2%~ BEGIN
   REPLACE_TEXTUALLY ~IAIJUTSU_DESCRIPTION~ ~
@@ -466,7 +483,7 @@ END
 
 END
 
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
 
 INCLUDE ~%MOD_FOLDER%/eeex/profs_eeex.tpa~
 
@@ -484,7 +501,6 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	    SET C0_DUAL_WIELDING = %row%
 	  END
 	END
-
 
 COPY_EXISTING ~C0SAM03A.spl~ ~override~
   LPF ALTER_EFFECT

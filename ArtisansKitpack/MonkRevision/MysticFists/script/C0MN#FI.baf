@@ -1,59 +1,71 @@
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player1)
   OR(2)
   Kit(Player1,C0_SACRED_FIST)
   Kit(Player1,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player1,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player1)
 END
 
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player2)
   OR(2)
   Kit(Player2,C0_SACRED_FIST)
   Kit(Player2,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player2,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player2)
 END
 
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player3)
   OR(2)
   Kit(Player3,C0_SACRED_FIST)
   Kit(Player3,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player3,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player3)
 END
 
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player4)
   OR(2)
   Kit(Player4,C0_SACRED_FIST)
   Kit(Player4,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player4,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player4)
 END
 
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player5)
   OR(2)
   Kit(Player5,C0_SACRED_FIST)
   Kit(Player5,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player5,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player5)
 END
 
 IF
-  OnCreation()
+  Global("ApplyMysticFistEffects","LOCALS",0)
+  !HasWeaponEquiped(Player6)
   OR(2)
   Kit(Player6,C0_SACRED_FIST)
   Kit(Player6,C0_ENLIGHTENED_FIST)
 THEN
   RESPONSE #100
-	ActionOverride(Player6,SelectWeaponAbility(SLOT_FIST,1))
+  SetGlobal("ApplyMysticFistEffects","LOCALS",1)
+	ApplySpellRES("C0MN#FF",Player6)
 END

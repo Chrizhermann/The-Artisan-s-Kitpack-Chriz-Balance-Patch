@@ -1,18 +1,19 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/npcs~
 AUTHOR ~The Artisan~
 ALWAYS
-  INCLUDE ~ArtisansKitpack/lib/alter_script.tpa~
-  INCLUDE ~ArtisansKitpack/lib/ClassSpellTool.tpa~
-  INCLUDE ~ArtisansKitpack/lib/a7#add_kit_ex.tpa~
-  INCLUDE ~ArtisansKitpack/lib/kit_strref.tpa~
-  INCLUDE ~ArtisansKitpack/lib/RA_SPHERE_COMPAT.tpa~
-  INCLUDE ~ArtisansKitpack/lib/eet.tph~
-  INCLUDE ~ArtisansKitpack/lib/functions.tph~
-  INCLUDE ~ArtisansKitpack/lib/hla_actions.tpa~
-  INCLUDE ~ArtisansKitpack/lib/replace_multiline.tpa~
-  INCLUDE ~ArtisansKitpack/lib/x_force.tph~
+  OUTER_SPRINT MOD_FOLDER ArtisansKitpack
+  INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/ClassSpellTool.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/a7#add_kit_ex.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/kit_strref.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/RA_SPHERE_COMPAT.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/eet.tph~
+  INCLUDE ~%MOD_FOLDER%/lib/functions.tph~
+  INCLUDE ~%MOD_FOLDER%/lib/hla_actions.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
 END
-AUTO_TRA ~ArtisansKitpack/tra/%s~
+AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
 BEGIN ~Artisan's Kitpack: Give Khalid the Vanguard Kit~ DESIGNATED 1101
   REQUIRE_PREDICATE (GAME_IS ~bgee eet~) ~This component must be installed on BG:EE or EET.~
@@ -158,7 +159,7 @@ COPY ~Emily/creatures/SoD/X32milyA.cre~ ~override/X32mily.cre~
   WRITE_SHORT 0x246 (IDS_OF_SYMBOL (~kit~ ~c0aa~))  
 END 
 
-LOAD_TRA ~ArtisansKitpack/tra/%s~
+LOAD_TRA ~%MOD_FOLDER%/tra/%s~
 
 END
 
@@ -278,7 +279,7 @@ COPY ~SkitiaNPCs/cre/X3EmiA25.cre~ ~override/X3Emi25.cre~
   SAY REACT_TO_DIE_GENERAL @564
   WRITE_SHORT 0x246 (IDS_OF_SYMBOL (~kit~ ~c0aa~))  
 
-LOAD_TRA ~ArtisansKitpack/tra/%s~
+LOAD_TRA ~%MOD_FOLDER%/tra/%s~
 
 END
 
@@ -401,7 +402,7 @@ COPY ~Emily/creatures/SoD/X32milyM.cre~ ~override/X32mily.cre~
   WRITE_SHORT 0x246 (IDS_OF_SYMBOL (~kit~ ~c0aa2~))  
 END 
 
-LOAD_TRA ~ArtisansKitpack/tra/%s~
+LOAD_TRA ~%MOD_FOLDER%/tra/%s~
 
 END
 
@@ -518,7 +519,7 @@ COPY ~SkitiaNPCs/cre/X3EmiM25.cre~ ~override/X3Emi25.cre~
   SAY REACT_TO_DIE_GENERAL @564
   WRITE_SHORT 0x246 (IDS_OF_SYMBOL (~kit~ ~c0aa2~))  
 
-LOAD_TRA ~ArtisansKitpack/tra/%s~
+LOAD_TRA ~%MOD_FOLDER%/tra/%s~
 
 END
 
@@ -551,7 +552,7 @@ END
 
 BEGIN ~Artisan's Kitpack: Rashemi Berserker Ranger Kit for Minsc~ DESIGNATED 2001
 REQUIRE_PREDICATE (GAME_IS ~BGEE BG2EE EET~) ~This mod must be installed on BG:EE, BG2EE or EET.~
-INCLUDE ~ArtisansKitpack/lib/berserkerminsc.tpa~
+INCLUDE ~%MOD_FOLDER%/lib/berserkerminsc.tpa~
 
 BEGIN ~Artisan's Kitpack: Give Ajantis the Divine Champion Kit~ DESIGNATED 3101
   REQUIRE_PREDICATE (GAME_IS ~bgee eet~) ~This component must be installed on BG:EE or EET.~
@@ -621,16 +622,13 @@ REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~5001~ ~The Elementalist Kit must 
 
 BEGIN ~Artisan's Kitpack: Red Wizard Mage Kit for Edwin~
 REQUIRE_PREDICATE (GAME_IS ~BGEE BG2EE EET~) ~This mod must be installed on BG:EE, BG2EE or EET.~
-INCLUDE ~ArtisansKitpack/lib/redwizard.tpa~
-
-BEGIN ~Skip~ DESIGNATED 99999
-SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
-REQUIRE_PREDICATE (MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7001~) OR (MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7003~) ~~
+INCLUDE ~%MOD_FOLDER%/lib/redwizard.tpa~
 
 BEGIN ~Rogue Archer~ DESIGNATED 7101
 SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
   REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee eet~) ~This component must be installed on BG:EE, BG2:EE or EET.~
-  REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~7001~ ~The Rogue Archer Kit must be installed.~
+
+ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7001~ THEN BEGIN
     COPY_EXISTING_REGEXP GLOB ~.+\.CRE~ ~override~
       READ_ASCII DEATHVAR "dv" (32) NULL
       PATCH_IF ((~%dv%~ STR_EQ ~IMOEN~) OR (~%dv%~ STR_EQ ~IMOEN2~)) BEGIN
@@ -640,11 +638,15 @@ SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
       	// do things here
       END
       BUT_ONLY
+      END ELSE BEGIN
+        PRINT ~Rogue Archer Kit is not present. This component will be installed, but will do nothing without the kit installed before it.~
+        END
 
 BEGIN ~Trickster~ DESIGNATED 7102
 SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
   REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee eet~) ~This component must be installed on BG:EE, BG2:EE or EET.~
-  REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~7003~ ~The Trickster Kit must be installed.~
+  
+ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7003~ THEN BEGIN
     COPY_EXISTING_REGEXP GLOB ~.+\.CRE~ ~override~
       READ_ASCII DEATHVAR "dv" (32) NULL
       PATCH_IF ((~%dv%~ STR_EQ ~IMOEN~) OR (~%dv%~ STR_EQ ~IMOEN2~)) BEGIN
@@ -654,6 +656,10 @@ SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
       	// do things here
       END
       BUT_ONLY
+      BUT_ONLY
+      END ELSE BEGIN
+        PRINT ~Trickster Kit is not present. This component will be installed, but will do nothing without the kit installed before it.~
+        END
 
 BEGIN ~Artisan's Kitpack: Give Hexxat the Invisible Blade Kit~ DESIGNATED 7104
   REQUIRE_PREDICATE (GAME_IS ~bg2ee eet~) ~This component must be installed on BG2:EE or EET.~

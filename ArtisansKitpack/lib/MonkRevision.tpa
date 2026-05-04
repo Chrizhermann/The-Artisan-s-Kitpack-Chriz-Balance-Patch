@@ -1,7 +1,7 @@
 COPY ~%MOD_FOLDER%/MonkRevision/2DA~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/audio~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/bam~ ~OVERRIDE~
-COPY ~%MOD_FOLDER%/MonkRevision/bmp~ ~OVERRIDE~
+COPY ~%MOD_FOLDER%/bmp~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/eff~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/fists~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/items~ ~OVERRIDE~
@@ -116,6 +116,24 @@ COPY_EXISTING ~%monk_avatar%.ini~   ~override~ // Lua file read by EEex, provide
   END
 END
 
+OUTER_SET opcode_342_eeex = 0
+ACTION_IF MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~ AND FILE_EXISTS ~EEex_scripts/EEex_Opcode_Patch.lua~ THEN BEGIN
+  
+  PRINT ~EEex_Opcode_Patch exists.~
+
+COPY_EXISTING ~EEex_scripts/EEex_Opcode_Patch.lua~ ~EEex_scripts~
+PATCH_IF ~~ STRING_MATCHES_REGEXP ~Opcode #342~ BEGIN
+  SET opcode_342_eeex = 1
+  END
+
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
+  PRINT ~Opcode #342 has been patched.~
+    END
+
+END
+
+ACTION_IF NOT (opcode_342_eeex = 1) THEN BEGIN
+
 ACTION_DEFINE_ASSOCIATIVE_ARRAY monk_anims_6xxx BEGIN
     ~6500~ => ~MONK_MALE_HUMAN_1~
     ~6500a~ => ~MONK_MALE_HUMAN_2~
@@ -132,6 +150,8 @@ ACTION_DEFINE_ASSOCIATIVE_ARRAY monk_anims_6xxx BEGIN
     COPY ~%MOD_FOLDER%/MonkRevision\animations\%animation%.ini~ ~override/%hexNumber%.ini~
     OUTER_SET EVAL ~slot_%folder%~ = slot   // save animation slot number for later
     APPEND ~ANIMATE.IDS~ ~0x%hexNumber% %symbol%~
+END
+
 END
 
 ACTION_DEFINE_ASSOCIATIVE_ARRAY halforc_monk_anims_6xxx BEGIN
@@ -494,6 +514,13 @@ COPY_EXISTING ~C0MN#04B.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 330 parameter1 = RESOLVE_STR_REF (~Flurry of Blows Active~) END
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0MN#04I END
 
+ACTION_IF (opcode_342_eeex = 1) THEN BEGIN
+  COPY ~%MOD_FOLDER%/MonkRevision/eeex/C0MN#04B.SPL~ ~override~
+  LPF ALTER_EFFECT INT_VAR match_opcode = 330 parameter1 = RESOLVE_STR_REF (~Flurry of Blows Active~) END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0MN#04I END
+  COPY ~%MOD_FOLDER%/MonkRevision/eeex/C0MN#04X.SPL~ ~override~
+END
+
 COPY_EXISTING ~C0MN#04Y.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 330 parameter1 = RESOLVE_STR_REF (~Flurry of Blows Inactive~) END
 COPY_EXISTING ~C0MN#04Y.SPL~ ~OVERRIDE/C0MN#04V.SPL~
@@ -727,7 +754,7 @@ A brutal, specialized advancement of the Quivering Palm technique that can be ma
 COPY_EXISTING ~C0MN#H12.SPL~ OVERRIDE
 SAY NAME1 ~Improved Diamond Soul~
 SAY UNIDENTIFIED_DESC ~Improved Diamond Soul
-The monk's mastery of ki allows them to negate even the strongest of magical effects. Each time this ability is chosen, the monk permanently gains +10% Magic Resistance and +1 to Saving Throws.
+The monk's mastery of ki allows them to negate even the strongest of magical effects. Each time this ability is chosen, the monk permanently gains +5% Magic Resistance and +1 to Saving Throws.
 
 Improved Diamond Soul may be taken up to a maximum of two times.~
 
