@@ -1,4 +1,3 @@
-COPY ~%MOD_FOLDER%/Fighter/Samurai/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/BAMS~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/spells~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/bmp~ ~OVERRIDE~
