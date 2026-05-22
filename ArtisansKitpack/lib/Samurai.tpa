@@ -1,7 +1,38 @@
-COPY ~%MOD_FOLDER%/Fighter/Samurai/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/BAMS~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Samurai/spells~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/bmp~ ~OVERRIDE~
+
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/C0SAMURA.2DA~
+	REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+	REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+	REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+	REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+	// REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+	REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SAM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SAM02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0CAV03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_Increment = 8 STR_VAR f_Entry = GA_C0CAV03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0SAM04 END
+
+ 	PRETTY_PRINT_2DA
+
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/C0RONIN.2DA~
+	REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+	REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+	REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+	REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+	// REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+	REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SAM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SAM05 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_Increment = 6 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0SAM04 END
+
+ 	PRETTY_PRINT_2DA
 
 INCLUDE ~%MOD_FOLDER%/effects/poison_weapon.tpa~
 
@@ -517,8 +548,25 @@ COPY_EXISTING ~C0SAM03D.spl~ ~override~
 		parameter1 = RESOLVE_STR_REF (~Iaijutsu Strike~)
 END
 
+COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+  PATCH_IF (SOURCE_SIZE > 0x71) THEN BEGIN // protects against invalid files
+    READ_BYTE 0x1f "usa2"
+    READ_BYTE 0x29 "kit1"
+    PATCH_IF ((("%kit1%" BAND 0b01000000) = 0b01000000) AND // if unusable by fighters and barbarians
+              (("%usa2%" BAND 0b00001000) = 0b00001000)) THEN BEGIN
+      WRITE_BYTE 0x29 ("%kit1%" BAND 0b10111111) //remove redundant barb flag
+      LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 timing = 2 power = 0 parameter1 = 0 parameter2 = 5 special = RESOLVE_STR_REF (~Barbarian~) END
+    END
+  END
+  BUT_ONLY
+
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
+      READ_BYTE    0x1E row1
+      READ_BYTE    0x1F row2
+      READ_BYTE    0x20 row3
+      READ_BYTE    0x21 row4
+      READ_BYTE    0x29 kit_row1
     READ_BYTE    0x18 twohanded
     PATCH_IF ((twohanded BAND 0b00000010) = 0b00000000) BEGIN 
       READ_SHORT    0x22 appearance 

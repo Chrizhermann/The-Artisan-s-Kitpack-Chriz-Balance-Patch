@@ -34,6 +34,7 @@ END
 
 ACTION_IF dd = 2 THEN BEGIN
 COPY ~%MOD_FOLDER%/Sorcerer/DragonDisciple/spells~ ~override~
+COPY ~%MOD_FOLDER%/Sorcerer/DragonDisciple/spells/C0DD05C.SPL~ ~override/C0DD05A.SPL~
 
 COPY ~%MOD_FOLDER%/Sorcerer/DragonDisciple/2das/c0dd2.2DA~ ~override/clabso01.2da~
 

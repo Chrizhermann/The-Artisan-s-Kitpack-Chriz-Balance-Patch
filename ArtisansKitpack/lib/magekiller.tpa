@@ -1,6 +1,23 @@
 COPY ~%MOD_FOLDER%/Thief/Magekiller/2da~ ~override~
 COPY ~%MOD_FOLDER%/Thief/Magekiller/spells~ ~override~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/C0MKILL.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+	REPLACE_TEXTUALLY ~AP_C0TH-A2~ ~**** ~ // EPIC PRECISION
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MK#000 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0MK#003 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = GA_C0MK#004 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_Increment = 10 STR_VAR f_Entry = AP_C0MK#001 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = GA_C0MK#003 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_C0MK#005 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 STR_VAR f_Entry = GA_C0MK#006 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0MK#003 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = GA_C0MK#007 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~MAGEKILLER: In regions where magic is feared and persecuted, the skills of those capable of hunting and eliminating magic-users are highly sought after. The Magekiller is a rogue who specializes in tracking, stealth and antimagic, becoming highly skilled at recognizing and countering magic of all kinds.
 
 Advantages:
@@ -286,16 +303,3 @@ The Magekiller, upon touching an arcane magic-user, imprisons them in an extradi
 This ability may only be chosen once.
 
 Requires: Spellstrike~
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7000~ THEN BEGIN
-
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
-
-COPY_EXISTING ~C0MKILL.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-      LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0TH-E1 END // USE MAGIC DEVICE
-  PRETTY_PRINT_2DA
-
-END
-
-END

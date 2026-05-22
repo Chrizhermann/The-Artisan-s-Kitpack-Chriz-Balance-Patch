@@ -1,6 +1,22 @@
 COPY ~%MOD_FOLDER%/Paladin/UndeadHunter/2da~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/UndeadHunter/spells~ ~override~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA04.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+	REPLACE_TEXTUALLY ~GA_SPCL211 ~ ~**** ~ // LAY ON HANDS
+	REPLACE_TEXTUALLY ~GA_C0PAL02 ~ ~**** ~ // SMITE EVIL
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0UHU01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0UHU00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0UHU02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0UHU02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0UHU02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0UHU02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0UHU02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0UHU02 END
+
+ 	PRETTY_PRINT_2DA
+
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon

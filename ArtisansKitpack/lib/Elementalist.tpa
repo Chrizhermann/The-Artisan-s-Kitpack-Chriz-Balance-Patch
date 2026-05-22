@@ -1,6 +1,46 @@
 COPY ~%MOD_FOLDER%/Druid/Elementalist/2da~ ~override~
 COPY ~%MOD_FOLDER%/Druid/Elementalist/spells~ ~override~
 
+COPY_EXISTING ~CLABDR01.2DA~ ~OVERRIDE/C0ELEM.2DA~
+  REPLACE_TEXTUALLY ~GA_SPCL107~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL101~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL108~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL112~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL113~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL114~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL611~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL612~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL613~ ~**** ~
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0EL#02 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0EL#01  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL103 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL115  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL117  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL204  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL211  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL217  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL320 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL327  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL304  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL308  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL319  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL404  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL418  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL432  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL512  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL503  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL523  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL517  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL614  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL615  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL628  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL702  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL724  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0EL712  END
+
+  PRETTY_PRINT_2DA
+
 LAF ADD_KIT_EX
   INT_VAR
     // Mage	= 1

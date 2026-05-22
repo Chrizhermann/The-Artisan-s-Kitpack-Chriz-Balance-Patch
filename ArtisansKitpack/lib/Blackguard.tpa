@@ -2,6 +2,29 @@ COPY ~%MOD_FOLDER%/Paladin/Blackguard/2da~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Blackguard/bams~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Blackguard/spells~ ~override~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA06.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+	REPLACE_TEXTUALLY ~GA_SPCL213 ~ ~**** ~ // PROTECTION FROM EVIL
+	REPLACE_TEXTUALLY ~GA_SPCL212 ~ ~**** ~ // DETECT EVIL
+	REPLACE_TEXTUALLY ~GA_SPCL211 ~ ~**** ~ // LAY ON HANDS
+	REPLACE_TEXTUALLY ~GA_C0PAL02 ~ ~**** ~ // SMITE EVIL
+	REPLACE_TEXTUALLY ~SPCL111 ~ ~**** ~ // CURE DISEASE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_SPCL102 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = GA_SPCL102 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_SPCL102 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BG#04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL104 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL105 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BG#02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0BG#S END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0BG#00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_C0BG#03 END
+
+ 	PRETTY_PRINT_2DA
+
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon

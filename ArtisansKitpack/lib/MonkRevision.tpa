@@ -6,6 +6,48 @@ COPY ~%MOD_FOLDER%/MonkRevision/eff~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/fists~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/MonkRevision/items~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/spells/strength_exceptional~ ~OVERRIDE~
+
+COPY_EXISTING ~CLABMO01.2DA~ ~OVERRIDE/CLABMO01.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL811~ ~**** ~ // STUNNING BLOW
+	REPLACE_TEXTUALLY ~AP_SPCL812~ ~**** ~ // MOVEMENT RATE
+	REPLACE_TEXTUALLY ~AP_SPCL813~ ~**** ~ // MOVEMENT RATE 2
+	REPLACE_TEXTUALLY ~AP_SPCL814~ ~**** ~ // FREE ACTION
+	REPLACE_TEXTUALLY ~GA_SPCL815~ ~**** ~ // LAY ON HANDS
+	REPLACE_TEXTUALLY ~AP_SPCL816~ ~**** ~ // SPEED FACTOR
+	REPLACE_TEXTUALLY ~AP_SPCL817~ ~**** ~ // IMMUNITY TO CHARM
+	REPLACE_TEXTUALLY ~AP_SPCL818~ ~**** ~ // IMMUNITY TO POISON
+	REPLACE_TEXTUALLY ~AP_SPCL819~ ~**** ~ // MAGIC RESISTANCE
+	REPLACE_TEXTUALLY ~GA_SPCL820~ ~**** ~ // QUIVERING PALM
+	REPLACE_TEXTUALLY ~AP_SPCL821~ ~**** ~ // WEAPON IMMUNITY
+	REPLACE_TEXTUALLY ~AP_SPCL822~ ~**** ~ // AC BONUS
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 4 STR_VAR f_Entry = GA_SPCL811 END // STUNNING BLOW
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL812 END // MOVEMENT RATE
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL822 END // UNARMED APR
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0MN#04 END // FLURRY OF BLOWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MN#04z END // FLURRY OF BLOWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = AP_C0MN#04z END // FLURRY OF BLOWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = AP_C0MN#04z END // FLURRY OF BLOWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MN#00 END // INNATE BONUSES
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MN#13 END // INNATE BONUSES
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MN#03 END // SAVING THROWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_Increment = 5 STR_VAR f_Entry = AP_C0MN#03 END // SAVING THROWS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AK#EX END // EXCEPTIONAL STRENGTH
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_SPCL817 END // SAVE VS. ENCHANTMENT
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 f_Increment = 3 STR_VAR f_Entry = AP_SPCL816 END // SPEED FACTOR
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_SPCL814 END // FREE ACTION
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = AP_C0MN#06 END // AC BONUS
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = AP_SPCL813 END // MOVEMENT RATE 2
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_SPCL815 END // WHOLENESS OF BODY
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 11 STR_VAR f_Entry = AP_SPCL818 END // DIAMOND BODY
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_Increment = 1 f_MaxLevel = 30 STR_VAR f_Entry = AP_SPCL819 END // DIAMOND SOUL
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = AP_C0MN#14 END // QUIVERING PALM
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0MN#05 END // EMPTY BODY
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0MN#05 END // EMPTY BODY
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_SPCL821 END // PERFECT SELF
+
+ 	PRETTY_PRINT_2DA
+
 COPY_EXISTING ~KITLIST.2DA~ ~override~
   READ_2DA_ENTRIES_NOW ~fig_kitlist~ 10
   FOR (row = 1; row < fig_kitlist; row += 1) BEGIN
@@ -27,7 +69,7 @@ COPY_EXISTING ~KITLIST.2DA~ ~override~
       PATCH_IF !(
 				("%kit_label%" STRING_EQUAL_CASE "C0_BRAWLER")
 														 ) BEGIN
-        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0MN#13 END // FLURRY OF BLOWS
+        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0MN#13 END
         PRETTY_PRINT_2DA
       END
 	  
@@ -36,6 +78,36 @@ COPY_EXISTING ~KITLIST.2DA~ ~override~
     END
   END
   END
+
+COPY_EXISTING ~CLABMO01.2DA~ ~OVERRIDE/CLABMO02.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL811~ ~**** ~ // STUNNING BLOW
+	REPLACE_TEXTUALLY ~AP_C0MN#14~ ~**** ~ // QUIVERING PALM
+	REPLACE_TEXTUALLY ~GA_SPCL815~ ~**** ~ // WHOLENESS OF BODY
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0DMM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0DMM02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 STR_VAR f_Entry = GA_C0DMM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = GA_C0DMM03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_C0DMM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = GA_C0DMM04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 STR_VAR f_Entry = GA_C0DMM05 END
+
+ 	PRETTY_PRINT_2DA
+
+COPY_EXISTING ~CLABMO01.2DA~ ~OVERRIDE/CLABMO03.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL811~ ~**** ~ // STUNNING BLOW
+	REPLACE_TEXTUALLY ~AP_C0MN#14~ ~**** ~ // QUIVERING PALM
+	REPLACE_TEXTUALLY ~GA_C0MN#05~ ~**** ~ // EMPTY BODY
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SSM00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0SSM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = GA_C0SSM01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0SSM02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = GA_C0SSM03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = GA_C0SSM04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 STR_VAR f_Entry = GA_C0SSM05 END
+
+ 	PRETTY_PRINT_2DA
 
 ///////////////////////////////////////////////////////////////////////////
 // Update Kit Descriptions                                               //
@@ -59,6 +131,7 @@ ACTION_FOR_EACH description IN
           SPRINT old_brawler_2 ~– Does not gain Magic Resistance.
 – Does not gain immunity to disease, slow, haste, charm, poison or non-magical weapons.~
           SPRINT new_brawler_2 ~– Does not gain Wisdom bonuses to Armor Class.
+– Does not gain bonus Saving Throws.
 – Does not gain Still Mind, Purity of Body, Diamond Body, Diamond Soul or Perfect Self.~
           GET_STRREF %brawler_desc% brawler_text
           INNER_PATCH_SAVE brawler_text ~%brawler_text%~ BEGIN
@@ -1184,6 +1257,78 @@ COPY_EXISTING BD5300.are override
   END
 END
 
+// BG2
+
+ACTION_FOR_EACH temple_stores IN BHELM DAWNMAS HELMPR SLILMAT WILMAT TEMHELM TEMLATH BEGIN
+ACTION_IF FILE_EXISTS_IN_GAME ~%temple_stores%.sto~ THEN BEGIN
+  COPY_EXISTING ~%temple_stores%.sto~ ~override~
+    ADD_STORE_ITEM ~c0mnro01~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnro02~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnro03~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnbr01~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnbr02~ #0 #0 #0 ~IDENTIFIED~ #1
+
+  END
+  END
+
+ACTION_FOR_EACH temple_stores_evil IN TEMTALOS PPUMB01 BEGIN
+ACTION_IF FILE_EXISTS_IN_GAME ~%temple_stores_evil%.sto~ THEN BEGIN
+  COPY_EXISTING ~%temple_stores_evil%.sto~ ~override~
+    ADD_STORE_ITEM ~c0mnro01~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnro02~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnro03~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnbr04~ #0 #0 #0 ~IDENTIFIED~ #1
+    ADD_STORE_ITEM ~c0mnbr05~ #0 #0 #0 ~IDENTIFIED~ #1
+
+  END
+  END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~AR0203.are~ THEN BEGIN
+COPY_EXISTING ~AR0203.are~ ~override~
+      LPF ADD_AREA_ITEM
+      INT_VAR
+        container_to_add_to = 1
+      STR_VAR
+        item_to_add = ~C0MNBR03~
+      END
+END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~AR1202.are~ THEN BEGIN
+COPY_EXISTING ~AR1202.are~ ~override~
+      LPF ADD_AREA_ITEM
+      INT_VAR
+        container_to_add_to = 7
+      STR_VAR
+        item_to_add = ~C0MNBR06~
+      END
+END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~OH4101.are~ THEN BEGIN
+COPY_EXISTING ~OH4101.are~ ~override~
+      LPF ADD_AREA_ITEM
+      INT_VAR
+        container_to_add_to = 1
+      STR_VAR
+        item_to_add = ~C0MNRO04~
+      END
+END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~SLILMAT.sto~ THEN BEGIN
+COPY_EXISTING ~SLILMAT.sto~ ~override~
+ADD_STORE_ITEM ~c0mnro08~ #0 #0 #0 ~IDENTIFIED~ #1
+END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~ribald3.sto~ THEN BEGIN
+COPY_EXISTING ~ribald3.sto~ ~override~
+ADD_STORE_ITEM ~c0mnro05~ #0 #0 #0 ~IDENTIFIED~ #1
+ADD_STORE_ITEM ~c0mnro06~ #0 #0 #0 ~IDENTIFIED~ #1
+ADD_STORE_ITEM ~c0mnro09~ #0 #0 #0 ~IDENTIFIED~ #1
+END
+
+ACTION_IF FILE_EXISTS_IN_GAME ~OHRBRAIT.cre~ THEN BEGIN
+COPY_EXISTING ~OHRBRAIT.cre~ ~override~
+ADD_CRE_ITEM ~c0mnro08~ #0 #0 #0 ~NONE~ ~ARMOR~
+END
 //// DARK MOON MONK SPELLCASTING
 
 ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
@@ -1224,6 +1369,13 @@ WRITE_SHORT 0x1C 3
 COPY_EXISTING ~SPWI414.spl~ ~override/C0DM404.spl~
 WRITE_SHORT 0x1C 3 
 
+COPY_EXISTING_REGEXP GLOB ~.+\.CRE~ ~override~
+    READ_BYTE 0x234 level1
+      READ_ASCII DEATHVAR "dv" (32) NULL
+      PATCH_IF (~%dv%~ STR_EQ ~RASAAD~) BEGIN
+      WRITE_BYTE 0x48 10
+    END
+    
 ///////////////////////////////////////////////////////////////////////////
 // Update Kit Descriptions                                               //
 ///////////////////////////////////////////////////////////////////////////

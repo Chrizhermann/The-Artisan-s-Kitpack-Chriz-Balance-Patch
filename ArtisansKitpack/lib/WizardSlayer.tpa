@@ -1,6 +1,24 @@
 COPY ~%MOD_FOLDER%/Fighter/WizardSlayer/2da~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/WizardSlayer/spells~ ~override~
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI03.2DA~
+  // REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+  // REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+  // REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+  // REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+  REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+  // REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_SPCL131 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL133 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 STR_VAR f_Entry = GA_C0WSL01 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 2 STR_VAR f_Entry = GA_C0WSL01 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_MaxLevel = 12 f_Increment = 2 STR_VAR f_Entry = GA_C0WSL02 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 STR_VAR f_Entry = AP_C0WSL03 END
+
+  PRETTY_PRINT_2DA
+
 // Resistances
 DEFINE_ACTION_FUNCTION	ADD_SPLPROT	INT_VAR	stat = 0	value = 0	relation = 0	RET	new_row		BEGIN
 	ACTION_IF	(stat > 278)	BEGIN	WARN	~SPLPROT.2DA - Stat out of Bounds.~	END
@@ -231,17 +249,3 @@ COPY_EXISTING ~C0WSL02.SPL~ OVERRIDE
 SAY NAME1 ~Antimagic Field~
 SAY UNIDENTIFIED_DESC ~Antimagic Field
 The Wizard Slayer extends their innate Magic Resistance to all nearby allies within a 15-ft. radius, granting them half of the Wizard Slayer's base amount. This effect lasts for five rounds, and the Wizard Slayer loses their own innate Magic Resistance for the duration and may not use Spellslayer Strike while the effect is active.~
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ BEGIN
-
-COPY_EXISTING ~CLABFI03.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 5 STR_VAR f_Entry = GA_C0FIG01 END // POWER ATTACK
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 5 STR_VAR f_Entry = GA_C0FIG02 END // EXPERTISE
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_MaxLevel = 6 STR_VAR f_Entry = GA_C0ARC03 END // RAPID SHOT
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 12 STR_VAR f_Entry = AP_C0ARC03Z END
-  // LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 16 STR_VAR f_Entry = AP_C0FIG04 END // SPECIALIZATION
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0FIG03 END // IMPROVED INITIATIVE
-  PRETTY_PRINT_2DA
-
-	END

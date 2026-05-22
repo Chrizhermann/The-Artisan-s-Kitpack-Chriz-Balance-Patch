@@ -13,6 +13,18 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
+APPEND ~splprot.2da~ ~C0_KIT_CHECK 152 -1 1~ UNLESS ~C0_KIT_CHECK ~
+COPY_EXISTING ~splprot.2da~ ~override~
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_KIT_CHECK~ BEGIN
+	    SET C0_KIT_CHECK = %row%
+	  END
+	PRETTY_PRINT_2DA
+	END
+
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
     READ_BYTE    0x20 mage //reads the byte containing the fighter usability flag
@@ -27,27 +39,26 @@ COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   END
 BUT_ONLY
 
-COPY_EXISTING ~C0MF.2DA~ OVERRIDE
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0PR#MF2 END
-
 COPY_EXISTING_REGEXP GLOB ~^.+\.cre$~ ~override~ 
    LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 6 parameter2 = 105 target = 1 timing = 1 STR_VAR resource = C0PR#MF1 END
 
-COPY_EXISTING ~ArtisansKitpack/eeex/profs/C0PR#CL.spl~ ~override/C0PR#MF1.SPL~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_MYSTIC_FIRE_EQUIPMENT~) parameter1 = 1 parameter2 = 1 END
+COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#MF.SPL~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~PALADIN~) parameter2 = 105 STR_VAR resource = C0PR#MF1 END
 
-COPY_EXISTING ~ArtisansKitpack/eeex/profs/C0PR#CL.spl~ ~override/C0PR#MF2.SPL~
-   LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 parameter1 = 0 parameter2 = 0 target = 1 timing = 9 duration = 1 STR_VAR resource = C0PR#MF1 END
+COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#MF1.SPL~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 9 STR_VAR resource = C0PR#MF1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 9 STR_VAR resource = C0PR#MF2 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_MYSTIC_FIRE_EQUIPMENT~) parameter1 = 1 parameter2 = 1 END
+	LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 timing = 9 parameter2 = C0_KIT_CHECK parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0MF~) STR_VAR resource = C0PR#MF2 END
+
+COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#MF2.SPL~
    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 parameter1 = 0 parameter2 = 0 target = 1 timing = 0 duration = 1 STR_VAR resource = C0PR#MF1 END
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~C0_MYSTIC_FIRE_EQUIPMENT~) parameter1 = 0 parameter2 = 1 END
+	
+INCLUDE ~%MOD_FOLDER%/eeex/on_load_eeex.tpa~
 
-COPY_EXISTING ~CHARBASE.CRE~ ~OVERRIDE/CHARBASE1.CRE~
-
-COPY_EXISTING ~CHARBASE1.CRE~ ~OVERRIDE~
-   LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 6 parameter2 = 105 target = 1 timing = 4 duration = 1 STR_VAR resource = C0PR#MF1 END
-
-COPY_EXISTING ~CHARBASE1.CRE~ ~weidu_external/backup/%MOD_FOLDER%/temp/CHARBASE.CRE~
-COPY_EXISTING ~weidu_external/backup/%MOD_FOLDER%/temp/CHARBASE.CRE~ ~OVERRIDE~
+COPY_EXISTING ~C0PR#XX.SPL~ ~OVERRIDE~
+	LPF CLONE_EFFECT INT_VAR match_opcode = 326 STR_VAR match_resource = C0PR#X1 resource = C0PR#MF	END
 
 ACTION_FOR_EACH description IN 
     BGCLATXT

@@ -2,6 +2,25 @@ COPY ~%MOD_FOLDER%/Paladin/Inquisitor/2da~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Inquisitor/bams~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Inquisitor/spells~ ~override~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA03.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+	REPLACE_TEXTUALLY ~GA_SPCL211 ~ ~**** ~ // LAY ON HANDS
+	REPLACE_TEXTUALLY ~GA_C0PAL02 ~ ~**** ~ // SMITE EVIL
+	REPLACE_TEXTUALLY ~SPCL111 ~ ~**** ~ // CURE DISEASE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL234 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL235 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL233b END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0INQ02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0INQ03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0INQ03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0INQ03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = GA_C0INQ03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 7 STR_VAR f_Entry = GA_C0INQ04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0INQ01 END
+
+ 	PRETTY_PRINT_2DA
+
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon

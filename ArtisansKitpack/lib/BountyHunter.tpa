@@ -2,6 +2,21 @@
 COPY ~%MOD_FOLDER%/Thief/BountyHunter/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Thief/BountyHunter/SPELLS~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH03.2DA~
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+	REPLACE_TEXTUALLY ~AP_C0TH-A2~ ~**** ~ // EPIC PRECISION
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0STK01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BH-0 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0BH-1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = GA_C0BH-1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_SPCL414 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = GA_SPCL414 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0A_A01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_c0dh#002 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~BOUNTY HUNTER: This is a hunter of men, skilled in tracking their quarry and bringing them back alive—whether for lawful authorities or underworld masters. Bounty Hunters are specially trained at their task and make fearsome opponents. They have honed their trap-making abilities well beyond that of the average Thief.
 
 Advantages:
@@ -11,6 +26,10 @@ Advantages:
 
 ANALYZE: With this ability, the user carefully observes the target and identifies their strengths and weaknesses, revealing their Hit Die, THAC0, Saving Throws, Magic Resistance, Damage Resistance and vulnerability to Poison and Backstabs. This ability may be used an unlimited number of times.
 
+– May use the Tracking modal ability.
+
+TRACKING: With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 50 feet radius of the ranger will be revealed from within the fog of war. Tracking's range increases by an additional 25 feet radius at 9th and 18th level.
+  
 – May use the Poison Weapon (Weakening) ability once per day. Gains an additional use every 5th level.
 
 POISON WEAPON: The bounty hunter is capable of coating <PRO_HISHER> weapon for the next eight hours with a non-lethal but devitalizing poison. This poison deals damage, inflicts Slow, and reduces the target's Saving Throw vs. Breath immediately and every following round for a number of rounds increasing with the bounty hunter's level. The penalty to Save vs. Breath inflicted by this poison lasts for five turns.
@@ -117,15 +136,36 @@ The Manhunter is a powerful trap intended for crippling and tracking marks. This
 
 END
 
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7000~ THEN BEGIN
+COPY_EXISTING ~C0STK01.SPL~ OVERRIDE
+SAY NAME1 ~Tracking~
+SAY UNIDENTIFIED_DESC ~Tracking
+With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 100-ft. radius of the ranger will be revealed from within the explored fog of war.
 
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
+This ability only works while outdoors.~
+  
+DEFINE_ACTION_FUNCTION cd_new_portrait_icon
+  INT_VAR string = 0
+  STR_VAR bam_file = "****"
+  RET     icon
+  BEGIN
 
-COPY_EXISTING ~CLABTH03.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-      LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0TH-E1 END // USE MAGIC DEVICE
-  PRETTY_PRINT_2DA
+  COPY_EXISTING ~statdesc.2da~ ~override~
+    COUNT_2DA_ROWS 3 count
+    READ_2DA_ENTRY (count - 1) 0 3 icon
+    SET icon += 1
+
+  APPEND ~statdesc.2da~ ~%icon% %string% %bam_file%~ UNLESS ~%bam_file%~
 
 END
 
-END
+COPY_EXISTING ~SPCL922.SPL~ ~OVERRIDE/C0STK01.SPL~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 318 END
+  LPF ALTER_EFFECT STR_VAR match_resource = C0TRACK resource = C0STK01 END
+
+COPY_EXISTING ~SPCL922A.SPL~ ~OVERRIDE/C0STK01A.SPL~
+  LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END
+  
+COPY_EXISTING ~SPCL922A.EFF~ ~OVERRIDE/C0STK01A.EFF~
+
+COPY_EXISTING ~SPCL922C.SPL~ ~OVERRIDE/C0STK01C.SPL~
+	LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END

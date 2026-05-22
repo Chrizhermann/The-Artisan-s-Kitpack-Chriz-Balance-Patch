@@ -37,7 +37,7 @@ LAF ADD_KIT_EX
 	
     lower         = RESOLVE_STR_REF(~Favored Soul~)
 	
-    help          = RESOLVE_STR_REF(~FAVORED SOUL: The favored soul follows the path of the cleric but is able to channel divine power with surprising ease. <PRO_HESHE> is able to perform the same tasks as <PRO_HISHER> fellow divine spellcasters but with virtually no study. Favored souls cast their spells naturally, as much through force of personality as through study. Though this gives them extraordinary divine abilities no normal person could ever match, they see their gift as a call to action, and so in some ways may lag behind their more studious colleagues. Favored souls cast divine spells by means of an innate connection rather than through laborious training and prayer, so their divine connection is natural rather than learned. Mortals who perform great services to deities, devoting their lives and work to the cause of their god or goddess, sometimes become the Chosen of that deity.
+    help          = RESOLVE_STR_REF(~FAVORED SOUL: The favored soul follows the path of the cleric but is able to channel divine power with surprising ease. They are able to perform the same tasks as their fellow divine spellcasters but with virtually no study. Favored souls cast their spells naturally, as much through force of personality as through study. Though this gives them extraordinary divine abilities no normal person could ever match, they see their gift as a call to action, and so in some ways may lag behind their more studious colleagues. Favored souls cast divine spells by means of an innate connection rather than through laborious training and prayer, so their divine connection is natural rather than learned. Mortals who perform great services to deities, devoting their lives and work to the cause of their god or goddess, sometimes become the Chosen of that deity.
 	
 CLASS FEATURES:
 
@@ -57,7 +57,7 @@ CLASS FEATURES:
 – 18th level: The Favored Soul becomes immune to non-enchanted weapons and 25% resistance to crushing, slashing, piercing and missile damage.
 – Hit Die: d8~)
 	
-    briefdesc     = RESOLVE_STR_REF(~FAVORED SOUL: The favored soul follows the path of the cleric but is able to channel divine power with surprising ease. She is able to perform the same tasks as her fellow divine spellcasters but with virtually no study. Favored souls cast their spells naturally, as much through force of personality as through study.~)
+    briefdesc     = RESOLVE_STR_REF(~FAVORED SOUL: The favored soul follows the path of the cleric but is able to channel divine power with surprising ease. They are able to perform the same tasks as their fellow divine spellcasters but with virtually no study. Favored souls cast their spells naturally, as much through force of personality as through study.~)
 	
 	// fallen = 0
 	
@@ -151,6 +151,8 @@ LAF ADD_IDS_ENTRY INT_VAR minValue = 1 preferredValue = 205 STR_VAR idsFile = "s
 
 OUTER_SET IS_FAVORED_SOUL = IDS_OF_SYMBOL (~STATS~ ~IS_FAVORED_SOUL~)
 
+OUTER_SET C0_MONK_EQUIPMENT = 0
+
 APPEND ~splprot.2da~ ~IS_FAVORED_SOUL %IS_FAVORED_SOUL% 1 1~ UNLESS ~IS_FAVORED_SOUL %IS_FAVORED_SOUL% 1 1~
 COPY_EXISTING ~splprot.2da~ ~override~ 
 	COUNT_2DA_COLS cols // amount of columns
@@ -161,41 +163,65 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	    SET IS_FAVORED_SOUL = %row%
 	  END
 	END
+COPY_EXISTING ~splprot.2da~ ~override~ 
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_MONK_EQUIPMENT~ BEGIN
+	    SET C0_MONK_EQUIPMENT = %row%
+	  END
+	END
 
 COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
   PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
+		LPF DELETE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) match_parameter2 = 9 match_power = 0 END
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 match_power = 1 power = 0 END
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 opcode = 0 parameter1 = 0 parameter2 = 0 special = 0 power = 0 STR_VAR resource = C0HTD_NM END
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter2 = C0_MONK_EQUIPMENT parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 timing = 2 power = 0 special = RESOLVE_STR_REF (~Favored Soul~) END
+        LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 target = 1 parameter1 = 0 parameter2 = IS_FAVORED_SOUL timing = 2 power = 2 match_power = 0 END
     READ_BYTE    0x1E cleric //reads the byte containing the fighter usability flag
     READ_BYTE    0x21 druid //reads the byte containing the fighter usability flag
+    PATCH_IF ((cleric BAND 0b10000000) = 0b10000000) BEGIN 
+        LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 timing = 2 power = 0 special = RESOLVE_STR_REF (~Favored Soul~) END
+  END
     PATCH_IF ((cleric BAND 0b10000000) = 0b00000000) AND ((druid BAND 0b01000000) = 0b01000000) BEGIN 
       READ_SHORT    0x1C type //reads the byte containing item type
       READ_BYTE    0x21 row4
-      PATCH_IF (type = 2) BEGIN // if it is armor
         WRITE_BYTE    0x21 (row4 BAND 0b10111111)
-      END
         LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 parameter1 = 0 parameter2 = IS_FAVORED_SOUL timing = 2 power = 2 special = RESOLVE_STR_REF (~Druid
 Shaman~) END
-    END
   END
+    END
 BUT_ONLY
 
 COPY_EXISTING_REGEXP GLOB ~^.+\.cre$~ ~override~ 
    LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 11 parameter2 = 105 target = 1 timing = 1 STR_VAR resource = C0PR#FS1 END
    LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 21 parameter2 = 105 target = 1 timing = 1 STR_VAR resource = C0PR#FS1 END
 
-COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#FS1.SPL~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~IS_FAVORED_SOUL~) parameter1 = 1 parameter2 = 1 END
-
-COPY_EXISTING ~CHARBASE.CRE~ ~OVERRIDE/CHARBASE1.CRE~
-
-COPY_EXISTING ~CHARBASE1.CRE~ ~OVERRIDE~
-   LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 11 parameter2 = 105 target = 1 timing = 4 duration = 1 STR_VAR resource = C0PR#FS1 END
-   LPF ADD_CRE_EFFECT INT_VAR opcode = 326 parameter1 = 21 parameter2 = 105 target = 1 timing = 4 duration = 1 STR_VAR resource = C0PR#FS1 END
-
-COPY_EXISTING ~CHARBASE1.CRE~ ~weidu_external/backup/%MOD_FOLDER%/temp/CHARBASE.CRE~
-COPY_EXISTING ~weidu_external/backup/%MOD_FOLDER%/temp~ ~OVERRIDE~
+APPEND ~splprot.2da~ ~C0_KIT_CHECK 152 -1 1~ UNLESS ~C0_KIT_CHECK ~
+COPY_EXISTING ~splprot.2da~ ~override~
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_KIT_CHECK~ BEGIN
+	    SET C0_KIT_CHECK = %row%
+	  END
+	PRETTY_PRINT_2DA
+	END
 
 COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#FS.SPL~
-   LPF ADD_SPELL_EFFECT INT_VAR opcode = 318 parameter1 = 0 parameter2 = 0 target = 1 timing = 9 duration = 1 STR_VAR resource = C0PR#FS1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~DRUID~) parameter2 = 105 STR_VAR resource = C0PR#FS1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~SHAMAN~) parameter2 = 105 STR_VAR resource = C0PR#FS1 END
+
+COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#FS1.SPL~
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 9 STR_VAR resource = C0PR#FS1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 9 STR_VAR resource = C0PR#FS2 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 401 target = 1 timing = 9 special = IDS_OF_SYMBOL (~STATS~ ~IS_FAVORED_SOUL~) parameter1 = 1 parameter2 = 1 END
+	LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 timing = 9 parameter2 = C0_KIT_CHECK parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) STR_VAR resource = C0PR#FS2 END
+
+COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#FS2.SPL~
    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 parameter1 = 0 parameter2 = 0 target = 1 timing = 0 duration = 1 STR_VAR resource = C0PR#FS1 END
    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 parameter1 = 0 parameter2 = 0 target = 1 timing = 0 duration = 1 STR_VAR resource = C0PR#92 END
    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 parameter1 = 0 parameter2 = 0 target = 1 timing = 0 duration = 1 STR_VAR resource = C0PR#95 END
@@ -212,6 +238,9 @@ COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#FS.SPL~
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = 0 parameter2 = 0 STR_VAR resource = C0PR#103 END // XBOW
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = 0 parameter2 = 0 STR_VAR resource = C0PR#106 END // DART
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 1 parameter1 = 0 parameter2 = 0 STR_VAR resource = C0PR#107 END // SLING
+
+COPY_EXISTING ~C0PR#XX.SPL~ ~OVERRIDE~
+	LPF CLONE_EFFECT INT_VAR match_opcode = 326 STR_VAR match_resource = C0PR#X1 resource = C0PR#FS	END
 
 INCLUDE ~%MOD_FOLDER%/lib/FavoredSoul_spells.tpa~
 
@@ -781,11 +810,55 @@ EXTEND_TOP ~AR0904.BCS~ ~%MOD_FOLDER%/strongholds/scripts/favored_soul_ar0904.ba
   
 ACTION_IF FILE_EXISTS_IN_GAME ~SPWI923.SPL~ THEN BEGIN
 COPY_EXISTING ~SPWI923.SPL~ ~OVERRIDE/C0FS#H1.SPL~
-WRITE_SHORT 0x1C 4
+WRITE_SHORT 0x1C 3
 COPY_EXISTING ~SPWI924.SPL~ ~OVERRIDE/C0FS#H2.SPL~
-WRITE_SHORT 0x1C 4
+WRITE_SHORT 0x1C 3
 END
 
 COPY_EXISTING ~LUCL0.2da~ ~override/LUC0FAV.2DA~
 LPF patch_add_hla STR_VAR 2da_row = ~C0FAV1~ ability = ~GA_C0FS#H1~ num_allowed = 1 excluded_by = ~GA_C0FS#H2~ alignment_restrict = ~ALL_EVIL~ END	
 LPF patch_add_hla STR_VAR 2da_row = ~C0FAV2~ ability = ~GA_C0FS#H2~ num_allowed = 1 excluded_by = ~GA_C0FS#H1~ alignment_restrict = ~ALL_GOOD~ END
+LPF patch_add_hla STR_VAR 2da_row = ~C0FAV3~ ability = ~GA_C0FS#06~ num_allowed = 5 END	
+
+ACTION_IF FILE_EXISTS_IN_GAME ~WISH25.DLG~ THEN BEGIN
+
+COPY_EXISTING ~C0FS#06.spl~ ~override~
+SAY NAME1 ~Miracle~
+SAY UNIDENTIFIED_DESC ~Miracle
+(Evocation)
+
+Level: Quest
+Sphere: Creation, Thought
+Range: Unlimited
+Duration: Special
+Casting Time: 9
+Area of Effect: Special
+Saving Throw: None
+
+This powerful spell allows the favored soul to call upon their deity to intervene in their current situation, bestowing an effect of unpredictable—and not necessarily beneficial—results. At its weakest, the intervention may take the form of a physical token or spell, while particularly fortunate casters may receive powerful boons that can instantly turn the tides in their favor. The favored soul's force of personality allows them to shift the winds of fortune in their favor, and as such, a higher charisma attribute grants improved chances of beneficial effects.
+
+However, excessive use of this spell will have diminishing results. For each time that this spell is cast, the chances of the caster's deity responding in subsequent casts is decreased by 20% until eight hours have passed.
+
+This spell may be selected five times.~
+
+COPY_EXISTING ~C0FS#06A.spl~ ~override~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 special = RESOLVE_STR_REF (~Your deity does not respond to your call.~) STR_VAR match_resource = C0FS#06A END
+
+COPY_EXISTING ~C0FS#06A.spl~ ~override/C0FS#06B.spl~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR match_resource = C0FS#06A resource = C0FS#06B END
+COPY_EXISTING ~C0FS#06A.spl~ ~override/C0FS#06C.spl~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR match_resource = C0FS#06A resource = C0FS#06C END
+COPY_EXISTING ~C0FS#06A.spl~ ~override/C0FS#06D.spl~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR match_resource = C0FS#06A resource = C0FS#06D END
+COPY_EXISTING ~C0FS#06A.spl~ ~override/C0FS#06E.spl~
+	LPF ALTER_EFFECT INT_VAR match_opcode = 324 STR_VAR match_resource = C0FS#06A resource = C0FS#06E END
+
+COPY_EXISTING ~C0FS#06.CRE~ OVERRIDE
+WRITE_ASCII 0x2cc ~C0FS#06~ #8  // dialogue
+WRITE_ASCII 0x248 ~C0FS#06~ #8  // override
+WRITE_ASCII 0x280 ~C0FS#06~ #32 // death variable
+
+COMPILE ~%MOD_FOLDER%/FavoredSoul/dialogue/miracle.d~
+COMPILE ~%MOD_FOLDER%/FavoredSoul/scripts/C0FS#06.baf~
+
+END

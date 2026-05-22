@@ -1,0 +1,8 @@
+IF
+    True()
+THEN
+    RESPONSE #100
+    PlaySound("ACT_08")
+    ActionOverride(LastSummonerOf(Myself),StartDialogOverride("C0FS#06",Myself))
+    DestroySelf()
+END

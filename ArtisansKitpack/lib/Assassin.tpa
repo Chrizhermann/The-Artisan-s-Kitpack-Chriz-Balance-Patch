@@ -2,6 +2,22 @@ COPY ~%MOD_FOLDER%/Thief/Assassin/2da~ ~override~
 COPY ~%MOD_FOLDER%/Thief/Assassin/bams~ ~override~
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells~ ~override~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH02.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0ASIN2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AS#I1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AS#I3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_Increment = 10 STR_VAR f_Entry = AP_C0AS#I3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 6 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0ASIN1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0A_A01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_Increment = 1 STR_VAR f_Entry = AP_C0AS#I2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_C0AS#I4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0AS#I5 END
+
+ 	PRETTY_PRINT_2DA
+
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon
@@ -378,22 +394,3 @@ COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0asinv2.spl~ ~override~
       match_opcode = 139 // display string
 	  parameter1 = RESOLVE_STR_REF (~Hidden Blade Ready~ /* Hidden Blade Ready */)
   END
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7000~ THEN BEGIN
-
-COPY_EXISTING ~CLABTH02.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 16 STR_VAR f_Entry = GA_C0TH-A1 END // CRIPPLING STRIKE
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0TH-A2 END // EPIC PRECISION
-  PRETTY_PRINT_2DA
-
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
-
-COPY_EXISTING ~CLABTH02.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-      LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0TH-E1 END // USE MAGIC DEVICE
-  PRETTY_PRINT_2DA
-
-END
-
-END

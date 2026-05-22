@@ -2,6 +2,39 @@
 COPY ~%MOD_FOLDER%/Druid/Avenger/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Druid/Avenger/SPELLS~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABDR01.2DA~ ~OVERRIDE/CLABDR04.2DA~
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0SS-S END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0D4_0 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0D4_1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0D4_2 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0D4_3 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0D4_4 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0D4_5A END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_SPCL632 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_SPCL633 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_SPCL634 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0D4_6A END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0D4_1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0D4_2 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0D4_3 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0D4_4 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0D4_7A END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0D4_1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0D4_2 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0D4_3 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0D4_4 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19 STR_VAR f_Entry = GA_SPCL632 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19 STR_VAR f_Entry = GA_SPCL633 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19 STR_VAR f_Entry = GA_SPCL634 END
+
+  PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~AVENGER: A member of a special sect within the druidic order, a Druid of this type is dedicated to fighting those who would defile nature. Avengers have powers the average Druid does not—additional abilities that have been earned through extensive rituals, a process that is very physically draining.
 
 Advantages:
@@ -948,6 +981,19 @@ COPY_EXISTING ~clasiskl.2da~ ~override~
   
 END
 
+OUTER_SET avenger_ids = IDS_OF_SYMBOL (~kit~ ~BEASTFRIEND~)
+  
 COPY ~%MOD_FOLDER%/lua/m_c0dru1.lua~      ~override~ // Lua file read by EEex, provided by Bubbs and further edited by myself
+///////////////////////////////////////////////////////////////////////////
+// Update lua file                                                       //
+///////////////////////////////////////////////////////////////////////////
+  LPF REPLACE_MULTILINE
+    INT_VAR
+    strict = 1
+    verbose = 0
+    STR_VAR
+    pattern = ~~~~~0x4000~~~~~
+    string = EVAL ~~~~~%avenger_ids%~~~~~ //"
+  END
 
 END

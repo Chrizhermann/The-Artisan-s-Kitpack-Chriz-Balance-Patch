@@ -1,5 +1,17 @@
 COPY ~%MOD_FOLDER%/Paladin\DivineChampion~ ~override~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/C0DC.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+	REPLACE_TEXTUALLY ~GA_C0PAL02 ~ ~**** ~ // SMITE EVIL
+	REPLACE_TEXTUALLY ~SPCL111 ~ ~**** ~ // CURE DISEASE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0DC01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_Increment = 2 STR_VAR f_Entry = GA_C0DC02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0DC03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = AP_C0DC04 END
+
+ 	PRETTY_PRINT_2DA
+
 LAF ADD_KIT_EX
   INT_VAR
     // Mage	= 1

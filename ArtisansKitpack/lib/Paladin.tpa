@@ -1,6 +1,17 @@
 COPY ~%MOD_FOLDER%/Paladin/2DA~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Paladin/spells~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA01.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL212 ~ ~**** ~ // DETECT EVIL
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0PAL00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0PAL00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0PAL05 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0PAL00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0PAL00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0PAL00 END
+
+ 	PRETTY_PRINT_2DA
 
 // CHARISMA
 APPEND ~splprot.2da~ ~C0HTCHR%TAB%42%TAB%-1%TAB%1~ UNLESS ~C0HTCHR~

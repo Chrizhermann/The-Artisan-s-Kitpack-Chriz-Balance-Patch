@@ -2,6 +2,28 @@ COPY ~%MOD_FOLDER%/Fighter/Kensai/2da~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/Kensai/bam~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/Kensai/spells~ ~override~
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI04.2DA~
+	// REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+	// REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+	REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+	REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+	REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+	// REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL143 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 4 STR_VAR f_Entry = AP_SPCL143 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 4 STR_VAR f_Entry = GA_SPCL144 END
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0KN#01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0KN#02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0KN#02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_Increment = 5 STR_VAR f_Entry = AP_C0KN#02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = GA_C0KN#03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0KN#04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0KN#06 END
+
+ 	PRETTY_PRINT_2DA
+
 // FATIGUE
 APPEND ~splprot.2da~ ~FATIGUEGTEQ%TAB%30%TAB%-1%TAB%4~
 COPY_EXISTING ~splprot.2da~ ~override~
@@ -93,8 +115,6 @@ END
 
 LAF ~GET_KIT_STRREF~ STR_VAR kit_name = ~KENSAI~ RET kit_strref END
 STRING_SET_EVALUATE kit_strref ~%kit_description%~
-
-COPY ~%MOD_FOLDER%/Fighter/Kensai/2da/clabfi04.2da~ ~override~
 
 ACTION_IF NOT MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ THEN BEGIN
 COPY_EXISTING ~CLABFI04.2DA~ OVERRIDE
@@ -193,17 +213,3 @@ SAY NAME1 ~Devastating Critical~
 SAY UNIDENTIFIED_DESC ~The Kensai's critical hits kill the target instantly on a failed Saving Throw vs. Death. Creatures with 8 or lower HD die with no save.
 
 Requires: Second Wind~
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ BEGIN
-
-COPY_EXISTING ~CLABFI04.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 5 STR_VAR f_Entry = GA_C0FIG01 END // POWER ATTACK
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 5 STR_VAR f_Entry = GA_C0FIG02 END // EXPERTISE
-   // LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_MaxLevel = 6 STR_VAR f_Entry = GA_C0ARC03 END // RAPID SHOT
-   // LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 12 STR_VAR f_Entry = AP_C0ARC03Z END
-   // LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 16 STR_VAR f_Entry = AP_C0FIG04 END // SPECIALIZATION
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0FIG03 END // IMPROVED INITIATIVE
-  PRETTY_PRINT_2DA
-
-	END

@@ -2,10 +2,22 @@
 COPY ~%MOD_FOLDER%/Thief/Adventurer~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Thief/Adventurer/spells~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/C0ADVENT.2DA~
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 3 STR_VAR f_Entry = AP_C0ADV01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0ARC03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0ADV00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 STR_VAR f_Entry = AP_C0ADV00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 4 STR_VAR f_Entry = GA_SPCL121 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~ROGUE ARCHER: Many rogues choose the use of ranged weapons out of pragmatism, choosing to approach combat from a safe distance. Rogue Archers are experienced enough with such weapons to become a match for any warrior from a distance, taking down their foes with deadly missiles without ever needing to put themselves within threat range.
 
 Advantages:
 – +1 to hit and damage rolls with any missile weapon at level 1 and every 3 levels thereafter.
+– Farsighted: The rogue archer's visual range is slightly greater than normal, and is further increased if stealthed or invisible.
 – May achieve Mastery (3 slots) in any missile weapon.
 – May use the Rapid Shot modal ability.
 
@@ -19,7 +31,7 @@ CALLED SHOT: All successful ranged attacks within the next 10 seconds have the f
  12th level: -1 penalty to the target's Strength score.
  16th level: +2 bonus to damage roll.
  
-– 14th level: Improved Rapid Shot: The archer’s penalty to hit while Rapid Shot is active is reduced to -2.
+– 12th level: Improved Rapid Shot: The archer’s penalty to hit while Rapid Shot is active is reduced to -2.
 – 18th level: Sniper: The archer's ranged attacks while stealthed or invisible are guaranteed critical hits.
 
 Disadvantages:
@@ -176,21 +188,3 @@ DEFINE_ACTION_FUNCTION cd_new_portrait_icon
 END
 
 INCLUDE ~%MOD_FOLDER%/spells/rapidshot.tpa~
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7000~ THEN BEGIN
-
-COPY_EXISTING ~C0ADVENT.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0TH-A2 END // EPIC PRECISION
-  PRETTY_PRINT_2DA
-
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
-
-COPY_EXISTING ~C0ADVENT.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-      LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0TH-E1 END // USE MAGIC DEVICE
-  PRETTY_PRINT_2DA
-
-END
-
-END

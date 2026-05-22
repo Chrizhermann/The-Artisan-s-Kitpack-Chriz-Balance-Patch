@@ -620,7 +620,7 @@ REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~5001~ ~The Elementalist Kit must 
       END
       BUT_ONLY
 
-BEGIN ~Artisan's Kitpack: Red Wizard Mage Kit for Edwin~
+BEGIN ~Artisan's Kitpack: Red Wizard Mage Kit for Edwin~ DESIGNATED 5102
 REQUIRE_PREDICATE (GAME_IS ~BGEE BG2EE EET~) ~This mod must be installed on BG:EE, BG2EE or EET.~
 INCLUDE ~%MOD_FOLDER%/lib/redwizard.tpa~
 
@@ -740,7 +740,7 @@ END
 
 BEGIN ~Artisan's Kitpack: Give Jan the Arcane Trickster Kit~ DESIGNATED 21001
   REQUIRE_PREDICATE (GAME_IS ~bg2ee eet~) ~This component must be installed on BG2:EE or EET.~
-REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~20001~ ~The Elementalist Kit must be installed.~
+REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~20001~ ~The Arcane Trickster Kit must be installed.~
     COPY_EXISTING_REGEXP GLOB ~.+\.CRE~ ~override~
       READ_ASCII DEATHVAR "dv" (32) NULL
       PATCH_IF (~%dv%~ STR_EQ ~JAN~) BEGIN

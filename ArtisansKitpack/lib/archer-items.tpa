@@ -1107,7 +1107,6 @@ COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
       END
     END
 BUT_ONLY_IF_IT_CHANGES
-END
 
 END ELSE BEGIN
 

@@ -49,3 +49,44 @@ BUT_ONLY
     LAF ADD_CLASS_SPELL STR_VAR resref= EVAL ~%druid%~ class_include = ~{'SHAMAN', 'DRUID_ALL', 'RANGER_ALL',}~ kit_exclude=~{'C0_FAVORED_SOUL', }~ END
   END
  END
+
+ COPY_EXISTING ~splprot.2da~ ~override~ 
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~IS_FAVORED_SOUL~ BEGIN
+	    SET IS_FAVORED_SOUL = %row%
+	  END
+	END
+OUTER_SET C0_MONK_EQUIPMENT = 0
+COPY_EXISTING ~splprot.2da~ ~override~ 
+	COUNT_2DA_COLS cols // amount of columns
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0_MONK_EQUIPMENT~ BEGIN
+	    SET C0_MONK_EQUIPMENT = %row%
+	  END
+	END
+  
+COPY_EXISTING_REGEXP GLOB ~.*\.itm~ ~override~ //copies all item files
+  PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // avoid crashing on empty items
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 match_power = 1 power = 0 END
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 opcode = 0 parameter1 = 0 parameter2 = 0 special = 0 power = 0 STR_VAR resource = C0HTD_NM END
+        LPF CLONE_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter2 = C0_MONK_EQUIPMENT parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 timing = 2 power = 0 special = RESOLVE_STR_REF (~Favored Soul~) END
+        LPF ALTER_EFFECT INT_VAR silent = 1 match_opcode = 319 match_parameter1 = 21 match_parameter2 = 5 target = 1 parameter1 = 0 parameter2 = IS_FAVORED_SOUL timing = 2 power = 2 match_power = 0 END
+    READ_BYTE    0x1E cleric //reads the byte containing the fighter usability flag
+    READ_BYTE    0x21 druid //reads the byte containing the fighter usability flag
+    PATCH_IF ((cleric BAND 0b10000000) = 0b10000000) BEGIN 
+        LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 parameter1 = IDS_OF_SYMBOL (~KIT~ ~C0_FAVORED_SOUL~) parameter2 = 9 timing = 2 power = 0 special = RESOLVE_STR_REF (~Favored Soul~) END
+  END
+    PATCH_IF ((cleric BAND 0b10000000) = 0b00000000) AND ((druid BAND 0b01000000) = 0b01000000) BEGIN 
+      READ_SHORT    0x1C type //reads the byte containing item type
+      READ_BYTE    0x21 row4
+        WRITE_BYTE    0x21 (row4 BAND 0b10111111)
+        LPF ADD_ITEM_EQEFFECT INT_VAR opcode = 319 target = 1 parameter1 = 0 parameter2 = IS_FAVORED_SOUL timing = 2 power = 2 special = RESOLVE_STR_REF (~Druid
+Shaman~) END
+  END
+    END
+BUT_ONLY

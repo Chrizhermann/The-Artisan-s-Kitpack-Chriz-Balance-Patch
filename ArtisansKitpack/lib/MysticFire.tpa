@@ -1,47 +1,26 @@
 COPY ~%MOD_FOLDER%/Paladin/MysticFire/2da~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/MysticFire/spells~ ~override~
 
-/*
-    READ_2DA_ENTRY 2 5 col_count war_thac0_lv2
-    READ_2DA_ENTRY 3 5 col_count war_thac0_lv3
-    READ_2DA_ENTRY 4 5 col_count war_thac0_lv4
-    READ_2DA_ENTRY 5 5 col_count war_thac0_lv5
-    READ_2DA_ENTRY 6 5 col_count war_thac0_lv6
-    READ_2DA_ENTRY 7 5 col_count war_thac0_lv7
-    READ_2DA_ENTRY 8 5 col_count war_thac0_lv8
-    READ_2DA_ENTRY 9 5 col_count war_thac0_lv9
-    READ_2DA_ENTRY 10 5 col_count war_thac0_lv10
-    READ_2DA_ENTRY 11 5 col_count war_thac0_lv11
-    READ_2DA_ENTRY 12 5 col_count war_thac0_lv12
-    READ_2DA_ENTRY 13 5 col_count war_thac0_lv13
-    READ_2DA_ENTRY 14 5 col_count war_thac0_lv14
-    READ_2DA_ENTRY 15 5 col_count war_thac0_lv15
-    READ_2DA_ENTRY 16 5 col_count war_thac0_lv16
-    READ_2DA_ENTRY 17 5 col_count war_thac0_lv17
-    READ_2DA_ENTRY 18 5 col_count war_thac0_lv18
-    READ_2DA_ENTRY 19 5 col_count war_thac0_lv19
-    READ_2DA_ENTRY 20 5 col_count war_thac0_lv20
-    READ_2DA_ENTRY 21 5 col_count war_thac0_lv21
-    READ_2DA_ENTRY 22 5 col_count war_thac0_lv22
-    READ_2DA_ENTRY 23 5 col_count war_thac0_lv23
-    READ_2DA_ENTRY 24 5 col_count war_thac0_lv24
-    READ_2DA_ENTRY 25 5 col_count war_thac0_lv25
-    READ_2DA_ENTRY 26 5 col_count war_thac0_lv26
-    READ_2DA_ENTRY 27 5 col_count war_thac0_lv27
-    READ_2DA_ENTRY 28 5 col_count war_thac0_lv28
-    READ_2DA_ENTRY 29 5 col_count war_thac0_lv29
-    READ_2DA_ENTRY 30 5 col_count war_thac0_lv30
-    READ_2DA_ENTRY 31 5 col_count war_thac0_lv31
-    READ_2DA_ENTRY 32 5 col_count war_thac0_lv32
-    READ_2DA_ENTRY 33 5 col_count war_thac0_lv33
-    READ_2DA_ENTRY 34 5 col_count war_thac0_lv34
-    READ_2DA_ENTRY 35 5 col_count war_thac0_lv35
-    READ_2DA_ENTRY 36 5 col_count war_thac0_lv36
-    READ_2DA_ENTRY 37 5 col_count war_thac0_lv37
-    READ_2DA_ENTRY 38 5 col_count war_thac0_lv38
-    READ_2DA_ENTRY 39 5 col_count war_thac0_lv39
-    READ_2DA_ENTRY 40 5 col_count war_thac0_lv40
-*/
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/C0MF.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+	REPLACE_TEXTUALLY ~GA_SPCL213 ~ ~**** ~ // PROTECTION FROM EVIL
+	// REPLACE_TEXTUALLY ~GA_SPCL212 ~ ~**** ~ // DETECT EVIL
+	REPLACE_TEXTUALLY ~GA_SPCL211 ~ ~**** ~ // LAY ON HANDS
+	REPLACE_TEXTUALLY ~GA_C0PAL02 ~ ~**** ~ // SMITE EVIL
+	// REPLACE_TEXTUALLY ~SPCL111 ~ ~**** ~ // CURE DISEASE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0MF#1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MF#2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = AP_C0MF#2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MF#3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0MF#4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_SPCL235 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0MF01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_Increment = 6 STR_VAR f_Entry = GA_C0MF01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0MF02 END
+
+ 	PRETTY_PRINT_2DA
+
 LAF ADD_KIT_EX
   INT_VAR
     // Mage	= 1

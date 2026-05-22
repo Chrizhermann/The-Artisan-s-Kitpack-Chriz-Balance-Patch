@@ -108,6 +108,46 @@ ACTION_FOR_EACH bamFile IN ~MSPIINV.bam~ BEGIN
     END
 END
 
+COPY_EXISTING ~CLABDR01.2DA~ ~OVERRIDE/C0HIVECL.2DA~
+  REPLACE_TEXTUALLY ~GA_SPCL107~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL101~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL108~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL112~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL113~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL114~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL611~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL612~ ~**** ~
+  REPLACE_TEXTUALLY ~GA_SPCL613~ ~**** ~
+  REPLACE_TEXTUALLY ~AP_SPCL925~ ~**** ~
+  REPLACE_TEXTUALLY ~AP_SPCL926~ ~**** ~
+  REPLACE_TEXTUALLY ~AP_SPCL927~ ~**** ~
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0HVAC1 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP1  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0HIVEIN END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP2  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0AS#P1  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP3  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP4  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP5  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0HVSP6  END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0PHIVS  END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_C0HIVEP END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_C0AS#P1 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = AP_C0HIVEZ END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_C0HIVEV END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0HIVES END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = AP_C0HIVEZ END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0AS#P1 END
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0HIVEI4 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 STR_VAR f_Entry = AP_C0HIVEI5 END
+
+  PRETTY_PRINT_2DA
+
 LAF ADD_KIT_EX
   INT_VAR
     // Mage	= 1

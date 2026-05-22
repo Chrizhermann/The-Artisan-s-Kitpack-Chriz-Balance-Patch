@@ -2,6 +2,16 @@ COPY ~%MOD_FOLDER%/Paladin/Cavalier/2da~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Cavalier/bams~ ~override~
 COPY ~%MOD_FOLDER%/Paladin/Cavalier/spells~ ~override~
 
+COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA02.2DA~
+	REPLACE_TEXTUALLY ~AP_C0PAL00 ~ ~**** ~ // AURA OF COURAGE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0CAV03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0CAV01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_Increment = 8 STR_VAR f_Entry = GA_C0CAV03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = AP_C0CAV02 END
+
+ 	PRETTY_PRINT_2DA
+
 // ICONS
 
 DEFINE_ACTION_FUNCTION cd_new_portrait_icon

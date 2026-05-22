@@ -1,6 +1,5 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack~
 AUTHOR ~Artemius_I~
-VERSION ~6.0~
 ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/2daHandling.tph~
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
@@ -13,6 +12,7 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/hla_actions.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
+  INCLUDE ~%MOD_FOLDER%/lib/extend_tables.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
@@ -970,13 +970,13 @@ GROUP ~Sorcerer Kits~
 REQUIRE_PREDICATE (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) ~This component requires EEEx.~ //EEX required!
 INCLUDE ~%MOD_FOLDER%/lib/Arcane_Trickster_Sorc.tpa~
 
-BEGIN ~Artisan's Kitpack: Brawler Kit~ DESIGNATED 10002
-GROUP ~Monk Kits~
-INCLUDE ~%MOD_FOLDER%/lib/Brawler.tpa~
-
 BEGIN ~Artisan's Kitpack: Monk Revisions~ DESIGNATED 10001
 GROUP ~Monk Kits~
 INCLUDE ~%MOD_FOLDER%/lib/MonkRevision.tpa~
+
+BEGIN ~Artisan's Kitpack: Brawler Kit~ DESIGNATED 10002
+GROUP ~Monk Kits~
+INCLUDE ~%MOD_FOLDER%/lib/Brawler.tpa~
 
 BEGIN ~Artisan's Kitpack: Sacred Fist (Cleric) and Enlightened Fist (Sorcerer) Kits—EEEx required~ DESIGNATED 10003
 GROUP ~Monk Kits~

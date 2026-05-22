@@ -1,9 +1,10 @@
 function ArtisanAvengerActionbarListener(config, state)
    if 
-      state == 11
+      (state == 11
+      and EEex_GameObject_GetSelected():getActiveStats().m_nKit == 0x4000)
       or
-      state == 16
-      and EEex_GameObject_GetSelected():getActiveStats().m_nKit == 0x4012
+      (state == 16
+      and EEex_GameObject_GetSelected():getActiveStats().m_nKit == 0x4000)
       then
       EEex_Actionbar_SetButton(5, EEex_Actionbar_ButtonType.STEALTH)
    end

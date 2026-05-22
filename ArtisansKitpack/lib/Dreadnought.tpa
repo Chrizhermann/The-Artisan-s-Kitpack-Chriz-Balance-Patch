@@ -2,6 +2,28 @@ COPY ~%MOD_FOLDER%/Fighter/Dreadnought/2das~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/Dreadnought/bams~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/Dreadnought/spells~ ~override~
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/C0DREADN.2DA~
+	// REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+	REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+	REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+	REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+	REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+	REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0DREDA END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0DRED0 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0DRED1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0DRED3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = GA_C0DRED4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 15 f_Increment = 5 STR_VAR f_Entry = GA_C0DRED5 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_Increment = 8 STR_VAR f_Entry = GA_C0DRED4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_C0DRED2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 STR_VAR f_Entry = GA_C0DRED2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = GA_C0DRED2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = GA_C0DRED2 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~DREADNOUGHT: The dreadnought is a truly fearsome warrior that eschews finesse in favor of power and stamina, specializing in placing the entirety of their weight into their attacks, capable of felling even the strongest of opponents in a single blow. Despite their ferocity, however, only a fool would mistake the dreadnought's fighting style as simple brute force—rather, learning how to use their strength to its full potential and inflict the most damage possible is a difficult technique that few others can master.
 
 Advantages:

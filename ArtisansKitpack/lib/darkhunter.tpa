@@ -1,6 +1,22 @@
-COPY ~%MOD_FOLDER%/Ranger/DarkHunter/2da~ ~override~
 COPY ~%MOD_FOLDER%/Ranger/DarkHunter/bams~ ~override~
 COPY ~%MOD_FOLDER%/Ranger/DarkHunter/spells~ ~override~
+
+COPY_EXISTING ~CLABRN01.2DA~ ~OVERRIDE/C0DHUNT.2DA~
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%][%0-9%] ~ ~**** ~ // TOUGHNESS
+	REPLACE_TEXTUALLY ~GA_SPCL311~ ~**** ~ // CHARM ANIMAL
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	// REPLACE_TEXTUALLY ~C0RNG00A ~ ~**** ~ // CAMOUFLAGE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0DH#000 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0AS#P1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 5 STR_VAR f_Entry = GA_SPCL412 END // Set Snare
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 1 STR_VAR f_Entry = AP_C0DH#004 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = GA_C0AS#P1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0DH#S END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = GA_C0DH#002 END
+
+ 	PRETTY_PRINT_2DA
 
 LAF ADD_KIT_EX
   INT_VAR

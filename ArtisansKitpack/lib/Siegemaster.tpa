@@ -1,6 +1,20 @@
 COPY ~%MOD_FOLDER%/Fighter/Siegemaster/2das~ ~override~
 COPY ~%MOD_FOLDER%/Fighter/Siegemaster/spells~ ~override~
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/C0SIEGEM.2DA~
+	REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+	REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+	REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+	REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+	REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+	REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SIEG0 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_Increment = 2 STR_VAR f_Entry = AP_C0SIEG1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = GA_C0SIEG4 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~SIEGEMASTER: The siegemaster is a heavily armed and armored warrior who specializes in terrifying long-ranged assaults. Wielding the largest and heaviest of ranged weapons with absolute ease, their lethal shots can penetrate even the most durable armors and heavily fortified castles. To the siegemaster, there is no such thing as an 'impenetrable defense'.
 
 Advantages:

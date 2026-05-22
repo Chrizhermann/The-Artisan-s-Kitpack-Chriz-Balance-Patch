@@ -1,6 +1,31 @@
 
 COPY_EXISTING ~C0AA.2DA~ ~OVERRIDE/C0AARN.2DA~
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/C0AARN.2DA~
+	REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%] ~ ~**** ~ // TOUGHNESS
+	REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%][%0-9%] ~ ~**** ~ // TOUGHNESS
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 STR_VAR f_Entry = GA_C0ARC03 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 12 STR_VAR f_Entry = AP_C0ARC03Z END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AAIN0 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AAIN1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AAIN2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 STR_VAR f_Entry = AP_C0AAIN3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AAIN3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0AAIN3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0AAIN4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0AAINN END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = GA_C0AASP1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0AASP2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0AASP2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0AASP2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = GA_C0AASP3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 STR_VAR f_Entry = GA_C0AASP4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 STR_VAR f_Entry = GA_C0AASP5 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT aa_ranger ~ARCANE ARCHER: Master of the elven warbands, the arcane archer is a warrior skilled in using magic to supplement their combat prowess. Beyond the woods, arcane archers gain renown throughout entire kingdoms for their supernatural accuracy with a bow and their ability to imbue their arrows with magic. In a group, they can strike fear into an entire enemy army. While human arcane archers are rare due to elvenkind withholding their secret techniques, they are not unheard of.
 
 Advantages:

@@ -3,6 +3,29 @@ COPY ~%MOD_FOLDER%/Thief/Trickster/2da~ OVERRIDE
 COPY ~%MOD_FOLDER%/Thief/Trickster/bam~ OVERRIDE
 COPY ~%MOD_FOLDER%/Thief/Trickster/spells~ OVERRIDE
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/C0TRICKS.2DA~
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+	REPLACE_TEXTUALLY ~AP_C0TH-A2~ ~**** ~ // EPIC PRECISION
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0TR#00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0TR#01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 3 STR_VAR f_Entry = GA_C0TR#02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0TR#03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0TR#04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_C0TR#05 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0TR#06 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0TR#00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0TR#07 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_C0TR#08 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_C0TR#00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 25 STR_VAR f_Entry = AP_C0TR#09 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 30 STR_VAR f_Entry = AP_C0TR#10 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 35 STR_VAR f_Entry = AP_C0TR#11 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 40 STR_VAR f_Entry = AP_C0TR#12 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 40 STR_VAR f_Entry = AP_C0TR#00 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~TRICKSTER: Perhaps the most complex and most difficult type of rogue to define, tricksters have few abilities to truly call their own. Rather than develop their skills through formal training, tricksters make use of their cleverness and strong memory to master the skills of other classes at a near-instant rate and use them as though with many years of practice—a talent often deridingly described as one part wit and two parts luck. Therefore, no two tricksters are truly alike. As a jack-of-all-trades, the trickster differs from the bard in that their skills are learned spontaneously rather through study. While versatile and quick to adapt, their lack of true specialization makes them slower to develop.
 
 Advantages:
@@ -596,17 +619,4 @@ END
 LPF ALTER_EFFECT INT_VAR match_opcode = 172 STR_VAR resource = C0TR#41 END
 	COPY_EXISTING ~C0TR#%hlamimics%A.SPL~ ~override/C0TR#%hlamimics%C.SPL~
 LPF ALTER_EFFECT INT_VAR match_opcode = 172 STR_VAR resource = C0TR#42 END
-END
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~7000~ THEN BEGIN
-
-ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
-
-COPY_EXISTING ~C0TRICKS.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-      LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 1 STR_VAR f_Entry = AP_C0TH-E1 END // USE MAGIC DEVICE
-  PRETTY_PRINT_2DA
-
-END
-
 END

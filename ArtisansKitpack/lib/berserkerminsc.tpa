@@ -1,6 +1,22 @@
 COPY ~ArtisansKitpack/Ranger/BerserkerMinsc/2da~ ~override~
 COPY ~ArtisansKitpack/Ranger/BerserkerMinsc/spells~ ~override~
 
+COPY_EXISTING ~CLABRN01.2DA~ ~OVERRIDE/C0TBM.2DA~
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%][%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~GA_SPCL311~ ~**** ~ // CHARM ANIMAL
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	// REPLACE_TEXTUALLY ~C0RNG00A ~ ~**** ~ // CAMOUFLAGE
+	// REPLACE_TEXTUALLY ~SPCL922 ~ ~**** ~ // TRACKING
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0TBMA END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_SPIN117 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 4 STR_VAR f_Entry = GA_SPIN117 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = GA_C0FIG01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = AP_C0TBMB END
+
+ 	PRETTY_PRINT_2DA
+
 // Minsc
 
 LAF ADD_KIT_EX

@@ -2,6 +2,23 @@
 COPY ~%MOD_FOLDER%/Thief/Swashbuckler/2DAs~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Thief/Swashbuckler/SPELLS~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH04.2DA~
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+	REPLACE_TEXTUALLY ~AP_C0TH-A2~ ~**** ~ // EPIC PRECISION
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SB-0 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SB-1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = AP_C0SB-2 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = AP_C0SB-2A END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_C0SB-2A END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0SB-1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 STR_VAR f_Entry = AP_C0SB-1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0SB-3 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 4 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0SB-4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0THWAR END
+
+ 	PRETTY_PRINT_2DA
+
 INCLUDE ~ArtisansKitpack/lib/thac0.tpa~
 
 OUTER_SPRINT kit_description ~SWASHBUCKLER: This rogue is part acrobat, part swords<PRO_MANWOMAN>, and part wit: the epitome of charm and grace. The swashbuckler embodies the concepts of daring and panache. Favoring agility and wit over brute force, the swashbuckler excels both in combat situations and social interactions, making them a versatile character indeed.

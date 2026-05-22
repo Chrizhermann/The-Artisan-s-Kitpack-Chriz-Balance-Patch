@@ -1,5 +1,27 @@
-COPY ~%MOD_FOLDER%/Ranger/Beastmaster/2DA~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Ranger/Beastmaster/spells~ ~OVERRIDE~
+
+COPY_EXISTING ~CLABRN01.2DA~ ~OVERRIDE/CLABRN04.2DA~
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%][%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~GA_SPCL311~ ~**** ~ // CHARM ANIMAL
+	// REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	// REPLACE_TEXTUALLY ~C0RNG00A ~ ~**** ~ // CAMOUFLAGE
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BMA00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_SPCL342 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 2 STR_VAR f_Entry = GA_C0BMA01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 STR_VAR f_Entry = GA_C0BMA02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 STR_VAR f_Entry = GA_C0BMA02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_C0BMA02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 STR_VAR f_Entry = GA_SPRA304 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = GA_SPRA305 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 STR_VAR f_Entry = GA_SPRA306 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0BMA03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = GA_C0BMA03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 STR_VAR f_Entry = GA_C0BMA03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = GA_C0BMA03 END
+
+ 	PRETTY_PRINT_2DA
 
 LAF ~GET_KIT_STRREF~ STR_VAR kit_name = ~BEASTMASTER~ RET kit_strref END
 STRING_SET_EVALUATE kit_strref ~BEAST MASTER: This Ranger is a wanderer and is not comfortable in civilized lands. Therefore, <PRO_HESHE> maintains a natural affinity for all beings of nature, from animals to beasts considered monsters by ordinary folk; they are <PRO_HISHER> friends and comrades-in-arms, and the Beast Master has a limited form of telepathic communication with them. 
@@ -216,32 +238,6 @@ ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~2000~ THEN BEGIN
 
 ACTION_IF FILE_EXISTS_IN_GAME ~M_C0RAN1.lua~ THEN BEGIN
 
-ACTION_IF FILE_EXISTS_IN_GAME ~CLABRN04.2DA~ BEGIN
-COPY_EXISTING ~CLABRN04.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 11 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  PRETTY_PRINT_2DA
-BUT_ONLY
-
 COPY_EXISTING ~thiefscl.2da~ ~override~
   REPLACE_TEXTUALLY ~^\([ %TAB%]*MAGE\)~ ~CD_DELETE_ME \1~ // adding column to header column
   COUNT_2DA_COLS col_count
@@ -276,6 +272,5 @@ COPY_EXISTING ~clasiskl.2da~ ~override~
   PRETTY_PRINT_2DA
   BUT_ONLY
   
-END
 END
 END

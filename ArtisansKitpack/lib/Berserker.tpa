@@ -14,6 +14,24 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
+COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI02.2DA~
+  // REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
+  REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
+  REPLACE_TEXTUALLY ~GA_C0ARC03~ ~**** ~ // RAPID SHOT
+  REPLACE_TEXTUALLY ~AP_C0ARC03Z~ ~**** ~
+  REPLACE_TEXTUALLY ~AP_C0FIG04~ ~**** ~ // SPECIALIZATION
+  // REPLACE_TEXTUALLY ~AP_C0FIG03~ ~**** ~ // IMPROVED INITATIVE
+
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#07 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#1X END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#2X END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#3X END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#I1 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 STR_VAR f_Entry = GA_C0BER#05 END
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 4 STR_VAR f_Entry = GA_C0BER#00 END
+
+  PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~BERSERKER: This is a warrior who is in tune with <PRO_HISHER> animalistic side and, during combat, can achieve an ecstatic state of mind that will enable <PRO_HIMHER> to fight longer, harder, and more savagely than any person has a right to. Berserkers tend to be barbarian-like in nature, but not always. Sometimes it is a conscious choice that a warrior in training makes. Regardless, opponents on the battlefield will be unsettled when they see the savage and inhuman elements of the Berserker's personality. This class is common amongst dwarves, known to them as the Battlerager.
 
 Advantages:
@@ -242,16 +260,3 @@ COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#H1.SPL~ ~OVERRIDE~
 SAY NAME1 ~Extend Rage~
 SAY UNIDENTIFIED_DESC ~Extend Rage
 The berserker's proficiency in their wild fighting style allows them to maintain the effects of their rage for longer, permanently extending the maximum total duration of Enrage to 20 rounds.~
-
-ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ BEGIN
-
-COPY_EXISTING ~CLABFI02.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 5 STR_VAR f_Entry = GA_C0FIG01 END // POWER ATTACK
-  // LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_MaxLevel = 6 STR_VAR f_Entry = GA_C0ARC03 END // RAPID SHOT
-  // LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 12 STR_VAR f_Entry = AP_C0ARC03Z END
-  // LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 16 STR_VAR f_Entry = AP_C0FIG04 END // SPECIALIZATION
-   LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0FIG03 END // IMPROVED INITIATIVE
-  PRETTY_PRINT_2DA
-
-	END

@@ -1,0 +1,25 @@
+menu
+{
+    name "C0_Modal_Menu"
+    align center bottom
+    -- Turn off Modal
+    label
+    {
+        area 783 1 40 40
+        bam "GUIBTBUT"
+      scaleToClip
+    }
+    button
+    {
+        name "C0_Modal_Open"
+      scaleToClip
+        tooltip "Modal Abilities"
+        align top right
+        area 783 1 40 40
+        bam "C0_MODIC"
+        frame 0
+        pad 10 10 10 10
+        action "C0_ModalButtonActivate()"
+    }
+    
+}

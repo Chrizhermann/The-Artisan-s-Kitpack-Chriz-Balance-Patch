@@ -1,6 +1,25 @@
 COPY ~%MOD_FOLDER%/Ranger/Stalker/2DA~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Ranger/Stalker/spells~ ~OVERRIDE~
 
+COPY_EXISTING ~CLABRN01.2DA~ ~OVERRIDE/CLABRN03.2DA~
+	REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%] ~ ~**** ~ // TOUGHNESS
+	REPLACE_TEXTUALLY ~AP_C0RNH[%0-9%][%0-9%] ~ ~**** ~ // TOUGHNESS
+	// REPLACE_TEXTUALLY ~GA_SPCL311~ ~**** ~ // CHARM ANIMAL
+	// REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	REPLACE_TEXTUALLY ~C0RNG00A ~ ~**** ~ // CAMOUFLAGE
+	REPLACE_TEXTUALLY ~SPCL922 ~ ~**** ~ // TRACKING
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0STK00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_C0STK00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 STR_VAR f_Entry = AP_C0STK00 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0STK01 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0STK02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0STK03 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0STK04 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0A_A01 END
+
+ 	PRETTY_PRINT_2DA
+
 ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~2000~ THEN BEGIN
 
 LAF ~GET_KIT_STRREF~ STR_VAR kit_name = ~STALKER~ RET kit_strref END
@@ -11,6 +30,7 @@ Advantages:
 – Gains Camouflage bonuses to Hide in Shadows and Move Silently (+25%) while indoors.
 – May use Tracking while indoors.
 – Fleet of Foot: The stalker moves at 30% increased movement rate while stealthed or invisible.
+– May memorize one Mage spell per spell level: Friends (1st level), Detect Invisibility (2nd level), Haste (3rd level)
 – May use Backstab ability, although for a lower damage multiplier than Thieves:
   Level 1-8: x2
   Level 9-16: x3
@@ -19,7 +39,6 @@ Advantages:
 
 ANALYZE: With this ability, the user carefully observes the target and identifies their strengths and weaknesses, revealing their Hit Die, THAC0, Saving Throws, Magic Resistance, Damage Resistance and vulnerability to Poison and Backstabs. This ability may be used an unlimited number of times.
 
-– 8th level: May memorize one Mage spell per spell level: Friends (1st level), Detect Invisibility (2nd level), Haste (3rd level)
 – 15th level: Cloak of Shadows: The stalker's mastery of stealth renders <PRO_HIMHER> completely undetectable and untargetable by all means, whether magical or mundane, while hiding or Invisible. Even creatures that normally see through invisibility cannot perceive the stalker.
 
 Disadvantages:
@@ -116,6 +135,7 @@ STRING_SET_EVALUATE kit_strref ~STALKER: Stalkers serve as covert intelligence-g
 Advantages:
 – +25% bonus to Hide in Shadows and Move Silently.
 – Stealth Caster: The stalker's spells cast while hiding or invisible have their casting time reduced to 1, if higher. 
+– May memorize one Mage spell per spell level: Friends (1st level), Detect Invisibility (2nd level), Haste (3rd level)
 – May use Backstab ability, although for a lower damage multiplier than Thieves:
   Level 1-8: x2
   Level 9-16: x3
@@ -124,7 +144,6 @@ Advantages:
 
 ANALYZE: With this ability, the user carefully observes the target and identifies their strengths and weaknesses, revealing their Hit Die, THAC0, Saving Throws, Magic Resistance, Damage Resistance and vulnerability to Poison and Backstabs. This ability may be used an unlimited number of times.
 
-– 8th level: May memorize one Mage spell per spell level: Friends (1st level), Detect Invisibility (2nd level), Haste (3rd level)
 – 15th level: Cloak of Shadows: The stalker's mastery of stealth renders <PRO_HIMHER> completely undetectable and untargetable by all means, whether magical or mundane, while hiding or Invisible. Even creatures that normally see through invisibility cannot perceive the stalker.
 
 Disadvantages:
@@ -202,32 +221,6 @@ ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~2000~ THEN BEGIN
 
 ACTION_IF FILE_EXISTS_IN_GAME ~M_C0RAN1.lua~ THEN BEGIN
 
-ACTION_IF FILE_EXISTS_IN_GAME ~CLABRN03.2DA~ BEGIN
-COPY_EXISTING ~CLABRN03.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 6 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 8 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 9 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 11 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 12 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 13 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 15 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 16 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 17 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 19 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG02 END // FIND TRAP/ILLUSION POINTS
-  PRETTY_PRINT_2DA
-BUT_ONLY
-
 COPY_EXISTING ~thiefscl.2da~ ~override~
   REPLACE_TEXTUALLY ~^\([ %TAB%]*MAGE\)~ ~CD_DELETE_ME \1~ // adding column to header column
   COUNT_2DA_COLS col_count
@@ -262,6 +255,5 @@ COPY_EXISTING ~clasiskl.2da~ ~override~
   PRETTY_PRINT_2DA
   BUT_ONLY
   
-END
 END
 END

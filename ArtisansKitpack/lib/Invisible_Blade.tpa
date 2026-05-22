@@ -1,6 +1,17 @@
 COPY ~%MOD_FOLDER%/Thief/InvisibleBlade/2da~ ~override~
 COPY ~%MOD_FOLDER%/Thief/InvisibleBlade/spells~ ~override~
 
+COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/C0INVBL.2DA~
+	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
+	REPLACE_TEXTUALLY ~GA_C0TH-A1~ ~**** ~ // CRIPPLING STRIKE
+	REPLACE_TEXTUALLY ~AP_C0TH-A2~ ~**** ~ // EPIC PRECISION
+
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0IVBP1 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0IVB02 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0IVBP2 END
+
+ 	PRETTY_PRINT_2DA
+
 OUTER_SPRINT kit_description ~INVISIBLE BLADE: Invisible Blades are deadly fighters who prefer to use daggers and related weapons in combat. Their training and techniques with these weapons make them just as lethal as any well-armed fighter. Invisible Blades enjoy cultivating misconceptions about the level of danger they present, and they relish any chance to demonstrate that the most unimposing weapons can be the most lethal.
 
 Advantages:

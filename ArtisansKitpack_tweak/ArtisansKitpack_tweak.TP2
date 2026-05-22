@@ -423,7 +423,7 @@ ACTION_FOR_EACH description IN
   END
 
   
-BEGIN ~Artisan's Kitpack: Favored Soul - Patch Cleric-exclusive spells from mods~ DESIGNATED 300010
+BEGIN ~Artisan's Kitpack: Favored Soul - Patch Items and Spells from mods installed after the kitpack~ DESIGNATED 300010
 INCLUDE ~%MOD_FOLDER%/lib/FavoredSoul_spells.tpa~
 
 BEGIN ~Artisan's Kitpack: Update EEex-based Weapon Usability Changes~ DESIGNATED 1010000
@@ -432,3 +432,7 @@ INCLUDE ~%MOD_FOLDER%/lib/profs_eeex_patch.tpa~
 
 BEGIN ~Artisan's Kitpack: Dual-Classes Keep Kit Names in Character Record~ DESIGNATED 1020000
 INCLUDE ~%MOD_FOLDER%/lib/dual_kit_names.tpa~
+
+BEGIN ~Artisan's Kitpack: Modal Abilities Menu (EEex)~ DESIGNATED 2000001
+REQUIRE_COMPONENT ~EEEX/EEEX.TP2~ ~0~ ~EEex must be installed.~
+INCLUDE ~%MOD_FOLDER%/lib/modal.tpa~
