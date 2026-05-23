@@ -8,13 +8,12 @@ COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH04.2DA~
 
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SB-0 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0SB-1 END
-	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = AP_C0SB-2 END
-	LPF set_clab_2da_entries INT_VAR f_MinLevel = 14 STR_VAR f_Entry = AP_C0SB-2A END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_C0SB-2 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 20 STR_VAR f_Entry = AP_C0SB-2A END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0SB-1 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 18 STR_VAR f_Entry = AP_C0SB-1 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0SB-3 END
-	LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 f_Increment = 4 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0SB-4 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_Increment = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0SB-4 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0THWAR END
 
  	PRETTY_PRINT_2DA
@@ -29,7 +28,7 @@ Advantages:
 – May full Specialize or achieve Mastery in Sword and Shield Style, Single Weapon Style and Two-Weapon Style respectively.
 – THAC0 progression is equivalent to a Fighter of the same level.
 – Gains a +1 bonus to base Armor Class on every even-numbered level up to 20th level.
-– Gains a +1 bonus to Armor Class on 4th level up to 20th level.
+– Gains a +1 bonus to Armor Class on 5th level up to 20th level.
 – Gains the Insightful Strike passive effect.
 
 INSIGHTFUL STRIKE: The swashbuckler is capable of making finesse attacks that strike at the target's weak points, gaining bonuses to damage and critical hit rate while wielding a melee weapon scaling with their Intelligence and level. The swashbuckler loses this bonus if they equip any armor that disables thieving skills.
@@ -45,7 +44,6 @@ INSIGHTFUL STRIKE: The swashbuckler is capable of making finesse attacks that st
 20th level, 25 Intelligence: +1 to critical hit rate.
 
 – 10th level: Luck of Heroes bonus increases to +2.
-– 14th level: Gains an additional bonus half attack per round while wielding a melee weapon.
 – 18th level: Luck of Heroes bonus increases to +3.
 – 20th level: Gains an additional bonus half attack per round while wielding a melee weapon.
 

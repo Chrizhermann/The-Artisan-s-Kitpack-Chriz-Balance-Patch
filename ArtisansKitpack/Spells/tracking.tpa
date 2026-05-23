@@ -1,0 +1,94 @@
+ACTION_IF NOT FILE_EXISTS_IN_GAME ~C0CL922.SPL~ THEN BEGIN
+
+COPY ~%MOD_FOLDER%/spells/tracking~ ~OVERRIDE~
+
+INCLUDE ~%MOD_FOLDER%/eeex/on_load_eeex.tpa~
+
+COPY_EXISTING ~C0PR#XX.SPL~ ~OVERRIDE~
+	LPF CLONE_EFFECT INT_VAR match_opcode = 326 STR_VAR match_resource = C0PR#X1 resource = SPCL922K	END
+
+COPY_EXISTING ~SPCL922.SPL~ OVERRIDE
+  LPF ALTER_SPELL_HEADER INT_VAR location = 0 END
+
+COPY_EXISTING ~C0CL922.SPL~ OVERRIDE
+	LPF ALTER_EFFECT INT_VAR match_opcode = 318 parameter2 = C0_NOT_OUTDOORS_CHECK END
+SAY NAME1 ~Tracking~
+SAY UNIDENTIFIED_DESC ~Tracking
+With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 50 feet radius of the ranger will be revealed from within the fog of war. Tracking's range increases by an additional 25 feet radius at 9th and 18th level.
+
+This ability only works while outdoors.~
+
+COPY_EXISTING ~SPCL922a.SPL~ OVERRIDE
+	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Tracking Activated~) END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = SPCL922I END
+
+ADD_PROJECTILE ~%MOD_FOLDER%/spells/tracking/projectile/C0TRKP01.PRO~ ~C0 Tracking 800~
+COPY_EXISTING ~C0TRKP01.PRO~ ~OVERRIDE/C0TRKP02.PRO~
+  WRITE_SHORT 0x204 1200
+  WRITE_SHORT 0x206 1200
+ADD_PROJECTILE ~OVERRIDE/C0TRKP02.PRO~ ~C0 Tracking 1200~
+COPY_EXISTING ~C0TRKP01.PRO~ ~OVERRIDE/C0TRKP03.PRO~
+  WRITE_SHORT 0x204 1600
+  WRITE_SHORT 0x206 1600
+ADD_PROJECTILE ~OVERRIDE/C0TRKP03.PRO~ ~C0 Tracking 1600~
+
+COPY_EXISTING ~SPCL922B.SPL~ OVERRIDE
+	LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter2 = C0_OUTDOORS_CHECK END
+
+COPY_EXISTING ~SPCL922F.SPL~ OVERRIDE
+  LPF ALTER_SPELL_HEADER
+	INT_VAR
+		projectile = C0TRKP01
+END
+
+COPY_EXISTING ~SPCL922G.SPL~ OVERRIDE
+  LPF ALTER_SPELL_HEADER
+	INT_VAR
+		projectile = C0TRKP02
+END
+
+COPY_EXISTING ~SPCL922H.SPL~ OVERRIDE
+  LPF ALTER_SPELL_HEADER
+	INT_VAR
+		projectile = C0TRKP03
+END
+
+COPY_EXISTING ~SPCL922c.SPL~ OVERRIDE
+	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Tracking Deactivated~) END
+
+COPY_EXISTING ~C0STK01.SPL~ OVERRIDE
+SAY NAME1 ~Tracking~
+SAY UNIDENTIFIED_DESC ~Tracking
+With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 100-ft. radius of the ranger will be revealed from within the explored fog of war.
+
+This ability only works while outdoors.~
+  
+DEFINE_ACTION_FUNCTION cd_new_portrait_icon
+  INT_VAR string = 0
+  STR_VAR bam_file = "****"
+  RET     icon
+  BEGIN
+
+  COPY_EXISTING ~statdesc.2da~ ~override~
+    COUNT_2DA_ROWS 3 count
+    READ_2DA_ENTRY (count - 1) 0 3 icon
+    SET icon += 1
+
+  APPEND ~statdesc.2da~ ~%icon% %string% %bam_file%~ UNLESS ~%bam_file%~
+
+END
+
+COPY_EXISTING ~C0CL922.SPL~ ~OVERRIDE/C0STK01.SPL~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 318 END
+  LPF ALTER_EFFECT STR_VAR match_resource = C0TRACK resource = C0STK01 END
+
+COPY_EXISTING ~SPCL922A.SPL~ ~OVERRIDE/C0STK01A.SPL~
+  LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END
+  
+COPY_EXISTING ~SPCL922A.EFF~ ~OVERRIDE/C0STK01A.EFF~
+
+COPY_EXISTING ~SPCL922C.SPL~ ~OVERRIDE/C0STK01C.SPL~
+	LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END
+
+
+END
