@@ -123,7 +123,6 @@ DEFINE_ACTION_FUNCTION cd_new_portrait_icon
 END
 
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Woodland Stride~) STR_VAR bam_file = C0RNG00I RET C0RNG00I = icon END
-LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Tracking~) STR_VAR bam_file = SPCL922I RET SPCL922I = icon END
 
 APPEND ~TRAPLIMT.2DA~ ~RANGER 3
 FERALAN 3
