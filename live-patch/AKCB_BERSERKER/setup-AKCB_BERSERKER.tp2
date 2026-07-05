@@ -13,7 +13,7 @@
 
 BACKUP ~AKCB_BERSERKER/backup~
 AUTHOR ~Chriz (The Artisan's Kitpack — Chriz Balance Patch)~
-VERSION ~1.0~
+VERSION ~1.1~
 
 BEGIN ~Berserker Overhaul Rebalance: no self-harm, rage immunities, low-HP resistances, Hardiness restored~ DESIGNATED 0
 REQUIRE_PREDICATE MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 1003 ~This patch requires Artisan's Kitpack: Berserker Overhaul (component 1003).~
@@ -124,8 +124,13 @@ END
 // changes reach existing characters automatically)
 // ---------------------------------------------------------------------------
 COPY_EXISTING ~c0ber#01.spl~ ~override~
-  // tier 1 (<76% HP): + physical resistance; Reckless Frenzy block dropped
+  // tier 1 (<76% HP): + physical resistance; Reckless Frenzy block dropped;
+  // riders rescaled (v1.1): movement/saves +2 -> +1, APR and luck removed from tier 1
   LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 1 END // movement rider
+  LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 1 END // saves rider
+  LPF DELETE_EFFECT INT_VAR match_opcode = 1 END  // APR rider: none at tier 1
+  LPF DELETE_EFFECT INT_VAR match_opcode = 22 END // luck rider: none at tier 1
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r1% parameter2 = 0 END // slashing
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r1% parameter2 = 0 END // crushing
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r1% parameter2 = 0 END // piercing
@@ -133,10 +138,15 @@ COPY_EXISTING ~c0ber#01.spl~ ~override~
 BUT_ONLY
 
 COPY_EXISTING ~c0ber#02.spl~ ~override~
-  // tier 2 (<50% HP): AC penalty -4 -> -3, + physical resistance
+  // tier 2 (<50% HP): AC penalty -4 -> -3, + physical resistance; riders rescaled
+  // (v1.1): movement/saves +4 -> +2, APR +1 -> +1/2, luck +3 -> +1
   // (negative writes need akcb_alter_p1_signed — built-in ALTER_EFFECT rejects them)
   LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
   LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 3) END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 2 END // movement rider
+  LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 2 END // saves rider
+  LPF ALTER_EFFECT INT_VAR match_opcode = 1   parameter1 = 6 END // APR rider +1/2 (half-attack encoding)
+  LPF ALTER_EFFECT INT_VAR match_opcode = 22  parameter1 = 1 END // luck rider
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r2% parameter2 = 0 END
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r2% parameter2 = 0 END
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r2% parameter2 = 0 END
@@ -144,14 +154,18 @@ COPY_EXISTING ~c0ber#02.spl~ ~override~
 BUT_ONLY
 
 COPY_EXISTING ~c0ber#03.spl~ ~override~
-  // tier 3 (<26% HP): offense +8 -> +6, AC penalty -6 -> -4, saves normalized
-  // to +8 (upstream bug: +10 in the L10 header), + physical resistance
+  // tier 3 (<26% HP): offense +8 -> +6, AC penalty -6 -> -4, + physical resistance;
+  // riders rescaled (v1.1): movement/saves +8 -> +4 (also fixes the upstream +10
+  // op325 in the L10 header), APR +2 -> +1, luck +5 -> +2
   LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
   LPF ALTER_EFFECT  INT_VAR match_opcode = 284 parameter1 = 6 END
   LPF ALTER_EFFECT  INT_VAR match_opcode = 73  parameter1 = 6 END
   LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 6) END
   LPF akcb_alter_p1_signed INT_VAR match_op = 0   new_p1 = (0 - 4) END
-  LPF ALTER_EFFECT  INT_VAR match_opcode = 325 parameter1 = 8 END
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 325 parameter1 = 4 END
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 126 parameter1 = 4 END // movement rider
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 1   parameter1 = 1 END // APR rider +1
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 22  parameter1 = 2 END // luck rider
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r3% parameter2 = 0 END
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r3% parameter2 = 0 END
   LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r3% parameter2 = 0 END
@@ -272,13 +286,13 @@ IN EXTREMIS: Berserkers revel in the thrill of carnage and fight harder when app
 
 ENRAGE: The berserker taps into <PRO_HISHER> frenzy through sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points and becomes immune to charm, confusion, feeblemindedness, hold, paralysis, sleep, and stun effects. If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The berserker cannot cast spells while Enraged.
 
-– From 7th level onwards, the berserker gains +2/+4/+8 to <PRO_HISHER> movement rate while under the effects of In Extremis.
+– From 7th level onwards, the berserker gains +1/+2/+4 to <PRO_HISHER> movement rate while under the effects of In Extremis.
 
-– From 10th level onwards, the berserker's trance-like state makes <PRO_HIMHER> more likely to shrug off debilitating effects, gaining +2/+4/+8 to all Saving Throws while under the effects of In Extremis.
+– From 10th level onwards, the berserker's trance-like state makes <PRO_HIMHER> more likely to shrug off debilitating effects, gaining +1/+2/+4 to all Saving Throws while under the effects of In Extremis.
 
-– From 14th level onwards, the berserker gains +0.5/+1/+2 bonus attacks per round while under the effects of In Extremis.
+– From 14th level onwards, the berserker gains +0.5/+1 bonus attacks per round while below 50% and 25% Hit Points respectively.
 
-– From 20th level onwards, the berserker gains a +1/+3/+5 luck bonus to rolls on damage dealt and received while under the effects of In Extremis.
+– From 20th level onwards, the berserker gains a +1/+2 luck bonus to rolls on damage dealt and received while below 50% and 25% Hit Points respectively.
 
 Disadvantages:
 – Becomes winded for five rounds after using Enrage, suffering a -2 penalty to Armor Class, to-hit rolls, and damage rolls. Additionally, the berserker is unable to Enrage or gain the benefits of In Extremis while winded.

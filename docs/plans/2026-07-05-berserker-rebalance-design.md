@@ -57,10 +57,15 @@ Artisan's Berserker Overhaul is a "wants to be at low HP" kit. On high difficult
 | < 50% | +4 (unchanged) | **−3** (was −4) | **+10% / +8%** |
 | < 26% | **+6** (was +8) | **−4** (was −6) | **+15% / +10%** |
 
-- Riders unchanged: L7+ movement +2/+4/+8, L10+ saves +2/+4/+8, L14+ APR
-  +½/+1/+2, L20+ luck +1/+3/+5.
-- **Bugfix:** tier-3 op325 save bonus normalized to +8 in ALL headers (upstream
-  has +10 in the L10 header).
+- Riders rescaled (**v1.1 revision, approved 2026-07-06** — the original values
+  were kept in v1.0 and judged too high for the level gates):
+
+  | Rider (opcode) | Gate | Tier 1 / 2 / 3 (was) |
+  |---|---|---|
+  | Movement (op126) | L7+ | +1 / +2 / +4 (was +2/+4/+8) |
+  | All saves (op325) | L10+ | +1 / +2 / +4 (was +2/+4/+8; also fixes the upstream +10 in the L10 header) |
+  | APR (op1) | L14+ | — / +½ / +1 (was +½/+1/+2; tier-1 effect DELETED) |
+  | Luck (op22) | L20+ | — / +1 / +2 (was +1/+3/+5; tier-1 effect DELETED) |
 - Resist = opcodes 86/87/88/89 (slashing/crushing/piercing/missile), cumulative
   (param2=0), added to **all 5 ability headers** of each tier spell, same
   12 s/timing-0 profile as the existing tier effects (cloned from the op73
@@ -202,7 +207,8 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
 - [ ] Damage character below 75/50/25%: tier icons appear, AC −2/−3/−4
       (verify the −3/−4 specifically — they use the unsigned-dword write trick),
       resistances +5/+10/+15% visible on record screen.
-- [ ] Tier 3 offense is +6, saves +8.
+- [ ] Tier 3 offense is +6, saves +4, movement +4; tier 1 grants no APR/luck at
+      L14+/L20+ (v1.1 rider rescale).
 - [ ] Enrage: no HP tick-down; hold/stun/charm/confusion/sleep/feeblemind fail
       against the raging berserker (PW:Stun too); still vulnerable when not raging.
 - [ ] Enrage refresh on melee hit + Winded after full cap still work.

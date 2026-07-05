@@ -32,9 +32,10 @@ Then select the components you want.
   confusion/feeblemind immunity while raging; In Extremis gains scaling
   physical resistance (+5/+10/+15% on Spell Revisions installs, +5/+8/+10%
   vanilla) with softened AC penalties (−2/−3/−4) and a trimmed tier-3 offense
-  (+6); Reckless Frenzy deleted; Hardiness restored to the HLA table; tier-3
-  save-bonus bug (+10 → +8) fixed. A tail-installable retrofit for live games
-  lives in `live-patch/AKCB_BERSERKER`.
+  (+6); level riders rescaled in v1.1 (movement/saves +1/+2/+4, APR —/+½/+1,
+  luck —/+1/+2); Reckless Frenzy deleted; Hardiness restored to the HLA table;
+  the upstream tier-3 save-bonus header bug fixed. A tail-installable retrofit
+  for live games lives in `live-patch/AKCB_BERSERKER`.
 
 ## License / usage
 
