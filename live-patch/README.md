@@ -29,6 +29,9 @@ C:Eval('ReallyForceSpellRES("AKCBRFRM",Player1)')
 ```
 
 (unquoted `Player1`; substitute the right PlayerN) — removes the deleted
-Reckless Frenzy innate from the character. Everything else self-applies:
-In Extremis tiers within one round, Enrage on its next cast, Hardiness at the
-next HLA level-up.
+Reckless Frenzy innate AND (v1.2) swaps the save-baked permanent passive for
+the trimmed one (fear/morale immunity moves into Enrage; the −4 thrown-mode
+penalty arrives). Safe to re-run; **run it again after upgrading from
+v1.0/v1.1**. Everything else self-applies: In Extremis tiers within one round,
+Enrage on its next cast, the ranged-weapon ban on load (unequip any bow/sling
+first — it becomes unusable), Hardiness at the next HLA level-up.

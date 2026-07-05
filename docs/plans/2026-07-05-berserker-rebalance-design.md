@@ -53,9 +53,13 @@ Artisan's Berserker Overhaul is a "wants to be at low HP" kit. On high difficult
 
 | HP threshold | Melee THAC0/dmg | AC | Physical resist (all 4 types) SR / vanilla |
 |---|---|---|---|
-| < 76% | +2 (unchanged) | −2 (unchanged) | **+5% / +5%** |
-| < 50% | +4 (unchanged) | **−3** (was −4) | **+10% / +8%** |
-| < 26% | **+6** (was +8) | **−4** (was −6) | **+15% / +10%** |
+| < 76% | **+1** (v1.2; was +2 through v1.1) | −2 (unchanged) | **+5% / +5%** |
+| < 50% | **+2** (v1.2; was +4 through v1.1) | **−3** (was −4) | **+10% / +8%** |
+| < 26% | **+4** (v1.2; was +8 upstream, +6 in v1.0/1.1) | **−4** (was −6) | **+15% / +10%** |
+
+- Offense rescaled in **v1.2 (approved 2026-07-06)** to +1/+2/+4; the op286
+  missile-damage cancels follow at −1/−2/−4 (signed writes via
+  `akcb_alter_p1_signed`).
 
 - Riders rescaled (**v1.1 revision, approved 2026-07-06** — the original values
   were kept in v1.0 and judged too high for the level gates):
@@ -99,29 +103,35 @@ Stacking math (worst realistic tank axis, slash/pierce/crush):
 AND the 6 s refresh package of `c0ber#09`, mirroring the installed vanilla
 `spcl321` implementation, which is EE-Fixpack/SCS-hardened):
 
-| Category | op101 immunity vs opcodes | Extras (mirrored from spcl321, granted categories only) |
+| Category | op101 immunity vs opcodes | Extras (mirrored from spcl321 / moved from c0ber#07) |
 |---|---|---|
 | Stun | 45, 210 (Stun 90HP = Power Word: Stun) | op267 strrefs 14043/1280, op169 icon 55 |
 | Sleep | 39, 217 (Unconsciousness 20HP) | op267 14001, op169 icons 14/130 |
 | Hold/Paralysis | 175, 109 | — (spcl321 has no hold icon/string extras) |
 | Charm | 5 | op296 spnwchrm/spmindat/spflayer, op267 8364/14780/14672, op169 icons 0/1/43 |
-| Confusion | 128 | op296 spconfus, op267 14791/14782, op169 icons 2/3/47 |
-| Feeblemind | 76 | op296 cdfeeble, op169 icon 48 |
+| Fear/Morale (**v1.2**, moved here from the permanent passive) | 24, 23, 106 | op296 cdhorror, op267 20568/17427/14007, op169 icon 36, op142 icon 37 (Resist Fear), op240 icon 36, op161 cure fear, op321 dispel spwi205/spin105 (Horror), op23 morale→10, op106 morale break→0 |
 
+- **v1.2 (approved 2026-07-06):** confusion (op101 128, op328 130, spconfus,
+  op267 14791/14782, icons 2/3/47) and feeblemind (op101 76, op328 137,
+  cdfeeble, icon 48) immunity **removed** from the rage; fear + morale failure
+  immunity moved INTO the rage (was permanent via `c0ber#07` upstream and
+  through v1.1).
 - SCS *detectable-spells* op328 states set alongside (verified against
   `splstate.ids` + SCS's ssl/libdata consumption): 128 STUN_IMMUNITY,
-  127 SLEEP_IMMUNITY, 131 HOLD_IMMUNITY, 119 CHARM_IMMUNITY,
-  130 CONFUSION_IMMUNITY, 137 FEEBLEMIND_IMMUNITY — needed because SCS's DS
+  127 SLEEP_IMMUNITY, 131 HOLD_IMMUNITY, 119 CHARM_IMMUNITY, and (v1.2)
+  129 PANIC_IMMUNITY + 106 (both as in spcl321) — needed because SCS's DS
   scan ran at SCS install time and never sees tail-added op101s.
 - op169 icon prevention is required because a blocked disabler's separate
   op142 portrait-icon effect is not stopped by op101 immunity to the disabler
-  opcode; icon IDs resolved from `statdesc.2da`.
+  opcode; icon IDs resolved from `statdesc.2da` (36 Panic, 37 Resist Fear,
+  4 Berserk).
 - spcl321's level-drain display-string suppressions (41495/40968/40969/40979/
   41616) are deliberately NOT copied — no drain immunity is granted, so drain
-  feedback must stay visible (verifier catch, 2026-07-05).
-- **Deliberately NOT immune:** maze (213), imprisonment (211), level drain
-  (216), fear (24 — already permanent via `c0ber#07`), Power Word: Kill.
-  SCS casters keep planar removal as a counter.
+  feedback must stay visible (verifier catch, 2026-07-05). c0ber#07's op267
+  25818 is dropped in the move (strref misresolves under EET; cosmetic).
+- **Deliberately NOT immune:** confusion (128), feeblemind (76), maze (213),
+  imprisonment (211), level drain (216), Power Word: Kill. Fear/morale only
+  while raging. SCS casters keep real counters at all times.
 
 **Kept unchanged:** +15 max HP, spellcasting lock, 2-round base duration,
 melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
@@ -134,6 +144,32 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
 - Live playthrough: the already-granted innate is stripped with a shipped
   cleanup spell (op172 Remove Innate — removes known + memorized), run once
   from the console.
+
+### 3.3b Permanent passive + ranged-weapon ban (v1.2, approved 2026-07-06)
+
+- `c0ber#07` (AP at 1) trimmed to: involuntary-berserk immunity (op101 vs 3 ×2
+  + op169 Berserk-icon prevention), the dwarven Battlerager title (op177), and
+  a NEW Cavalier-style thrown-mode penalty: **op167 (missile THAC0) −4,
+  permanent** — copied from the installed `c0cav01.spl` (AK's Dreadnought uses
+  the same opcode at −10). All fear/morale effects move into the rage packages.
+- **Hard ranged ban:** the BERSERKER column of `WEAPPROF.2DA` is zeroed for the
+  exact rows the Cavalier/Kensai/Dreadnought zero — `BOW_BG1`, `MISSILE_BG1`,
+  `CROSSBOW`, `LONGBOW`, `SHORTBOW`, `DART`, `SLING` (the EE engine blocks
+  equipping weapons whose kit proficiency cap is 0; this is how AK's own
+  ADD_KIT_EX kits implement "may not use ranged weapons"). The column is
+  located dynamically from the header row; rows are matched by label
+  (`READ_2DA_ENTRIES_NOW`/`SET_2DA_ENTRY_LATER` with required-columns = 1, under
+  which the sig/default/header lines are rows 0–2 — per the WeiDU README's own
+  weapprof example).
+- The op167 −4 covers what WEAPPROF cannot: melee/ranged hybrids (throwing
+  axes/daggers/hammers) used in ranged mode, without banning their melee use.
+  Kit text copies the Cavalier disadvantage wording verbatim.
+- **Save impact:** unlike everything else in this rework, `c0ber#07`'s effects
+  are baked into saves as timing-9 permanents. The `AKCBRFRM` cleanup spell
+  therefore now (1) op321-removes all effects sourced from `C0BER#07`, (2)
+  op172-strips the Reckless Frenzy innate, (3) op146 instantly re-casts the new
+  `c0ber#07` (op321 removes effects of any timing mode; effect list order =
+  application order; `insert_point = 0` puts the op321 first).
 
 ### 3.4 HLA table
 
@@ -196,10 +232,14 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
    `C:Eval('ReallyForceSpellRES("AKCBRFRM",Player1)')`
    (**unquoted** `Player1` — quoted protagonist references silently fail;
    `ReallyForceSpellRES`, not `ApplySpellRES`, which silently fails for
-   override SPLs per the verified gotcha) — strips the Reckless Frenzy innate
-   (op172 removes known + memorized).
+   override SPLs per the verified gotcha). As of v1.2 this strips the Reckless
+   Frenzy innate AND swaps the save-baked old passive for the new one
+   (fear/morale immunity leaves the passive, thrown-mode −4 arrives). Safe to
+   re-run; **required again after upgrading from v1.0/v1.1** even if already
+   run once.
 4. Everything else self-applies: tier changes within one round, Enrage on next
-   cast, Hardiness at the next HLA level-up (he is L6).
+   cast, Hardiness at the next HLA level-up (he is L6). The WEAPPROF ban
+   applies on load — an equipped bow/sling becomes unusable; unequip/stash it.
 
 ## 6. Test checklist (in-game, post-install)
 
@@ -207,10 +247,13 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
 - [ ] Damage character below 75/50/25%: tier icons appear, AC −2/−3/−4
       (verify the −3/−4 specifically — they use the unsigned-dword write trick),
       resistances +5/+10/+15% visible on record screen.
-- [ ] Tier 3 offense is +6, saves +4, movement +4; tier 1 grants no APR/luck at
-      L14+/L20+ (v1.1 rider rescale).
-- [ ] Enrage: no HP tick-down; hold/stun/charm/confusion/sleep/feeblemind fail
-      against the raging berserker (PW:Stun too); still vulnerable when not raging.
+- [ ] Tier offense is +1/+2/+4 (v1.2), saves +4 / movement +4 at tier 3;
+      tier 1 grants no APR/luck at L14+/L20+ (v1.1 rider rescale).
+- [ ] Enrage: no HP tick-down; hold/stun/charm/sleep/fear/morale failure fail
+      against the raging berserker (PW:Stun too); confusion/feeblemind LAND even
+      while raging (v1.2); fear lands when not raging.
+- [ ] Ranged ban: bows/crossbows/slings/darts cannot be equipped; a throwing
+      axe still works in melee but shows −4 to hit in ranged mode.
 - [ ] Enrage refresh on melee hit + Winded after full cap still work.
 - [ ] Reckless Frenzy gone from the innate bar after the console line.
 - [ ] Hardiness appears in HLA choices at fighter level 15+ (test via
