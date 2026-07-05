@@ -1,0 +1,312 @@
+// AKCB_BERSERKER — live-install tail patch for the Artisan's Kitpack Berserker
+// Overhaul rebalance (Chriz Balance Patch fork, docs/plans/2026-07-05-berserker-
+// rebalance-design.md).
+//
+// This mod transforms an ALREADY-INSTALLED Artisan's Berserker Overhaul (#1003)
+// into the rebalanced version, so it can be appended at the tail of a live WeiDU
+// stack without uninstalling anything. Fresh installs should use the fork's
+// lib/Berserker.tpa instead, which produces the same end state — with one
+// accepted divergence: this patch keeps the installed Enrage-use grant levels
+// (1,5,9,13,17,20,25,29,33,37,43,47) while the fork normalizes them to exactly
+// every 4 levels (1,5,...,49). Functionally negligible (differs only at L20/21
+// and L41+).
+
+BACKUP ~AKCB_BERSERKER/backup~
+AUTHOR ~Chriz (The Artisan's Kitpack — Chriz Balance Patch)~
+VERSION ~1.0~
+
+BEGIN ~Berserker Overhaul Rebalance: no self-harm, rage immunities, low-HP resistances, Hardiness restored~ DESIGNATED 0
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 1003 ~This patch requires Artisan's Kitpack: Berserker Overhaul (component 1003).~
+
+INCLUDE ~AKCB_BERSERKER/lib/kit_strref.tpa~
+
+// ---------------------------------------------------------------------------
+// In Extremis physical resistance — higher on Spell Revisions installs (SR's
+// Revised Warrior HLAs nerfs Hardiness 40% physical -> 20% all types)
+// ---------------------------------------------------------------------------
+ACTION_IF MOD_IS_INSTALLED "spell_rev/setup-spell_rev.tp2" 0 BEGIN
+  OUTER_SET ie_r1 = 5
+  OUTER_SET ie_r2 = 10
+  OUTER_SET ie_r3 = 15
+END ELSE BEGIN
+  OUTER_SET ie_r1 = 5
+  OUTER_SET ie_r2 = 8
+  OUTER_SET ie_r3 = 10
+END
+
+// ---------------------------------------------------------------------------
+// Status immunities while Enraged, mirrored from the vanilla EE SPCL321
+// implementation (opcode set + SCS detectable-spells states + display-string
+// suppressions). Donor for cloning = the op328 STATE_ENRAGED marker (p2=104),
+// which carries the right duration in both the 2-round package (c0ber#00, 12s)
+// and the melee-hit refresh package (c0ber#09, 6s).
+// Deliberately NOT immune: fear (permanent via c0ber#07), maze, imprisonment,
+// level drain.
+// ---------------------------------------------------------------------------
+DEFINE_PATCH_FUNCTION akcb_rage_immunities BEGIN
+  // op101 Immunity to opcode
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 45  special = 0 END // stun
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 210 special = 0 END // stun 90hp (Power Word: Stun)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 39  special = 0 END // sleep
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 217 special = 0 END // unconsciousness 20hp
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 175 special = 0 END // hold
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 109 special = 0 END // paralyze
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 5   special = 0 END // charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 128 special = 0 END // confusion
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 76  special = 0 END // feeblemind
+  // op328 spell states so SCS AI knows not to waste disablers (SPLSTATE.IDS, engine-fixed)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 128 END // STUN_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 127 END // SLEEP_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 131 END // HOLD_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 119 END // CHARM_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 130 END // CONFUSION_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 137 END // FEEBLEMIND_IMMUNITY
+  // op296 protection from specific animation (charm/confusion/feeblemind visuals)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 5   special = 0 STR_VAR resource = spnwchrm END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 175 special = 0 STR_VAR resource = spmindat END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 175 special = 0 STR_VAR resource = spflayer END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 128 special = 0 STR_VAR resource = spconfus END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 0   special = 0 STR_VAR resource = cdfeeble END
+  // op267 display-string suppression (BG2EE/EET strrefs, as in the EE-Fixpack-patched
+  // SPCL321; without these, a blocked disabler still floats its "Stunned"/"Charmed" text).
+  // NOTE: spcl321's level-drain string suppressions (41495/40968/40969/40979/41616) are
+  // deliberately NOT copied — this rework grants no drain immunity, so drains must stay visible.
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14043 parameter2 = 45  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 1280  parameter2 = 45  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14001 parameter2 = 39  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 8364  parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14780 parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14672 parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14791 parameter2 = 128 special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14782 parameter2 = 128 special = 0 END
+  // op169 prevent portrait icon — a blocked disabler's separate op142 icon effect is NOT
+  // stopped by op101 immunity to the disabler opcode; icon ids from statdesc.2da, set
+  // mirrored from SPCL321 restricted to the granted categories
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 55  special = 0 END // Stun
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 14  special = 0 END // Sleep
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 130 special = 0 END // Unconscious
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 0   special = 0 END // Charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 1   special = 0 END // Dire Charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 43  special = 0 END // Domination
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 2   special = 0 END // Rigid Thinking
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 3   special = 0 END // Confused
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 47  special = 0 END // Chaos
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 48  special = 0 END // Feebleminded
+END
+
+// WeiDU's built-in ALTER_EFFECT gates every field write on `parameter1 >= 0`
+// (and PE integers are 32-bit, so unsigned-hex workarounds re-evaluate to
+// negatives and are skipped too). This function writes a SIGNED parameter1 into
+// every effect with the given opcode across all ability headers.
+// SPL ability header: nFx at +0x1E, firstFxIdx at +0x20 (empirical layout;
+// IESDP documents these wrong), effect stride 0x30, parameter1 at effect +0x04.
+DEFINE_PATCH_FUNCTION akcb_alter_p1_signed
+  INT_VAR match_op = 0
+          new_p1 = 0
+BEGIN
+  READ_LONG  0x64 abil_off
+  READ_SHORT 0x68 abil_num
+  READ_LONG  0x6A fx_off
+  FOR (i = 0; i < abil_num; ++i) BEGIN
+    READ_SHORT (abil_off + i * 0x28 + 0x1E) nfx
+    READ_SHORT (abil_off + i * 0x28 + 0x20) first
+    FOR (j = 0; j < nfx; ++j) BEGIN
+      READ_SHORT (fx_off + (first + j) * 0x30) op
+      PATCH_IF op = match_op BEGIN
+        WRITE_LONG (fx_off + (first + j) * 0x30 + 0x04) new_p1
+      END
+    END
+  END
+END
+
+// ---------------------------------------------------------------------------
+// In Extremis tier spells (re-cast every round by the baked watchers, so these
+// changes reach existing characters automatically)
+// ---------------------------------------------------------------------------
+COPY_EXISTING ~c0ber#01.spl~ ~override~
+  // tier 1 (<76% HP): + physical resistance; Reckless Frenzy block dropped
+  LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r1% parameter2 = 0 END // slashing
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r1% parameter2 = 0 END // crushing
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r1% parameter2 = 0 END // piercing
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r1% parameter2 = 0 END // missile
+BUT_ONLY
+
+COPY_EXISTING ~c0ber#02.spl~ ~override~
+  // tier 2 (<50% HP): AC penalty -4 -> -3, + physical resistance
+  // (negative writes need akcb_alter_p1_signed — built-in ALTER_EFFECT rejects them)
+  LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+  LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 3) END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r2% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r2% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r2% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r2% parameter2 = 0 END
+BUT_ONLY
+
+COPY_EXISTING ~c0ber#03.spl~ ~override~
+  // tier 3 (<26% HP): offense +8 -> +6, AC penalty -6 -> -4, saves normalized
+  // to +8 (upstream bug: +10 in the L10 header), + physical resistance
+  LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 284 parameter1 = 6 END
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 73  parameter1 = 6 END
+  LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 6) END
+  LPF akcb_alter_p1_signed INT_VAR match_op = 0   new_p1 = (0 - 4) END
+  LPF ALTER_EFFECT  INT_VAR match_opcode = 325 parameter1 = 8 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r3% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r3% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r3% parameter2 = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r3% parameter2 = 0 END
+BUT_ONLY
+
+// ---------------------------------------------------------------------------
+// Enrage: drop the missing-HP damage ladder (20x op177), add status immunities.
+// New description on c0ber#00.
+// ---------------------------------------------------------------------------
+COPY_EXISTING ~c0ber#00.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 177 END
+  LPF akcb_rage_immunities END
+SAY UNIDENTIFIED_DESC ~Enrage
+The berserker taps into <PRO_HISHER> frenzy through sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points and becomes immune to charm, confusion, feeblemindedness, hold, paralysis, sleep, and stun effects. If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The berserker cannot cast spells while Enraged.~
+
+COPY_EXISTING ~c0ber#09.spl~ ~override~
+  // melee-hit refresh package — ladder out, immunities in (6s versions)
+  LPF DELETE_EFFECT INT_VAR match_opcode = 177 END
+  LPF akcb_rage_immunities END
+BUT_ONLY
+
+// Enrage cap engines: remove the 1 HP/second drain (op146 -> C0BER#04, timing 3)
+// and the 20x op272 damage-ladder re-appliers. Leftover op321 cleanup references
+// to C0BER#04/#6* stay as harmless no-ops.
+COPY_EXISTING ~c0ber#08.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 146 match_timing = 3 END
+  LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+BUT_ONLY
+
+COPY_EXISTING ~c0ber#h2.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 146 match_timing = 3 END
+  LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+BUT_ONLY
+
+// ---------------------------------------------------------------------------
+// CLAB: remove the Reckless Frenzy grant (GA_C0BER#05 at level 4). The Enrage-use
+// grid is left as installed. Surgical edit — preserves the GA_C0FIG01/AP_C0FIG03
+// rows added by the Fighter Overhaul.
+// ---------------------------------------------------------------------------
+COPY_EXISTING ~clabfi02.2da~ ~override~
+  REPLACE_TEXTUALLY ~GA_C0BER#05~ ~****~
+  PRETTY_PRINT_2DA
+BUT_ONLY
+
+// ---------------------------------------------------------------------------
+// HLA table: restore Hardiness (GA_SPCL907) next to Extend Rage. The active
+// table is resolved from luabbr.2da (SCS #4250 renamed AK's LUC0BER to Fi1 in
+// this install); the orphaned LUC0BER.2DA is patched too for consistency.
+// The row is written into the FIRST all-asterisk placeholder row — the layout
+// every proven HLA-adder uses (AK's patch_add_hla, SCS's lightweight adder);
+// no precedent exists for real rows after placeholder rows, so no APPEND.
+// ---------------------------------------------------------------------------
+DEFINE_ACTION_FUNCTION akcb_restore_hardiness
+  STR_VAR table = ~~
+BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%table%.2da~ BEGIN
+    COPY_EXISTING ~%table%.2da~ ~override~
+      PATCH_IF (INDEX_BUFFER (~GA_SPCL907~) < 0) BEGIN
+        READ_2DA_ENTRIES_NOW akcb_lu_rows 10
+        SET akcb_done = 0
+        FOR (row = 0; row < akcb_lu_rows; ++row) BEGIN
+          PATCH_IF !akcb_done BEGIN
+            READ_2DA_ENTRY_FORMER akcb_lu_rows row 1 ~abil~
+            PATCH_IF ~%abil%~ STRING_EQUAL ~*~ BEGIN
+              SET_2DA_ENTRY row 1 10 ~GA_SPCL907~ // ABILITY
+              SET_2DA_ENTRY row 4 10 ~1~          // MIN_LEV
+              SET_2DA_ENTRY row 5 10 ~99~         // MAX_LEVEL
+              SET_2DA_ENTRY row 6 10 ~20~         // NUM_ALLOWED
+              SET akcb_done = 1
+            END
+          END
+        END
+        PATCH_IF !akcb_done BEGIN
+          // no placeholder row free — insert one at the end as a fallback
+          INSERT_2DA_ROW akcb_lu_rows 10 ~40 GA_SPCL907 * * 1 99 20 * * *~
+        END
+        PRETTY_PRINT_2DA
+      END
+    BUT_ONLY
+  END
+END
+
+OUTER_SPRINT akcb_hla_abbr ~~
+COPY_EXISTING ~luabbr.2da~ ~override~
+  COUNT_2DA_COLS cols
+  READ_2DA_ENTRIES_NOW rows cols
+  FOR (row = 1; row < rows; ++row) BEGIN
+    READ_2DA_ENTRY_FORMER rows row 0 ~text~
+    PATCH_IF ~%text%~ STRING_EQUAL_CASE ~BERSERKER~ BEGIN
+      READ_2DA_ENTRY_FORMER rows row 1 ~akcb_hla_abbr~
+      SPRINT ~akcb_hla_abbr~ ~%akcb_hla_abbr%~
+    END
+  END
+BUT_ONLY
+
+ACTION_IF (~%akcb_hla_abbr%~ STR_CMP ~~) BEGIN
+  LAF akcb_restore_hardiness STR_VAR table = EVAL ~lu%akcb_hla_abbr%~ END
+END
+
+LAF akcb_restore_hardiness STR_VAR table = ~LUC0BER~ END
+
+// ---------------------------------------------------------------------------
+// Kit description (rewritten for the new mechanics)
+// ---------------------------------------------------------------------------
+OUTER_SPRINT kit_description ~BERSERKER: This is a warrior who is in tune with <PRO_HISHER> animalistic side and, during combat, can achieve an ecstatic state of mind that will enable <PRO_HIMHER> to fight longer, harder, and more savagely than any person has a right to. Berserkers tend to be barbarian-like in nature, but not always. Sometimes it is a conscious choice that a warrior in training makes. Regardless, opponents on the battlefield will be unsettled when they see the savage and inhuman elements of the Berserker's personality. This class is common amongst dwarves, known to them as the Battlerager.
+
+Advantages:
+– Immunity to fear, morale failure and involuntary berserk effects.
+– Gains the In Extremis passive effect.
+
+IN EXTREMIS: Berserkers revel in the thrill of carnage and fight harder when approaching death while most warriors would falter or retreat. As the berserker accumulates wounds in battle, their blows become increasingly deadly and their body learns to shrug off punishment, though their reckless stance leaves openings in their defense.
+  Below 75% Hit Points: +2 to melee THAC0 and Damage, %ie_r1%% resistance to physical damage, -2 penalty to Armor Class
+  Below 50% Hit Points: +4 to melee THAC0 and Damage, %ie_r2%% resistance to physical damage, -3 penalty to Armor Class
+  Below 25% Hit Points: +6 to melee THAC0 and Damage, %ie_r3%% resistance to physical damage, -4 penalty to Armor Class
+
+– May use the Enrage ability once per day. Gains one use at level 1 and an additional use every 4 levels thereafter.
+
+ENRAGE: The berserker taps into <PRO_HISHER> frenzy through sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points and becomes immune to charm, confusion, feeblemindedness, hold, paralysis, sleep, and stun effects. If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The berserker cannot cast spells while Enraged.
+
+– From 7th level onwards, the berserker gains +2/+4/+8 to <PRO_HISHER> movement rate while under the effects of In Extremis.
+
+– From 10th level onwards, the berserker's trance-like state makes <PRO_HIMHER> more likely to shrug off debilitating effects, gaining +2/+4/+8 to all Saving Throws while under the effects of In Extremis.
+
+– From 14th level onwards, the berserker gains +0.5/+1/+2 bonus attacks per round while under the effects of In Extremis.
+
+– From 20th level onwards, the berserker gains a +1/+3/+5 luck bonus to rolls on damage dealt and received while under the effects of In Extremis.
+
+Disadvantages:
+– Becomes winded for five rounds after using Enrage, suffering a -2 penalty to Armor Class, to-hit rolls, and damage rolls. Additionally, the berserker is unable to Enrage or gain the benefits of In Extremis while winded.
+– May not Specialize in ranged weapons.KIT_DISADV_1
+– Alignment restricted to any non-lawful.~
+
+ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ ~1100~ THEN BEGIN
+  OUTER_PATCH_SAVE kit_description ~%kit_description%~ BEGIN
+    REPLACE_TEXTUALLY ~KIT_DISADV_1~ ~
+– May not use Expertise or Rapid Shot.
+– Does not gain Specialization in all weapons at 16th level.~
+  END
+END ELSE BEGIN
+  OUTER_PATCH_SAVE kit_description ~%kit_description%~ BEGIN
+    REPLACE_TEXTUALLY ~KIT_DISADV_1~ ~~
+  END
+END
+
+LAF ~GET_KIT_STRREF~ STR_VAR kit_name = ~BERSERKER~ RET kit_strref END
+STRING_SET_EVALUATE kit_strref ~%kit_description%~
+
+// ---------------------------------------------------------------------------
+// Cleanup spell for existing characters: strips the already-granted Reckless
+// Frenzy innate (op172 removes known + memorized). Run once in-game per
+// berserker party member, e.g. for the protagonist:
+//   C:Eval('ReallyForceSpellRES("AKCBRFRM",Player1)')
+// (unquoted Player1 — a quoted "Player1" silently fails in C:Eval)
+// ---------------------------------------------------------------------------
+COPY_EXISTING ~c0ber#06.spl~ ~override/akcbrfrm.spl~
+  LPF ALTER_EFFECT INT_VAR match_opcode = 17 opcode = 172 parameter1 = 0 parameter2 = 0 STR_VAR resource = C0BER#05 END
+BUT_ONLY

@@ -24,6 +24,18 @@ run the relevant setup executable:
 
 Then select the components you want.
 
+## Balance changes vs upstream
+
+- **Berserker Overhaul (component 1003)** — reworked 2026-07-05, full spec in
+  `docs/plans/2026-07-05-berserker-rebalance-design.md`: Enrage HP drain and
+  missing-HP damage ladder removed; Enrage grants stun/sleep/hold/charm/
+  confusion/feeblemind immunity while raging; In Extremis gains scaling
+  physical resistance (+5/+10/+15% on Spell Revisions installs, +5/+8/+10%
+  vanilla) with softened AC penalties (−2/−3/−4) and a trimmed tier-3 offense
+  (+6); Reckless Frenzy deleted; Hardiness restored to the HLA table; tier-3
+  save-bonus bug (+10 → +8) fixed. A tail-installable retrofit for live games
+  lives in `live-patch/AKCB_BERSERKER`.
+
 ## License / usage
 
 Follow the upstream project's terms. This fork inherits them — any

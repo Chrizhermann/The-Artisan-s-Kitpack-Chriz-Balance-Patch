@@ -6,13 +6,109 @@ COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS~ ~OVERRIDE~
 APPEND ~splprot.2da~ ~C0CURHP 0 -1 0~ UNLESS ~C0CURHP 0 -1 0~
 COPY_EXISTING ~splprot.2da~ ~override~
 	COUNT_2DA_COLS cols // amount of columns
-	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory
 	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
 	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~ // read column value
 	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~C0CURHP~ BEGIN
 	    SET C0CURHP = %row%
 	  END
 	END
+
+// CHRIZ BALANCE: In Extremis physical resistance — higher on Spell Revisions installs
+// (SR's Revised Warrior HLAs nerfs Hardiness 40% physical -> 20% all types, so the
+// kit may carry more of its own physical mitigation without stacking past 100%)
+ACTION_IF MOD_IS_INSTALLED "spell_rev/setup-spell_rev.tp2" 0 BEGIN
+  OUTER_SET ie_r1 = 5
+  OUTER_SET ie_r2 = 10
+  OUTER_SET ie_r3 = 15
+END ELSE BEGIN
+  OUTER_SET ie_r1 = 5
+  OUTER_SET ie_r2 = 8
+  OUTER_SET ie_r3 = 10
+END
+
+// CHRIZ BALANCE: status immunities while Enraged, mirrored from the vanilla EE
+// SPCL321 implementation (opcode set + SCS detectable-spells states + display-string
+// suppressions). Donor effect for cloning = the op328 STATE_ENRAGED marker (p2=104),
+// which carries the correct duration in both the 2-round package (c0ber#00, 12s) and
+// the melee-hit refresh package (c0ber#09, 6s).
+// Deliberately NOT immune: fear (permanent via c0ber#07), maze/imprisonment/level
+// drain (SCS casters keep counters).
+DEFINE_PATCH_FUNCTION akcb_rage_immunities BEGIN
+  // op101 Immunity to opcode
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 45  special = 0 END // stun
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 210 special = 0 END // stun 90hp (Power Word: Stun)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 39  special = 0 END // sleep
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 217 special = 0 END // unconsciousness 20hp
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 175 special = 0 END // hold
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 109 special = 0 END // paralyze
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 5   special = 0 END // charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 128 special = 0 END // confusion
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 101 parameter1 = 0 parameter2 = 76  special = 0 END // feeblemind
+  // op328 spell states so SCS AI knows not to waste disablers (SPLSTATE.IDS, engine-fixed)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 128 END // STUN_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 127 END // SLEEP_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 131 END // HOLD_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 119 END // CHARM_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 130 END // CONFUSION_IMMUNITY
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 328 parameter1 = 0 parameter2 = 137 END // FEEBLEMIND_IMMUNITY
+  // op296 protection from specific animation (charm/confusion/feeblemind visuals)
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 5   special = 0 STR_VAR resource = spnwchrm END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 175 special = 0 STR_VAR resource = spmindat END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 175 special = 0 STR_VAR resource = spflayer END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 128 special = 0 STR_VAR resource = spconfus END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 296 parameter1 = 0 parameter2 = 0   special = 0 STR_VAR resource = cdfeeble END
+  // op267 display-string suppression (BG2EE/EET strrefs, as in the EE-Fixpack-patched
+  // SPCL321; without these, a blocked disabler still floats its "Stunned"/"Charmed" text).
+  // NOTE: spcl321's level-drain string suppressions (41495/40968/40969/40979/41616) are
+  // deliberately NOT copied — this rework grants no drain immunity, so drains must stay visible.
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14043 parameter2 = 45  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 1280  parameter2 = 45  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14001 parameter2 = 39  special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 8364  parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14780 parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14672 parameter2 = 5   special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14791 parameter2 = 128 special = 0 END
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 267 parameter1 = 14782 parameter2 = 128 special = 0 END
+  // op169 prevent portrait icon — a blocked disabler's separate op142 icon effect is NOT
+  // stopped by op101 immunity to the disabler opcode; icon ids from statdesc.2da, set
+  // mirrored from SPCL321 restricted to the granted categories
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 55  special = 0 END // Stun
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 14  special = 0 END // Sleep
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 130 special = 0 END // Unconscious
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 0   special = 0 END // Charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 1   special = 0 END // Dire Charm
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 43  special = 0 END // Domination
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 2   special = 0 END // Rigid Thinking
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 3   special = 0 END // Confused
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 47  special = 0 END // Chaos
+  LPF CLONE_EFFECT INT_VAR match_opcode = 328 match_parameter2 = 104 opcode = 169 parameter1 = 0 parameter2 = 48  special = 0 END // Feebleminded
+END
+
+// CHRIZ BALANCE: WeiDU's built-in ALTER_EFFECT gates every field write on
+// `parameter1 >= 0` (and PE integers are 32-bit, so unsigned-hex workarounds
+// re-evaluate to negatives and are skipped too). This function writes a SIGNED
+// parameter1 into every effect with the given opcode across all ability headers.
+// SPL ability header: nFx at +0x1E, firstFxIdx at +0x20 (empirical layout;
+// IESDP documents these wrong), effect stride 0x30, parameter1 at effect +0x04.
+DEFINE_PATCH_FUNCTION akcb_alter_p1_signed
+  INT_VAR match_op = 0
+          new_p1 = 0
+BEGIN
+  READ_LONG  0x64 abil_off
+  READ_SHORT 0x68 abil_num
+  READ_LONG  0x6A fx_off
+  FOR (i = 0; i < abil_num; ++i) BEGIN
+    READ_SHORT (abil_off + i * 0x28 + 0x1E) nfx
+    READ_SHORT (abil_off + i * 0x28 + 0x20) first
+    FOR (j = 0; j < nfx; ++j) BEGIN
+      READ_SHORT (fx_off + (first + j) * 0x30) op
+      PATCH_IF op = match_op BEGIN
+        WRITE_LONG (fx_off + (first + j) * 0x30 + 0x04) new_p1
+      END
+    END
+  END
+END
 
 COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI02.2DA~
   // REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
@@ -27,7 +123,7 @@ COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI02.2DA~
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#2X END
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#3X END
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0BER#I1 END
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 4 STR_VAR f_Entry = GA_C0BER#05 END
+  // CHRIZ BALANCE: Reckless Frenzy (GA_C0BER#05 at 4) removed — no self-damage abilities
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 4 STR_VAR f_Entry = GA_C0BER#00 END
 
   PRETTY_PRINT_2DA
@@ -38,18 +134,14 @@ Advantages:
 – Immunity to fear, morale failure and involuntary berserk effects.
 – Gains the In Extremis passive effect.
 
-IN EXTREMIS: Berserkers revel in the thrill of carnage to a sadomasochistic degree, and fight harder when approaching death while most warriors would falter or retreat. While powerful, the berserker's technique is a double-edged sword – as the berserker accumulates more wounds in battle, their blows become increasingly deadly, yet their defense falters, becoming more vulnerable to further damage.
-  >75% Hit Points: +2 to melee THAC0 and Damage, -2 penalty to Armor Class
-  >50% Hit Points: +4 to melee THAC0 and Damage, -4 penalty to Armor Class
-  >25% Hit Points: +8 to melee THAC0 and Damage, -6 penalty to Armor Class
+IN EXTREMIS: Berserkers revel in the thrill of carnage and fight harder when approaching death while most warriors would falter or retreat. As the berserker accumulates wounds in battle, their blows become increasingly deadly and their body learns to shrug off punishment, though their reckless stance leaves openings in their defense.
+  Below 75% Hit Points: +2 to melee THAC0 and Damage, %ie_r1%% resistance to physical damage, -2 penalty to Armor Class
+  Below 50% Hit Points: +4 to melee THAC0 and Damage, %ie_r2%% resistance to physical damage, -3 penalty to Armor Class
+  Below 25% Hit Points: +6 to melee THAC0 and Damage, %ie_r3%% resistance to physical damage, -4 penalty to Armor Class
 
 – May use the Enrage ability once per day. Gains one use at level 1 and an additional use every 4 levels thereafter.
 
-ENRAGE: The berserker taps into <PRO_HISHER> frenzy though sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points, loses one hit point per second, and deals an additional +5% slashing, piercing and crushing damage for every 5% of their missing hit points (+100% at one hit point). If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The hit point loss from Enrage will not reduce the berserker's hit points below one. The berserker cannot cast spells while Enraged.
-
-– From 4th level onwards, may use the Reckless Frenzy ability at will.
-
-RECKLESS FRENZY: The berserker deliberately injures <HIMHER>self, instantly reducing <PRO_HISHER> hit points to 70%, 45% or 20% of <PRO_HISHER> maximum. This ability has no effect if used while the berserker is already below the selected value.
+ENRAGE: The berserker taps into <PRO_HISHER> frenzy through sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points and becomes immune to charm, confusion, feeblemindedness, hold, paralysis, sleep, and stun effects. If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The berserker cannot cast spells while Enraged.
 
 – From 7th level onwards, the berserker gains +2/+4/+8 to <PRO_HISHER> movement rate while under the effects of In Extremis.
 
@@ -108,9 +200,13 @@ COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#0X.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Winded~) END
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#00.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 206 parameter1 = RESOLVE_STR_REF (~The berserker is already enraged.~) STR_VAR match_resource = SPCL321 END
+// CHRIZ BALANCE: missing-HP damage ladder removed (was 20x op177 -> C0BER#61..#6J);
+// status immunities added instead
+LPF DELETE_EFFECT INT_VAR match_opcode = 177 END
+LPF akcb_rage_immunities END
 SAY NAME1 ~Enrage~
 SAY UNIDENTIFIED_DESC ~Enrage
-The berserker taps into <PRO_HISHER> frenzy though sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points, loses one hit point per second, and deals an additional +5% slashing, piercing and crushing damage for every 5% of their missing hit points (+100% at one hit point). If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The hit point loss from Enrage will not reduce the berserker's hit points below one. The berserker cannot cast spells while Enraged.~
+The berserker taps into <PRO_HISHER> frenzy through sheer force of will. For the next two rounds, <PRO_HESHE> gains +15 maximum hit points and becomes immune to charm, confusion, feeblemindedness, hold, paralysis, sleep, and stun effects. If the remaining duration of Enrage is less than one round, melee attacks made by the berserker reset Enrage's duration to one round up to a maximum total duration of ten rounds. The berserker cannot cast spells while Enraged.~
 
 COPY ~%MOD_FOLDER%/SPELLS/C0KTNAME.EFF~ ~OVERRIDE/C0BER#00.EFF~
 WRITE_LONG 0x1c RESOLVE_STR_REF (~Battlerager~)
@@ -120,12 +216,39 @@ COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#3x.SPL~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#01.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#01.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
+// CHRIZ BALANCE tier 1 (<76% HP): +%ie_r1%% physical resistance; Reckless Frenzy block dropped
+LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r1% parameter2 = 0 END // slashing
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r1% parameter2 = 0 END // crushing
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r1% parameter2 = 0 END // piercing
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r1% parameter2 = 0 END // missile
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#02.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#02.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
+// CHRIZ BALANCE tier 2 (<50% HP): AC penalty -4 -> -3, +%ie_r2%% physical resistance
+// (negative writes need akcb_alter_p1_signed — built-in ALTER_EFFECT rejects them)
+LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 3) END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r2% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r2% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r2% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r2% parameter2 = 0 END
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#03.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#03.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
+// CHRIZ BALANCE tier 3 (<26% HP): offense +8 -> +6, AC penalty -6 -> -4,
+// save bonus normalized to +8 (upstream bug: +10 in the L10 header),
+// +%ie_r3%% physical resistance
+LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
+LPF ALTER_EFFECT INT_VAR match_opcode = 284 parameter1 = 6 END
+LPF ALTER_EFFECT INT_VAR match_opcode = 73 parameter1 = 6 END
+LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 6) END
+LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 4) END
+LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 8 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r3% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r3% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r3% parameter2 = 0 END
+LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r3% parameter2 = 0 END
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#04.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 318 parameter2 = C0CURHP END
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#05.SPL~ ~OVERRIDE~
@@ -142,107 +265,24 @@ COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#5C.SPL~ ~OVERRIDE~
 SAY NAME1 ~Reckless Frenzy—20%~
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Maximum Hit Points reduced to 20%~) END
 
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#62.EFF~
-WRITE_ASCII 0x30 ~C0BER#62~
-WRITE_BYTE 0x48 90
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#63.EFF~
-WRITE_BYTE 0x48 86
-WRITE_ASCII 0x30 ~C0BER#63~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#64.EFF~
-WRITE_BYTE 0x48 80
-WRITE_ASCII 0x30 ~C0BER#64~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#65.EFF~
-WRITE_BYTE 0x48 76
-WRITE_ASCII 0x30 ~C0BER#65~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#66.EFF~
-WRITE_BYTE 0x48 70
-WRITE_ASCII 0x30 ~C0BER#66~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#67.EFF~
-WRITE_BYTE 0x48 66
-WRITE_ASCII 0x30 ~C0BER#67~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#68.EFF~
-WRITE_BYTE 0x48 60
-WRITE_ASCII 0x30 ~C0BER#68~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#69.EFF~
-WRITE_BYTE 0x48 56
-WRITE_ASCII 0x30 ~C0BER#69~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#60.EFF~
-WRITE_BYTE 0x48 50
-WRITE_ASCII 0x30 ~C0BER#60~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6a.EFF~
-WRITE_BYTE 0x48 46
-WRITE_ASCII 0x30 ~C0BER#6A~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6b.EFF~
-WRITE_BYTE 0x48 40
-WRITE_ASCII 0x30 ~C0BER#6B~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6c.EFF~
-WRITE_BYTE 0x48 36
-WRITE_ASCII 0x30 ~C0BER#6C~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6d.EFF~
-WRITE_BYTE 0x48 30
-WRITE_ASCII 0x30 ~C0BER#6D~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6e.EFF~
-WRITE_BYTE 0x48 26
-WRITE_ASCII 0x30 ~C0BER#6E~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6f.EFF~
-WRITE_BYTE 0x48 20
-WRITE_ASCII 0x30 ~C0BER#6F~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6g.EFF~
-WRITE_BYTE 0x48 16
-WRITE_ASCII 0x30 ~C0BER#6G~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6h.EFF~
-WRITE_BYTE 0x48 10
-WRITE_ASCII 0x30 ~C0BER#6H~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6i.EFF~
-WRITE_BYTE 0x48 6
-WRITE_ASCII 0x30 ~C0BER#6I~
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.EFF~ ~OVERRIDE/C0BER#6j.EFF~
-WRITE_BYTE 0x20 19
-WRITE_BYTE 0x48 2
-WRITE_ASCII 0x30 ~C0BER#6J~
-
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#62.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#62 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#63.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#63 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#64.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#64 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#65.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#65 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#66.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#66 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#67.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#67 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#68.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#68 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#69.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#69 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#60.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#60 END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6A.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6A END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6B.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6B END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6C.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6C END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6D.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6D END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6E.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6E END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6F.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6F END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6G.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6G END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6H.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6H END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6I.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6I END
-COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#61.SPL~ ~OVERRIDE/C0BER#6J.SPL~
-LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6J END
+// CHRIZ BALANCE: Enrage engines — remove the 1 HP/second drain (op146 -> C0BER#04,
+// timing 3) and the 20x op272 damage-ladder re-appliers. The ladder EFF/SPL clone
+// loops (C0BER#62..#6J) are gone entirely; leftover op321 cleanup references to
+// C0BER#6* resrefs are harmless no-ops.
+COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#08.SPL~ ~OVERRIDE~
+LPF DELETE_EFFECT INT_VAR match_opcode = 146 match_timing = 3 END
+LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#H2.SPL~ ~OVERRIDE~
+LPF DELETE_EFFECT INT_VAR match_opcode = 146 match_timing = 3 END
+LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+// CHRIZ BALANCE: melee-hit refresh package — ladder out, immunities in (6s versions)
+COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#09.SPL~ ~OVERRIDE~
+LPF DELETE_EFFECT INT_VAR match_opcode = 177 END
+LPF akcb_rage_immunities END
 
   COPY_EXISTING ~luabbr.2da~ ~override~
 	COUNT_2DA_COLS cols // amount of columns
-	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
+	READ_2DA_ENTRIES_NOW rows cols // read all file into memory
 	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
 	  READ_2DA_ENTRY_FORMER rows row 0 ~text~ // read column value
 	  PATCH_IF ~%text%~ STRING_EQUAL_CASE ~BERSERKER~ BEGIN
@@ -250,11 +290,12 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 321 STR_VAR resource = C0BER#6J END
 		SET_2DA_ENTRY (%patch_row%) 1 cols ~C0BER~
 	  END
 	END
-	
-  
+
+
+// CHRIZ BALANCE: Hardiness (GA_SPCL907) is NOT removed anymore — the kit keeps the
+// standard fighter HLA next to the auto-granted Extend Rage
 COPY_EXISTING ~LUFI0.2da~ ~override/LUC0BER.2DA~
-LPF patch_remove_hla STR_VAR remove_ability = ~GA_SPCL907~ END
-LPF patch_add_hla STR_VAR 2da_row = ~C0BERS1~ ability = ~AP_C0BER#H1~ num_allowed = 1 END	
+LPF patch_add_hla STR_VAR 2da_row = ~C0BERS1~ ability = ~AP_C0BER#H1~ num_allowed = 1 END
 
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#H1.SPL~ ~OVERRIDE~
 SAY NAME1 ~Extend Rage~
