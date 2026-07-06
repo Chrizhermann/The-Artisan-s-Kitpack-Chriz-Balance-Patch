@@ -4,6 +4,8 @@
 **Fork:** The Artisan's Kitpack — Chriz Balance Patch.
 **Scope:** component 1003 (`lib/Berserker.tpa`) + a live-install tail patch (`live-patch/AKCB_BERSERKER`) for the running EET game.
 
+> **v2.0 (2026-07-06)** rebuilds the In Extremis engine — see [§7](#7-v20-rage-scaling-in-extremis-restructure). THAC0 becomes a *penalty*, damage and resistance *double while Enraged*, resistance is regated to L14 (dual-class-proof), and APR moves to the L1 base. §3.1's original tables describe v1.x and are superseded by §7 for the tier values; the delivery architecture (§4) and everything else stand.
+
 ---
 
 ## 1. Problem statement
@@ -50,6 +52,11 @@ Artisan's Berserker Overhaul is a "wants to be at low HP" kit. On high difficult
 ## 3. Approved design
 
 ### 3.1 In Extremis (rework)
+
+> **Superseded by [§7](#7-v20-rage-scaling-in-extremis-restructure) as of v2.0.** The
+> tables below are the v1.x values (THAC0 as a *bonus*, resist from L1 at SR 5/10/15).
+> v2.0 makes THAC0 a penalty, regates resist to L14 at SR **4/8/15** (→8/16/30 enraged),
+> and moves APR to L1 — see §7.1/§7.2 for current numbers.
 
 | HP threshold | Melee THAC0/dmg | AC | Physical resist (all 4 types) SR / vanilla |
 |---|---|---|---|
@@ -261,3 +268,144 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
       verifies the first-empty-row HLA table write.
 - [ ] Imoen's Trickster "Mimic: Enrage" still works and shows the reworked
       behavior (no HP drain).
+
+## 7. v2.0 — rage-scaling In Extremis restructure
+
+Approved 2026-07-06. Reshapes In Extremis around three ideas: (a) accuracy
+*drops* as HP falls (reckless swings), (b) the offensive/defensive payoff
+*doubles while Enraged*, (c) the strongest defence is gated high to defeat a
+dual-class dip.
+
+### 7.1 In Extremis tier values (per HP tier)
+
+| Effect (opcode) | <76% | <50% | <26% | Scope |
+|---|---|---|---|---|
+| Melee THAC0 (op284) | **−1** | **−2** | **−4** | all headers (L1+); a PENALTY now |
+| Melee damage (op73) | +1 | +2 | +4 | all headers (L1+) |
+| — while **Enraged** | +2 | +4 | +8 | op326 delta, doubles the above |
+| Missile-dmg cancel (op286) | −1 | −2 | −4 | keeps the bonus melee-only (delta cancels too) |
+| Armor Class (op0) | −2 | −3 | −4 | all headers (L1+) |
+| Attacks/round (op1) | — | +½ | +1 | all headers (L1+) — moved down from L14 |
+| Movement (op126) | +1 | +2 | +4 | L7+ headers |
+| Saving throws (op325) | +1 | +2 | +4 | L10+ headers |
+| Physical resist (op86–89) | see 7.2 | | | **L14+ headers only** |
+| — while **Enraged** | ×2 | | | op326 delta, doubles the base |
+| Luck (op22) | — | +1 | +2 | L20 header |
+
+THAC0/AC penalties and the level riders do **not** scale with rage — only
+damage and resistance double (luck/saves/movement were judged strong enough).
+
+### 7.2 Physical resistance (L14+, all four physical types)
+
+|  | <76% | <50% | <26% |
+|---|---|---|---|
+| **Spell Revisions** base | 4% | 8% | 15% |
+| SR enraged | 8% | 16% | 30% |
+| Vanilla base | 3% | 6% | 10% |
+| Vanilla enraged | 6% | 12% | 20% |
+
+Vanilla is lower because Hardiness there is a full 40% (SR cuts it to 20% all-
+type). Worst realistic SR stack (enraged, <26%, L14+, Hardiness + a 20% item):
+30 + 20 + 20 = **70%** physical — below the engine's 100% immunity floor.
+
+### 7.3 Dual-class gate
+
+The exploit: Berserker 7 → dual to Mage/Cleric, regain the class at caster L8+,
+and the whole In Extremis passive reactivates on a caster. Fix: the tier spells'
+level headers are selected by the character's **BERSERKER class level**, so a
+Berserker-7 dual only ever reaches the L1/L7 headers. Everything caster-relevant
+— saves (L10), **resistance (L14)** — sits above that. The L1 perks that *do*
+come back (damage, THAC0 penalty, AC penalty, APR) are melee-only and worthless
+to a caster. Resistance at L14 was the explicit choice (over L10) for margin.
+
+### 7.4 Delivery mechanism (rage scaling)
+
+Each tier spell (`c0ber#01/02/03`, re-cast every round by the HP watcher) carries
+an **opcode 326** ("apply sub-spell effects if the target matches a SPLPROT row")
+branch:
+
+- SPLPROT row `AKCBENR` = `0x112 104 1` — STAT 0x112 (is-SPLSTATE-set), value 104
+  = `STATE_ENRAGED` (set by Enrage's op328 while raging), relation 1 (set). Appended
+  at the splprot tail; its index is captured the same way the mod captures `C0CURHP`
+  for op318 (READ_2DA_ENTRIES_NOW → op326 parameter2). Verified: appended index 574
+  (skip-3 row count) == the op326 param2 the engine reads.
+- **Damage delta** `op326 → AKCBD{1,2,3}` in every header (dmg doubles from L1).
+  `AKCBD_n` = op73 +n, op286 −n (melee-only, mirrors the base).
+- **Resistance delta** `op326 → AKCBR{1,2,3}` in the L14/L20 headers only (so the
+  doubled resist also respects the gate). `AKCBR_n` = op86–89 +r_n.
+- Re-evaluated every round: the branch applies only while `STATE_ENRAGED` holds, so
+  the bonus tracks rage on/off with at most the tier spells' own ~2-round refresh lag.
+
+Resistance is regated to L14 by cloning op73→op86-89 in all headers, then
+`akcb_set_p1_by_minlvl` (header-walk with a min-level filter) zeroes the sub-L14
+headers — leaving inert 0% effects there and the real value at L14/L20.
+
+**Anti-stacking (review finding, fixed):** the base effects are kept to one copy by
+the tier spells' native op321 "remove by resource" sweep of `C0BER#01/02/03`. But
+op326-applied effects are **stamped with the sub-spell resref** (`AKCBD*/AKCBR*`) as
+their source, so that sweep does NOT clear them — a 12s delta re-applied every round
+steady-states to **2 concurrent copies**, inflating the enraged bonus to ~3× base
+instead of 2× (adversarial review, 2026-07-06). Fix: `akcb_add_delta_cleanup`
+prepends (insert_point=0) an op321 removal for each of the six delta resrefs to every
+tier spell, so each round starts clean. All three tiers remove all six resrefs, so a
+tier transition (HP crossing a threshold) also clears the vacated tier's delta.
+Byte-verified: 6 delta-removals per header, positioned before the op326 applies.
+
+### 7.5 WeiDU notes for maintainers
+
+- `akcb_set_p1_by_minlvl` mirrors `akcb_alter_p1_signed` but gates writes on the
+  ability header's min-level (+0x10). Used to zero resistance below L14.
+- Sub-spells are built by `COPY_EXISTING c0ber#1x.spl` (minimal one-header shell) →
+  new resref, `DELETE_EFFECT` the op272 watcher, `ADD_SPELL_EFFECT` the deltas.
+  op286's negative value uses the `akcb_alter_p1_signed` flip (ADD writes positive).
+- `ADD_SPELL_EFFECT ... header = N` (1-based) places the resist op326 in headers 4/5
+  (min-level 14/20) only.
+- **Function signature order:** `DEFINE_ACTION_FUNCTION name INT_VAR ... STR_VAR ...`
+  — INT_VAR must precede STR_VAR, or WeiDU throws a GLR parse error at the STR_VAR.
+  (Cost a reinstall; both are now INT_VAR-first.)
+
+### 7.6 Test checklist (v2.0, in-game)
+
+- [ ] Below 75/50/25% HP: record screen shows −1/−2/−4 to hit, +1/+2/+4 damage,
+      −2/−3/−4 AC; APR +½ at <50%, +1 at <25%.
+- [ ] Resistance shows **only at L14+**, values 4/8/15% (this SR install). A L7–13
+      berserker below 25% HP has **no** physical resistance.
+- [ ] Enrage active: damage bonus and resistance **double** (e.g. <25% dmg +8, resist
+      30%); revert within ~2 rounds of rage ending. Confirm no unbounded stacking over
+      a long (10/20-round) rage — damage should hold at 2×, not climb.
+- [ ] Dual-class sanity (throwaway save): a Berserker-7 → Mage dual, after regaining
+      the class, gets the L1 melee perks but **no** saves/resistance/luck.
+
+### 7.7 Adversarial review outcome (2026-07-06)
+
+Three-agent review (runtime mechanics / WeiDU correctness / balance). Verdicts:
+
+- **Delta stacking — CONFIRMED bug, FIXED.** Two reviewers independently found that
+  op326-applied deltas are source-stamped `AKCBD*/AKCBR*` and so escaped the native
+  `C0BER#0*` op321 sweep, steady-stating to ~2 copies (enraged bonus ~3× not 2×).
+  Fixed by `akcb_add_delta_cleanup` (§7.4). Because op321 removes *all* copies of a
+  source before each re-apply, the delta is capped at exactly one copy regardless of
+  the op272 re-cast frequency — robust even though the watcher has duration=0.
+- **Ranged ban hits WIZARD_SLAYER — FALSE POSITIVE (refuted).** One reviewer diffed
+  weapprof and claimed the `col+1` write hit WIZARD_SLAYER. Empirically disproved:
+  weapprof data rows carry a leading row-label token the header lacks, so data col =
+  header index + 1; BERSERKER (header 29) → data col 30, which is exactly what the
+  ban zeroes (`5→0`/`1→0` on all ranged rows), while WIZARD_SLAYER (col 31) and KENSAI
+  (col 32) are untouched. The `col+1` is correct.
+- **Dual-class gate — UNVERIFIED, load-bearing (open in-game test).** The gate assumes
+  op272's innate (spellType-4) self-cast selects the tier header by the *frozen
+  Berserker/Fighter class level*, not total character level. AK's own rider gating
+  (movement@7, saves@10) implies class-level selection, but a single-class Berserker
+  can't distinguish the two, so it was never tested at the dual-class edge. If the
+  engine uses total level, a Berserker-7 → Mage-14 reaches the L14/20 headers and the
+  resistance/saves/luck gate fails (the base L14 resist + saves + luck leak; the
+  *doubled* resist still needs Enrage, which locks casting, so that part self-limits).
+  **Must be tested (checklist above).** If it fails, fallback = a hard class-level
+  splprot gate on the resistance delivery, or move resistance out of the header system.
+- **Resistance ceiling — acceptable at intended values.** Enraged <26% L14 worst tank
+  axis: kit 30 + SR-Hardiness 20 + item 20 = 70% (crushing + Roranach ~85–105%, a
+  corner that pre-exists in vanilla without any kit help; >100% floors at immunity, no
+  heal). Gated behind <26% HP + Enrage (casting locked) + an HLA. Not a regression.
+- Clean: exact-2× doubling formula, missile-cancel on base AND enraged (no ranged
+  damage leak), APR encoding, movement/saves/resist/luck level-gating, casting lock,
+  removed HP drain, THAC0 coherence, all WeiDU offset math and idempotency.

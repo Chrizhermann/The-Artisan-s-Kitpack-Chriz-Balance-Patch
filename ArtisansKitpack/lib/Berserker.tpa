@@ -14,16 +14,35 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
+// CHRIZ BALANCE (v2.0): ENRAGED-STATE CHECK for the rage-scaling op326 branch.
+// STAT 0x112 = "is SPLSTATE index N set"; 104 = STATE_ENRAGED (set by Enrage's op328
+// while raging); RELATION 1 = equals/is-set. op326 references this by ROW INDEX
+// (the same index convention op318 uses for C0CURHP above — verified in-engine).
+APPEND ~splprot.2da~ ~AKCBENR 0x112 104 1~ UNLESS ~AKCBENR~
+COPY_EXISTING ~splprot.2da~ ~override~
+	COUNT_2DA_COLS cols
+	READ_2DA_ENTRIES_NOW rows cols
+	FOR (row = 1; row < rows; ++row) BEGIN
+	  READ_2DA_ENTRY_FORMER rows row 0 ~stat~
+	  PATCH_IF ~%stat%~ STRING_EQUAL_CASE ~AKCBENR~ BEGIN
+	    SET akcb_enr_row = %row%
+	  END
+	END
+
 // CHRIZ BALANCE: In Extremis physical resistance — higher on Spell Revisions installs
 // (SR's Revised Warrior HLAs nerfs Hardiness 40% physical -> 20% all types, so the
-// kit may carry more of its own physical mitigation without stacking past 100%)
+// kit may carry more of its own physical mitigation without stacking past 100%).
+// v2.0: base values are the per-tier resist; while Enraged they DOUBLE (delivered as
+// an equal-magnitude op326 delta gated on STATE_ENRAGED). Gated to L14+ (see below).
+//   SR:      base 4/8/15   enraged 8/16/30
+//   vanilla: base 3/6/10   enraged 6/12/20   (Hardiness is 40% not 20% here, so lower)
 ACTION_IF MOD_IS_INSTALLED "spell_rev/setup-spell_rev.tp2" 0 BEGIN
-  OUTER_SET ie_r1 = 5
-  OUTER_SET ie_r2 = 10
+  OUTER_SET ie_r1 = 4
+  OUTER_SET ie_r2 = 8
   OUTER_SET ie_r3 = 15
 END ELSE BEGIN
-  OUTER_SET ie_r1 = 5
-  OUTER_SET ie_r2 = 8
+  OUTER_SET ie_r1 = 3
+  OUTER_SET ie_r2 = 6
   OUTER_SET ie_r3 = 10
 END
 
@@ -118,6 +137,53 @@ BEGIN
   END
 END
 
+// CHRIZ BALANCE (v2.0): write a SIGNED parameter1 into every effect with the given
+// opcode, but ONLY in ability headers whose min-level falls in [min_lvl, max_lvl].
+// This is how the level gates are enforced on a per-effect basis — e.g. resistance
+// is written into the min-level 14/20 headers only (min_lvl=14), and zeroed out of
+// the min-level 1/7/10 headers (max_lvl=13). Ability header min-level is at +0x10.
+DEFINE_PATCH_FUNCTION akcb_set_p1_by_minlvl
+  INT_VAR match_op = 0
+          new_p1  = 0
+          min_lvl = 0
+          max_lvl = 9999
+BEGIN
+  READ_LONG  0x64 abil_off
+  READ_SHORT 0x68 abil_num
+  READ_LONG  0x6A fx_off
+  FOR (i = 0; i < abil_num; ++i) BEGIN
+    READ_SHORT (abil_off + i * 0x28 + 0x10) ml
+    READ_SHORT (abil_off + i * 0x28 + 0x1E) nfx
+    READ_SHORT (abil_off + i * 0x28 + 0x20) first
+    PATCH_IF (ml >= min_lvl) AND (ml <= max_lvl) BEGIN
+      FOR (j = 0; j < nfx; ++j) BEGIN
+        READ_SHORT (fx_off + (first + j) * 0x30) op
+        PATCH_IF op = match_op BEGIN
+          WRITE_LONG (fx_off + (first + j) * 0x30 + 0x04) new_p1
+        END
+      END
+    END
+  END
+END
+
+// v2.0: ANTI-STACKING cleanup for the rage-scaling deltas. op326-applied effects are
+// stamped with the SUB-SPELL resref (AKCBD*/AKCBR*) as their source, so the tier
+// spells' existing op321 sweep (which removes C0BER#01/02/03) does NOT clear them.
+// Without this, the 12s deltas re-applied every round steady-state to 2 concurrent
+// copies -> the enraged bonus becomes ~3x base instead of the intended 2x. Prepend
+// (insert_point=0) an op321 "remove by resource" for every delta resref so each round
+// starts clean. Fields mirror the native C0BER#0* removals (p1=8, resist_dispel=2).
+// Every tier removes ALL six so tier transitions (HP crossing a threshold) also clear
+// the vacated tier's delta.
+DEFINE_PATCH_FUNCTION akcb_add_delta_cleanup BEGIN
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBD1~ END
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBD2~ END
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBD3~ END
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBR1~ END
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBR2~ END
+  LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 0 duration = 0 resist_dispel = 2 parameter1 = 8 parameter2 = 0 insert_point = 0 STR_VAR resource = ~AKCBR3~ END
+END
+
 COPY_EXISTING ~CLABFI01.2DA~ ~OVERRIDE/CLABFI02.2DA~
   // REPLACE_TEXTUALLY ~GA_C0FIG01~ ~**** ~ // POWER ATTACK
   REPLACE_TEXTUALLY ~GA_C0FIG02~ ~**** ~ // EXPERTISE
@@ -142,10 +208,10 @@ Advantages:
 – Immunity to involuntary berserk effects.
 – Gains the In Extremis passive effect.
 
-IN EXTREMIS: Berserkers revel in the thrill of carnage and fight harder when approaching death while most warriors would falter or retreat. As the berserker accumulates wounds in battle, their blows become increasingly deadly and their body learns to shrug off punishment, though their reckless stance leaves openings in their defense.
-  Below 75% Hit Points: +1 to melee THAC0 and Damage, %ie_r1%% resistance to physical damage, -2 penalty to Armor Class
-  Below 50% Hit Points: +2 to melee THAC0 and Damage, %ie_r2%% resistance to physical damage, -3 penalty to Armor Class
-  Below 25% Hit Points: +4 to melee THAC0 and Damage, %ie_r3%% resistance to physical damage, -4 penalty to Armor Class
+IN EXTREMIS: Berserkers revel in the thrill of carnage and fight harder — if wilder and more recklessly — as they approach death, where most warriors would falter or retreat. Their blows land with mounting force even as their swings grow erratic and their guard drops. While Enraged, this ferocity redoubles: the damage bonuses double.
+  Below 75% Hit Points: -1 to hit, +1 melee damage (+2 while Enraged), -2 penalty to Armor Class
+  Below 50% Hit Points: -2 to hit, +2 melee damage (+4 while Enraged), -3 penalty to Armor Class, +1/2 attack per round
+  Below 25% Hit Points: -4 to hit, +4 melee damage (+8 while Enraged), -4 penalty to Armor Class, +1 attack per round
 
 – May use the Enrage ability once per day. Gains one use at level 1 and an additional use every 4 levels thereafter.
 
@@ -155,7 +221,7 @@ ENRAGE: The berserker taps into <PRO_HISHER> frenzy through sheer force of will.
 
 – From 10th level onwards, the berserker's trance-like state makes <PRO_HIMHER> more likely to shrug off debilitating effects, gaining +1/+2/+4 to all Saving Throws while under the effects of In Extremis.
 
-– From 14th level onwards, the berserker gains +0.5/+1 bonus attacks per round while below 50% and 25% Hit Points respectively.
+– From 14th level onwards, the berserker's hide toughens under duress, granting %ie_r1%%/%ie_r2%%/%ie_r3%% resistance to physical damage at each successive wound tier while under the effects of In Extremis. These values double while Enraged.
 
 – From 20th level onwards, the berserker gains a +1/+2 luck bonus to rolls on damage dealt and received while below 50% and 25% Hit Points respectively.
 
@@ -291,65 +357,131 @@ WRITE_LONG 0x1c RESOLVE_STR_REF (~Battlerager~)
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#1x.SPL~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#2x.SPL~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#3x.SPL~ ~OVERRIDE~
+
+// CHRIZ BALANCE (v2.0): RAGE-SCALING DELTA SUB-SPELLS. While Enraged, In Extremis
+// damage and physical resistance DOUBLE. Rather than bake a second value set into
+// the tier spells, each tier carries an op326 "apply-if-enraged" branch pointing at
+// one of these deltas; op326 re-evaluates every round (the tiers are re-cast every
+// round), so the bonus appears/vanishes cleanly with rage. The delta magnitude equals
+// the base (doubling): dmg +1/+2/+4, resist +ie_rN. Built from the minimal c0ber#1x
+// shell (one header) with its op272 watcher stripped.
+DEFINE_ACTION_FUNCTION akcb_make_dmg_delta INT_VAR dval = 0 STR_VAR res = ~~ BEGIN
+  COPY_EXISTING ~c0ber#1x.spl~ ~override/%res%.spl~
+    LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 73  target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = dval probability1 = 100 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 286 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = dval probability1 = 100 END
+    LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - dval) END // missile damage cancel
+  BUT_ONLY
+END
+DEFINE_ACTION_FUNCTION akcb_make_resist_delta INT_VAR rval = 0 STR_VAR res = ~~ BEGIN
+  COPY_EXISTING ~c0ber#1x.spl~ ~override/%res%.spl~
+    LPF DELETE_EFFECT INT_VAR match_opcode = 272 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 86 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = rval probability1 = 100 END // slashing
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 87 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = rval probability1 = 100 END // crushing
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 88 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = rval probability1 = 100 END // piercing
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 89 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = rval probability1 = 100 END // missile
+  BUT_ONLY
+END
+LAF akcb_make_dmg_delta    INT_VAR dval = 1 STR_VAR res = ~AKCBD1~ END
+LAF akcb_make_dmg_delta    INT_VAR dval = 2 STR_VAR res = ~AKCBD2~ END
+LAF akcb_make_dmg_delta    INT_VAR dval = 4 STR_VAR res = ~AKCBD3~ END
+LAF akcb_make_resist_delta INT_VAR rval = %ie_r1% STR_VAR res = ~AKCBR1~ END
+LAF akcb_make_resist_delta INT_VAR rval = %ie_r2% STR_VAR res = ~AKCBR2~ END
+LAF akcb_make_resist_delta INT_VAR rval = %ie_r3% STR_VAR res = ~AKCBR3~ END
+
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#01.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#01.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
-// CHRIZ BALANCE tier 1 (<76% HP): +%ie_r1%% physical resistance; Reckless Frenzy block
-// dropped; riders rescaled (2026-07-06): movement/saves +2 -> +1, APR and luck removed
-// from tier 1 entirely; offense rescaled (v1.2): +2 -> +1 (op284/op73, op286 missile
-// cancel follows)
+// CHRIZ BALANCE tier 1 (<76% HP) — v2.0:
+//   THAC0 -1 (now a PENALTY: reckless swings), damage +1 (rage +1 -> +2 total),
+//   AC -2, physical resistance %ie_r1%% but GATED to L14+ headers only (rage doubles),
+//   movement +1 (L7+), saves +1 (L10+), no APR, no luck.
 LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
-LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 1 END // movement rider
-LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 1 END // saves rider
-LPF DELETE_EFFECT INT_VAR match_opcode = 1 END  // APR rider: none at tier 1
-LPF DELETE_EFFECT INT_VAR match_opcode = 22 END // luck rider: none at tier 1
-LPF ALTER_EFFECT INT_VAR match_opcode = 284 parameter1 = 1 END // melee THAC0
+LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 1 END // movement rider (L7+ headers)
+LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 1 END // saves rider (L10+ headers)
+LPF DELETE_EFFECT INT_VAR match_opcode = 1 END  // APR: none at tier 1
+LPF DELETE_EFFECT INT_VAR match_opcode = 22 END // luck: none at tier 1
+LPF akcb_alter_p1_signed INT_VAR match_op = 284 new_p1 = (0 - 1) END // melee THAC0 PENALTY
 LPF ALTER_EFFECT INT_VAR match_opcode = 73  parameter1 = 1 END // damage
 LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 1) END // missile damage cancel
+LPF akcb_alter_p1_signed INT_VAR match_op = 0   new_p1 = (0 - 2) END // AC penalty
+// resistance: clone the op73 template to op86-89 (all headers), then zero the sub-L14
+// headers so it only applies at L14+ (dual-class gate — a Berserker-7 dual can't reach it)
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r1% parameter2 = 0 END // slashing
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r1% parameter2 = 0 END // crushing
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r1% parameter2 = 0 END // piercing
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r1% parameter2 = 0 END // missile
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 86 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 87 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 88 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 89 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+// rage-scaling: op326 apply-if-enraged. Damage delta in every header; resistance delta
+// only in the L14+ headers (so the doubled resist also respects the gate).
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 STR_VAR resource = ~AKCBD1~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 4 STR_VAR resource = ~AKCBR1~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 5 STR_VAR resource = ~AKCBR1~ END
+LPF akcb_add_delta_cleanup END // prepend op321 removals so the deltas don't stack across rounds
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#02.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#02.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
-// CHRIZ BALANCE tier 2 (<50% HP): AC penalty -4 -> -3, +%ie_r2%% physical resistance;
-// riders rescaled (2026-07-06): movement/saves +4 -> +2, APR +1 -> +1/2, luck +3 -> +1;
-// offense rescaled (v1.2): +4 -> +2
-// (negative writes need akcb_alter_p1_signed — built-in ALTER_EFFECT rejects them)
+// CHRIZ BALANCE tier 2 (<50% HP) — v2.0:
+//   THAC0 -2 (penalty), damage +2 (rage -> +4), AC -3, resistance %ie_r2%% (L14+, rage
+//   doubles), movement +2 (L7+), saves +2 (L10+), APR +1/2 moved to L1 (all headers),
+//   luck +1 (L20).
 LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
-LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 3) END
-LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 2 END // movement rider
-LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 2 END // saves rider
-LPF ALTER_EFFECT INT_VAR match_opcode = 1   parameter1 = 6 END // APR rider +1/2 (half-attack encoding)
-LPF ALTER_EFFECT INT_VAR match_opcode = 22  parameter1 = 1 END // luck rider
-LPF ALTER_EFFECT INT_VAR match_opcode = 284 parameter1 = 2 END // melee THAC0
+LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 3) END // AC penalty
+LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 2 END // movement rider (L7+)
+LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 2 END // saves rider (L10+)
+LPF ALTER_EFFECT INT_VAR match_opcode = 22  parameter1 = 1 END // luck rider (L20 header)
+// APR +1/2 relocated from L14 to L1: strip the existing (L14/20) op1 and re-add it to
+// every header (half-attack encoding p1=6). Melee-only, so worthless to a dualed caster.
+LPF DELETE_EFFECT INT_VAR match_opcode = 1 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 1 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = 6 probability1 = 100 END
+LPF akcb_alter_p1_signed INT_VAR match_op = 284 new_p1 = (0 - 2) END // melee THAC0 PENALTY
 LPF ALTER_EFFECT INT_VAR match_opcode = 73  parameter1 = 2 END // damage
 LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 2) END // missile damage cancel
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r2% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r2% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r2% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r2% parameter2 = 0 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 86 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 87 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 88 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 89 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 STR_VAR resource = ~AKCBD2~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 4 STR_VAR resource = ~AKCBR2~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 5 STR_VAR resource = ~AKCBR2~ END
+LPF akcb_add_delta_cleanup END // prepend op321 removals so the deltas don't stack across rounds
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#03.EFF~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#03.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = c0ber#ic END
-// CHRIZ BALANCE tier 3 (<26% HP): offense +8 -> +4 (v1.2; was +6 in v1.0/1.1), AC
-// penalty -6 -> -4, +%ie_r3%% physical resistance; riders rescaled (2026-07-06):
-// movement/saves +8 -> +4 (also fixes the upstream +10 op325 in the L10 header),
-// APR +2 -> +1, luck +5 -> +2
+// CHRIZ BALANCE tier 3 (<26% HP) — v2.0:
+//   THAC0 -4 (penalty), damage +4 (rage -> +8), AC -4, resistance %ie_r3%% (L14+, rage
+//   doubles), movement +4 (L7+; also fixes the upstream +10 op325 in the L10 header),
+//   saves +4 (L10+), APR +1 moved to L1 (all headers), luck +2 (L20).
 LPF DELETE_EFFECT INT_VAR match_opcode = 206 END
-LPF ALTER_EFFECT INT_VAR match_opcode = 284 parameter1 = 4 END
-LPF ALTER_EFFECT INT_VAR match_opcode = 73 parameter1 = 4 END
-LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 4) END
-LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 4) END
-LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 4 END
-LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 4 END // movement rider
-LPF ALTER_EFFECT INT_VAR match_opcode = 1   parameter1 = 1 END // APR rider +1
-LPF ALTER_EFFECT INT_VAR match_opcode = 22  parameter1 = 2 END // luck rider
+LPF akcb_alter_p1_signed INT_VAR match_op = 284 new_p1 = (0 - 4) END // melee THAC0 PENALTY
+LPF ALTER_EFFECT INT_VAR match_opcode = 73 parameter1 = 4 END // damage
+LPF akcb_alter_p1_signed INT_VAR match_op = 286 new_p1 = (0 - 4) END // missile damage cancel
+LPF akcb_alter_p1_signed INT_VAR match_op = 0 new_p1 = (0 - 4) END // AC penalty
+LPF ALTER_EFFECT INT_VAR match_opcode = 325 parameter1 = 4 END // saves rider (L10+)
+LPF ALTER_EFFECT INT_VAR match_opcode = 126 parameter1 = 4 END // movement rider (L7+)
+LPF ALTER_EFFECT INT_VAR match_opcode = 22  parameter1 = 2 END // luck rider (L20)
+// APR +1 relocated from L14 to L1 (all headers)
+LPF DELETE_EFFECT INT_VAR match_opcode = 1 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 1 target = 1 timing = 0 duration = 12 resist_dispel = 2 parameter1 = 1 probability1 = 100 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 86 parameter1 = %ie_r3% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 87 parameter1 = %ie_r3% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 88 parameter1 = %ie_r3% parameter2 = 0 END
 LPF CLONE_EFFECT INT_VAR match_opcode = 73 opcode = 89 parameter1 = %ie_r3% parameter2 = 0 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 86 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 87 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 88 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF akcb_set_p1_by_minlvl INT_VAR match_op = 89 new_p1 = 0 min_lvl = 0 max_lvl = 13 END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 STR_VAR resource = ~AKCBD3~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 4 STR_VAR resource = ~AKCBR3~ END
+LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 timing = 1 duration = 0 resist_dispel = 0 parameter1 = 0 parameter2 = %akcb_enr_row% probability1 = 100 header = 5 STR_VAR resource = ~AKCBR3~ END
+LPF akcb_add_delta_cleanup END // prepend op321 removals so the deltas don't stack across rounds
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#04.SPL~ ~OVERRIDE~
 LPF ALTER_EFFECT INT_VAR match_opcode = 318 parameter2 = C0CURHP END
 COPY ~%MOD_FOLDER%/Fighter/Berserker/SPELLS/C0BER#05.SPL~ ~OVERRIDE~

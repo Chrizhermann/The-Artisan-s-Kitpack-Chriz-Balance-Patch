@@ -35,3 +35,9 @@ penalty arrives). Safe to re-run; **run it again after upgrading from
 v1.0/v1.1**. Everything else self-applies: In Extremis tiers within one round,
 Enrage on its next cast, the ranged-weapon ban on load (unequip any bow/sling
 first — it becomes unusable), Hardiness at the next HLA level-up.
+
+**v2.0** (In Extremis rebuilt — THAC0 penalty, damage/resistance double while
+Enraged, resistance regated to L14, APR at the L1 base) needs **no additional
+console step**: the tier spells are re-cast from files every round, so the new
+values, the rage-scaling op326 branch and the level gates all take effect on the
+next load. Only run `AKCBRFRM` if you haven't already for v1.2.
