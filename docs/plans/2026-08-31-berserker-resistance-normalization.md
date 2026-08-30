@@ -178,11 +178,13 @@ Expected: all tests PASS.
 **Step 2: Run WeiDU parse checks**
 
 ```powershell
-.\Setup-ArtisansKitpack.exe --nogame --parse-check TPA ArtisansKitpack/lib/Berserker.tpa
-.\Setup-ArtisansKitpack.exe --nogame --parse-check TP2 live-patch/AKCB_BERSERKER/setup-AKCB_BERSERKER.tp2
+.\Setup-ArtisansKitpack.exe --no-auto-tp2 --no-exit-pause --nogame --parse-check TPA ArtisansKitpack/lib/Berserker.tpa
+.\Setup-ArtisansKitpack.exe --no-auto-tp2 --no-exit-pause --nogame --parse-check TP2 live-patch/AKCB_BERSERKER/setup-AKCB_BERSERKER.tp2
 ```
 
-Expected: both commands exit 0 with no parse error.
+Expected: both commands exit 0 with no parse error. `--no-auto-tp2` prevents
+the setup-named executable from launching its normal interactive installer
+after the isolated parse check.
 
 **Step 3: Check diff hygiene and live-game isolation**
 
