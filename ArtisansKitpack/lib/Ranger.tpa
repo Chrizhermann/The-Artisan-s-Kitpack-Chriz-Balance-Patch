@@ -2,7 +2,7 @@ COPY ~%MOD_FOLDER%/Ranger/spells~ ~OVERRIDE~
 
 COPY_EXISTING ~CLABRN01.2DA~ OVERRIDE
   // Borrowed from Rogue Rebalancing
-  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = GA_SPCL922 END // Tracking
+  LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = GA_C0CL922 END // Tracking
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG00 END // Camouflage
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG00 END // Camouflage
   LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 5 STR_VAR f_Entry = GA_SPCL412 END // Set Snare
@@ -123,7 +123,6 @@ DEFINE_ACTION_FUNCTION cd_new_portrait_icon
 END
 
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Woodland Stride~) STR_VAR bam_file = C0RNG00I RET C0RNG00I = icon END
-LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Tracking~) STR_VAR bam_file = SPCL922I RET SPCL922I = icon END
 
 APPEND ~TRAPLIMT.2DA~ ~RANGER 3
 FERALAN 3
@@ -387,7 +386,7 @@ COPY_EXISTING ~KITLIST.2DA~ ~override~
       INNER_ACTION BEGIN
         // This gives Ranger kits the Thief snare at the same frequency Thieves get them.
         COPY_EXISTING ~%kit_clab%.2DA~ override
-        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = GA_SPCL922 END // Tracking
+        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = GA_C0CL922 END // Tracking
         LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 STR_VAR f_Entry = AP_C0RNG00 END // Camouflage
         LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 5 STR_VAR f_Entry = GA_SPCL412 END // Set Snare
         LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_MaxLevel = 20 f_Increment = 1 STR_VAR f_Entry = AP_C0RNG01 END // Set Traps
@@ -429,54 +428,7 @@ COPY_EXISTING ~KITLIST.2DA~ ~override~
   END
   END
   
-COPY_EXISTING ~SPCL922.SPL~ OVERRIDE
-	LPF ALTER_EFFECT INT_VAR match_opcode = 318 parameter2 = C0_NOT_OUTDOORS_CHECK END
-SAY NAME1 ~Tracking~
-SAY UNIDENTIFIED_DESC ~Tracking
-With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 50 feet radius of the ranger will be revealed from within the fog of war. Tracking's range increases by an additional 25 feet radius at 9th and 18th level.
-
-This ability only works while outdoors.~
-
-COPY_EXISTING ~SPCL922a.SPL~ OVERRIDE
-	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Tracking Activated~) END
-  LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = SPCL922I END
-
-COPY ~%MOD_FOLDER%/Ranger/spells/projectile/C0TRKP01.PRO~ ~OVERRIDE/C0TRKP01.PRO~
-
-ADD_PROJECTILE ~%MOD_FOLDER%/Ranger/spells/projectile/C0TRKP01.PRO~ ~C0 Tracking 800~
-COPY_EXISTING ~C0TRKP01.PRO~ ~OVERRIDE/C0TRKP02.PRO~
-  WRITE_SHORT 0x204 1200
-  WRITE_SHORT 0x206 1200
-ADD_PROJECTILE ~OVERRIDE/C0TRKP02.PRO~ ~C0 Tracking 1200~
-COPY_EXISTING ~C0TRKP01.PRO~ ~OVERRIDE/C0TRKP03.PRO~
-  WRITE_SHORT 0x204 1600
-  WRITE_SHORT 0x206 1600
-ADD_PROJECTILE ~OVERRIDE/C0TRKP03.PRO~ ~C0 Tracking 1600~
-
-COPY_EXISTING ~SPCL922B.SPL~ OVERRIDE
-	LPF ALTER_EFFECT INT_VAR match_opcode = 326 parameter2 = C0_OUTDOORS_CHECK END
-
-COPY_EXISTING ~SPCL922F.SPL~ OVERRIDE
-  LPF ALTER_SPELL_HEADER
-	INT_VAR
-		projectile = C0TRKP01
-END
-
-COPY_EXISTING ~SPCL922G.SPL~ OVERRIDE
-  LPF ALTER_SPELL_HEADER
-	INT_VAR
-		projectile = C0TRKP02
-END
-
-COPY_EXISTING ~SPCL922H.SPL~ OVERRIDE
-  LPF ALTER_SPELL_HEADER
-	INT_VAR
-		projectile = C0TRKP03
-END
-
-COPY_EXISTING ~SPCL922c.SPL~ OVERRIDE
-	LPF ALTER_EFFECT INT_VAR match_opcode = 139 parameter1 = RESOLVE_STR_REF (~Tracking Deactivated~) END
-
+INCLUDE ~%MOD_FOLDER%/spells/tracking.tpa~
 
 ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
 

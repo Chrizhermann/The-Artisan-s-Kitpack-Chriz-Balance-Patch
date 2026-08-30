@@ -22,7 +22,48 @@ run the relevant setup executable:
 - `Setup-ArtisansKitpack_tweak.exe` — tweaks
 - `Setup-ArtisansKitpack_npc.exe` — NPC kits
 
+> [!WARNING]
+> **SPELL REVISIONS COMPATIBILITY — PHASE 0**
+>
+> **Do not include Favored Soul (component `30001`) in recommended installs or
+> mod collections for now.** Its current installer globally hides and
+> re-delivers ordinary priest spells through generated CLAB files. With Spell
+> Revisions—and especially with later divine-spell or ranger-progression
+> components—that snapshot can corrupt Cleric, Druid, Paladin, Ranger, and
+> multiclass spellbooks. Omitting Favored Soul from a clean install avoids the
+> traced Ranger/Cleric delivery failure.
+>
+> Uninstalling Favored Soul in the middle of an established stack is not the
+> same as never installing it. Use a clean rebuild or allow WeiDU to reinstall
+> every later component from the restored state.
+
+For recommended **Spell Revisions** installations, currently omit these exact
+components:
+
+| Installer | Component | Reason |
+|---|---:|---|
+| `Setup-ArtisansKitpack.exe` | `30001` Favored Soul | Globally replaces native priest spell delivery using install-time metadata. |
+| `Setup-ArtisansKitpack.exe` | `8101` / `8102` Pale Master spell choices | Copies fixed `SPPRxxx` slots that contain different spells under SR. The base Pale Master kit (`8001`) is not excluded. |
+| `Setup-ArtisansKitpack_npc.exe` | `5102` Red Wizard Edwin | Removes a fixed wizard slot that SR uses for the permitted Conjuration spell Obscuring Mist. |
+| `Setup-ArtisansKitpack_npc.exe` | `10004` Sacred Fist Rasaad | Adds obsolete/disabled SR priest resources and relies on a later spellbook cleanup pass. |
+
 Then select the components you want.
+
+### Deferred compatibility fixes
+
+Phase 0 is documentation policy, not a code-level compatibility fix. The
+deferred work is recorded in the
+[Spell Revisions compatibility design](docs/plans/2026-08-31-spell-revisions-phase-0-compatibility-design.md)
+and includes:
+
+- rebuilding Favored Soul as a kit-specific choice registry that leaves native
+  priest delivery, `HIDESPL.2DA`, and ordinary class/kit CLABs alone;
+- resolving intended spells through current semantic `SPELL.IDS` identities
+  instead of physical `SPPRxxx` filenames;
+- repairing the Pale Master, Red Wizard Edwin, and Sacred Fist Rasaad
+  component-local assumptions; and
+- adding vanilla/SR install-and-uninstall fixtures before any component is
+  declared compatible again.
 
 ## License / usage
 
