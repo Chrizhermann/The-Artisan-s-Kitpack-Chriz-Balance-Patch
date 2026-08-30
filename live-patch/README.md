@@ -26,11 +26,14 @@ From the game dir, after copying the `AKCB_BERSERKER` folder there and creating
 **UPGRADE/REINSTALL** an already-installed v2.0 component:
 
 ```
-./Setup-AKCB_BERSERKER.exe --reinstall --language 0 --no-exit-pause
+./Setup-AKCB_BERSERKER.exe --force-uninstall-list 0 --force-install-list 0 --language 0 --no-exit-pause
 ```
 
-`--reinstall` is valid for this WeiDU v24900 one-component mini-mod: WeiDU
-reinstalls all installed components, and this TP2 contains only component 0.
+Keep both force flags in the same invocation. `--force-install-list 0` alone is
+a no-op when component 0 is already installed, while WeiDU's `--reinstall`
+only reliably handles a component that is still at the top of the install
+stack. The paired command also lets WeiDU unwind and restore any later
+components if this former tail patch is no longer last.
 
 Post-install, for each existing Berserker party member (once, in-game, fully
 restarted client):
