@@ -7,7 +7,7 @@ COPY_EXISTING ~CLABRN01.2DA~ ~OVERRIDE/CLABRN03.2DA~
 	// REPLACE_TEXTUALLY ~GA_SPCL311~ ~**** ~ // CHARM ANIMAL
 	// REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
 	REPLACE_TEXTUALLY ~C0RNG00A ~ ~**** ~ // CAMOUFLAGE
-	REPLACE_TEXTUALLY ~SPCL922 ~ ~**** ~ // TRACKING
+	REPLACE_TEXTUALLY ~C0CL922 ~ ~**** ~ // TRACKING
 
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0STK00 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_C0STK00 END
@@ -57,42 +57,7 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
-COPY_EXISTING ~c0stk00.eff~ ~override~
-	WRITE_SHORT 0x20 C0_OUTDOORS_CHECK
-
-COPY_EXISTING ~C0STK01.SPL~ OVERRIDE
-SAY NAME1 ~Tracking~
-SAY UNIDENTIFIED_DESC ~Tracking
-With an intimate knowledge of <PRO_HISHER> surroundings and the creatures that live within them, a ranger can use the Tracking ability to give <PRO_HIMHER>self a general idea of what creatures are in an area and which direction they are. All enemies within a 100-ft. radius of the ranger will be revealed from within the explored fog of war.
-
-This ability only works while outdoors.~
-  
-DEFINE_ACTION_FUNCTION cd_new_portrait_icon
-  INT_VAR string = 0
-  STR_VAR bam_file = "****"
-  RET     icon
-  BEGIN
-
-  COPY_EXISTING ~statdesc.2da~ ~override~
-    COUNT_2DA_ROWS 3 count
-    READ_2DA_ENTRY (count - 1) 0 3 icon
-    SET icon += 1
-
-  APPEND ~statdesc.2da~ ~%icon% %string% %bam_file%~ UNLESS ~%bam_file%~
-
-END
-
-COPY_EXISTING ~SPCL922.SPL~ ~OVERRIDE/C0STK01.SPL~
-  LPF DELETE_EFFECT INT_VAR match_opcode = 318 END
-  LPF ALTER_EFFECT STR_VAR match_resource = C0TRACK resource = C0STK01 END
-
-COPY_EXISTING ~SPCL922A.SPL~ ~OVERRIDE/C0STK01A.SPL~
-  LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END
-  
-COPY_EXISTING ~SPCL922A.EFF~ ~OVERRIDE/C0STK01A.EFF~
-
-COPY_EXISTING ~SPCL922C.SPL~ ~OVERRIDE/C0STK01C.SPL~
-	LPF ALTER_EFFECT STR_VAR match_resource = SPCL922A resource = C0STK01A END
+INCLUDE ~%MOD_FOLDER%/spells/tracking.tpa~
 
 COPY_EXISTING ~thiefscl.2da~ ~override~
   REPLACE_TEXTUALLY ~^\([ %TAB%]*MAGE\)~ ~CD_DELETE_ME \1~ // adding column to header column
