@@ -65,7 +65,13 @@ and includes:
 - adding vanilla/SR install-and-uninstall fixtures before any component is
   declared compatible again.
 
-## Balance changes vs upstream
+## License / usage
+
+Follow the upstream project's terms. This fork inherits them — any
+redistribution should credit Artemius_I first and link to the current
+website above.
+
+## Changes vs upstream
 
 - **Berserker Overhaul (component 1003)** — reworked 2026-07-05, full spec in
   `docs/plans/2026-07-05-berserker-rebalance-design.md`. Highlights: all self-harm
@@ -84,8 +90,8 @@ and includes:
   by an opcode-326 branch that checks `STATE_ENRAGED` each round. A
   tail-installable retrofit for live games lives in `live-patch/AKCB_BERSERKER`.
 
-## License / usage
+- **Arcane Archer / Mage (component 1001)** — already receives one fewer Mage spell
+  slot at every spell level; its description now makes that explicit.
 
-Follow the upstream project's terms. This fork inherits them — any
-redistribution should credit Artemius_I first and link to the current
-website above.
+- **Arcane Trickster (components 20001 and 8004)** — Stealth Caster correctly
+  recognizes Improved Invisibility for both the Mage / Thief and Sorcerer variants.
