@@ -4,7 +4,13 @@
 **Fork:** The Artisan's Kitpack — Chriz Balance Patch.
 **Scope:** component 1003 (`lib/Berserker.tpa`) + a live-install tail patch (`live-patch/AKCB_BERSERKER`) for the running EET game.
 
-> **v2.0 (2026-07-06)** rebuilds the In Extremis engine — see [§7](#7-v20-rage-scaling-in-extremis-restructure). THAC0 becomes a *penalty*, damage and resistance *double while Enraged*, resistance is regated to L14 (dual-class-proof), and APR moves to the L1 base. §3.1's original tables describe v1.x and are superseded by §7 for the tier values; the delivery architecture (§4) and everything else stand.
+> **v2.0 (2026-07-06)** rebuilds the In Extremis engine — see [§7](#7-v20-rage-scaling-in-extremis-restructure). THAC0 becomes a *penalty*, damage and resistance *double while Enraged*, resistance is regated to L14 through level headers, and APR moves to the L1 base. The dual-class edge remains an open assumption requiring the in-game test in §7.7. §3.1's original tables describe v1.x and are superseded by §7 for the tier values; the delivery architecture (§4) and everything else stand.
+
+> **v2.1 (2026-08-31, current)** normalizes L14+ physical resistance on every
+> install. The three wound tiers are base totals of 3/6/10% and Enraged totals
+> of 6/12/20% for slashing, crushing, piercing, and missile damage. Tier values
+> are totals, not cumulative bonuses across HP thresholds. The former v2.0
+> Spell Revisions branch is retained below only as superseded history.
 
 ---
 
@@ -53,10 +59,11 @@ Artisan's Berserker Overhaul is a "wants to be at low HP" kit. On high difficult
 
 ### 3.1 In Extremis (rework)
 
-> **Superseded by [§7](#7-v20-rage-scaling-in-extremis-restructure) as of v2.0.** The
-> tables below are the v1.x values (THAC0 as a *bonus*, resist from L1 at SR 5/10/15).
-> v2.0 makes THAC0 a penalty, regates resist to L14 at SR **4/8/15** (→8/16/30 enraged),
-> and moves APR to L1 — see §7.1/§7.2 for current numbers.
+> **Superseded chronology.** The tables below record the v1.x values (THAC0 as
+> a *bonus*, resistance from L1 at SR 5/10/15). v2.0 subsequently made THAC0 a
+> penalty, moved APR to L1, and regated resistance to L14; its retired SR branch
+> used **4/8/15** base totals (→ **8/16/30** Enraged totals). v2.1 retired that
+> branch. See §7.1/§7.2 for the current contract.
 
 | HP threshold | Melee THAC0/dmg | AC | Physical resist (all 4 types) SR / vanilla |
 |---|---|---|---|
@@ -77,20 +84,23 @@ Artisan's Berserker Overhaul is a "wants to be at low HP" kit. On high difficult
   | All saves (op325) | L10+ | +1 / +2 / +4 (was +2/+4/+8; also fixes the upstream +10 in the L10 header) |
   | APR (op1) | L14+ | — / +½ / +1 (was +½/+1/+2; tier-1 effect DELETED) |
   | Luck (op22) | L20+ | — / +1 / +2 (was +1/+3/+5; tier-1 effect DELETED) |
-- Resist = opcodes 86/87/88/89 (slashing/crushing/piercing/missile), cumulative
-  (param2=0), added to **all 5 ability headers** of each tier spell, same
+- Resist = opcodes 86/87/88/89 (slashing/crushing/piercing/missile), using
+  additive effect mode (param2=0) within the active tier and added to **all 5
+  ability headers** of each tier spell, same
   12 s/timing-0 profile as the existing tier effects (cloned from the op73
   block so target/duration/dispel flags match exactly).
 - op206 blocks of `C0BER#5A/5B/5C` deleted (Reckless Frenzy is gone).
 
-**SR gate:** `MOD_IS_INSTALLED` Spell Revisions main component (#0). SR nerfs
-Hardiness 40%-physical → 20%-all-types, so the kit may carry more of its own
-physical mitigation there.
+**Historical v1.x/v2.0 SR policy (superseded in v2.1):** the retired installer
+gate checked Spell Revisions main component (#0). The rationale was that SR's
+optional Revised Warrior HLAs changed Hardiness from 40%-physical to
+20%-all-types, so the earlier design allowed the kit to carry more of its own
+physical mitigation on that install.
 
-Stacking math (worst realistic tank axis, slash/pierce/crush):
-- SR install: DoE 20 + Hardiness 20 + tier-3 15 = **55%** (crushing with
+Historical v1.x stacking math (worst realistic tank axis, slash/pierce/crush):
+- An SR install had DoE 20 + Hardiness 20 + tier-3 15 = **55%** (crushing with
   Roranach's Horn: 105%, only while < 26% HP with an HLA burning).
-- Vanilla gated: DoE 20 + Hardiness 40 + tier-3 10 = **70%**. Vanilla's
+- A vanilla install had DoE 20 + Hardiness 40 + tier-3 10 = **70%**. Vanilla's
   DoE+Roranach+Hardiness = 110% crushing exists *without any kit help* —
   pre-existing, not a regression. Physical resistance > 100% does not heal in
   the EE engine (floors at immunity).
@@ -253,7 +263,9 @@ melee-hit refresh, 10/20-round caps + Extend Rage HLA switch, Winded.
 - [ ] Kit description shows new text, clean bullets, correct resist numbers.
 - [ ] Damage character below 75/50/25%: tier icons appear, AC −2/−3/−4
       (verify the −3/−4 specifically — they use the unsigned-dword write trick),
-      resistances +5/+10/+15% visible on record screen.
+      and, at L14+, all four physical resistances show base tier totals
+      3/6/10% or Enraged tier totals 6/12/20%. The tiers do not accumulate
+      across thresholds.
 - [ ] Tier offense is +1/+2/+4 (v1.2), saves +4 / movement +4 at tier 3;
       tier 1 grants no APR/luck at L14+/L20+ (v1.1 rider rescale).
 - [ ] Enrage: no HP tick-down; hold/stun/charm/sleep/fear/morale failure fail
@@ -299,24 +311,34 @@ damage and resistance double (luck/saves/movement were judged strong enough).
 
 |  | <76% | <50% | <26% |
 |---|---|---|---|
-| **Spell Revisions** base | 4% | 8% | 15% |
-| SR enraged | 8% | 16% | 30% |
-| Vanilla base | 3% | 6% | 10% |
-| Vanilla enraged | 6% | 12% | 20% |
+| **Base tier total (every install)** | 3% | 6% | 10% |
+| **Enraged tier total (every install)** | 6% | 12% | 20% |
 
-Vanilla is lower because Hardiness there is a full 40% (SR cuts it to 20% all-
-type). Worst realistic SR stack (enraged, <26%, L14+, Hardiness + a 20% item):
-30 + 20 + 20 = **70%** physical — below the engine's 100% immunity floor.
+These are totals for the single active wound tier, not cumulative bonuses from
+all thresholds crossed. They apply equally to slashing, crushing, piercing,
+and missile resistance. Reference stacking examples at Enraged <26% HP, L14+:
 
-### 7.3 Dual-class gate
+- **60% = kit 20 + SR Hardiness 20 + item 20**.
+- **80% = kit 20 + 40%-physical Hardiness + item 20**.
 
-The exploit: Berserker 7 → dual to Mage/Cleric, regain the class at caster L8+,
-and the whole In Extremis passive reactivates on a caster. Fix: the tier spells'
-level headers are selected by the character's **BERSERKER class level**, so a
-Berserker-7 dual only ever reaches the L1/L7 headers. Everything caster-relevant
-— saves (L10), **resistance (L14)** — sits above that. The L1 perks that *do*
-come back (damage, THAC0 penalty, AC penalty, APR) are melee-only and worthless
-to a caster. Resistance at L14 was the explicit choice (over L10) for margin.
+These are not absolute maxima: specialized additional physical-resistance
+items can raise the totals. Physical resistance above 100% floors at immunity
+and does not heal.
+
+### 7.3 Intended dual-class gate — UNVERIFIED
+
+The intended protection is conditional on how the engine selects innate tier
+spell headers. If it uses the frozen **BERSERKER class level**, a Berserker-7
+dual reaches only the L1/L7 headers after regaining the class, so the L14
+resistance gate works (and the L10 saves and L20 luck also stay unavailable).
+The L1 perks that return — damage, THAC0 penalty, AC penalty, and APR — remain
+melee-focused.
+
+If the engine instead uses total/current level, a Berserker-7 dual can reach
+the L14/L20 headers after progressing in the new class, allowing resistance,
+saves, and luck to leak. Resistance at L14 was chosen over L10 for margin, but
+the dual-class gate is not verified. §7.7 records the required in-game test and
+the documented fallback if the assumption fails.
 
 ### 7.4 Delivery mechanism (rage scaling)
 
@@ -364,14 +386,15 @@ Byte-verified: 6 delta-removals per header, positioned before the op326 applies.
   — INT_VAR must precede STR_VAR, or WeiDU throws a GLR parse error at the STR_VAR.
   (Cost a reinstall; both are now INT_VAR-first.)
 
-### 7.6 Test checklist (v2.0, in-game)
+### 7.6 Test checklist (v2.1 current, in-game)
 
 - [ ] Below 75/50/25% HP: record screen shows −1/−2/−4 to hit, +1/+2/+4 damage,
       −2/−3/−4 AC; APR +½ at <50%, +1 at <25%.
-- [ ] Resistance shows **only at L14+**, values 4/8/15% (this SR install). A L7–13
-      berserker below 25% HP has **no** physical resistance.
+- [ ] Resistance shows **only at L14+** for all four physical types, with base
+      tier totals 3/6/10% on every install. A L7–13 berserker below 25% HP has
+      **no** physical resistance; crossing thresholds does not add tiers together.
 - [ ] Enrage active: damage bonus and resistance **double** (e.g. <25% dmg +8, resist
-      30%); revert within ~2 rounds of rage ending. Confirm no unbounded stacking over
+      20%); revert within ~2 rounds of rage ending. Confirm no unbounded stacking over
       a long (10/20-round) rage — damage should hold at 2×, not climb.
 - [ ] Dual-class sanity (throwaway save): a Berserker-7 → Mage dual, after regaining
       the class, gets the L1 melee perks but **no** saves/resistance/luck.
@@ -402,10 +425,13 @@ Three-agent review (runtime mechanics / WeiDU correctness / balance). Verdicts:
   *doubled* resist still needs Enrage, which locks casting, so that part self-limits).
   **Must be tested (checklist above).** If it fails, fallback = a hard class-level
   splprot gate on the resistance delivery, or move resistance out of the header system.
-- **Resistance ceiling — acceptable at intended values.** Enraged <26% L14 worst tank
-  axis: kit 30 + SR-Hardiness 20 + item 20 = 70% (crushing + Roranach ~85–105%, a
-  corner that pre-exists in vanilla without any kit help; >100% floors at immunity, no
-  heal). Gated behind <26% HP + Enrage (casting locked) + an HLA. Not a regression.
+- **Resistance stacking — v2.1 current update (2026-08-31).** At Enraged <26%
+  HP and L14+, the normalized reference examples are **60% = kit 20 + SR
+  Hardiness 20 + item 20**, and **80% = kit 20 + 40%-physical Hardiness + item
+  20**. They are not absolute maxima: specialized additional
+  physical-resistance items can raise the totals, while values above 100% floor
+  at immunity and do not heal. The kit share remains gated behind <26% HP +
+  Enrage (casting locked).
 - Clean: exact-2× doubling formula, missile-cancel on base AND enraged (no ranged
   damage leak), APR encoding, movement/saves/resist/luck level-gating, casting lock,
   removed HP drain, THAC0 coherence, all WeiDU offset math and idempotency.

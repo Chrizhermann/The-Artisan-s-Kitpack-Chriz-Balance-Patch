@@ -73,13 +73,16 @@ and includes:
   deleted); Enrage grants stun/sleep/hold/charm/fear/morale-failure immunity while
   raging; ranged weapons banned outright with a Cavalier-style −4 thrown-mode
   penalty; Hardiness restored to the HLA table.
-  **In Extremis, rebuilt in v2.0:** to-hit becomes a *penalty* that deepens with your
-  wounds (−1/−2/−4), melee damage +1/+2/+4 and physical resistance both **double
-  while Enraged**; APR (—/+½/+1) sits in the level-1 base; physical resistance is
-  gated to level 14 (dual-class-proof) — SR installs 4/8/15% → 8/16/30% enraged,
-  vanilla 3/6/10% → 6/12/20%. Rage scaling is delivered by an opcode-326 branch that
-  checks `STATE_ENRAGED` each round. A tail-installable retrofit for live games lives
-  in `live-patch/AKCB_BERSERKER`.
+  **In Extremis, rebuilt in v2.0 and resistance-normalized in v2.1:** to-hit
+  becomes a *penalty* that deepens with your wounds (−1/−2/−4), melee damage
+  +1/+2/+4 and physical resistance both **double while Enraged**; APR
+  (—/+½/+1) sits in the level-1 base. Physical resistance is delivered through
+  the L14+ tier-spell headers and applies equally to slashing, crushing,
+  piercing, and missile damage: the three wound tiers give base **totals** of 3/6/10%,
+  doubling to Enraged **totals** of 6/12/20% on every install. These are tier
+  totals, not cumulative bonuses across thresholds. Rage scaling is delivered
+  by an opcode-326 branch that checks `STATE_ENRAGED` each round. A
+  tail-installable retrofit for live games lives in `live-patch/AKCB_BERSERKER`.
 
 ## License / usage
 
