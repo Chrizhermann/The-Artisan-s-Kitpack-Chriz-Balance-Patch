@@ -14,12 +14,26 @@ Berserker Overhaul rebalance (see
 `docs/plans/2026-07-05-berserker-rebalance-design.md` for the full spec and
 rationale). Requires AK component 1003 installed.
 
-Install (from the game dir, after copying the `AKCB_BERSERKER` folder there and
-creating `Setup-AKCB_BERSERKER.exe` as a copy of any WeiDU v24900 setup exe):
+From the game dir, after copying the `AKCB_BERSERKER` folder there and creating
+`Setup-AKCB_BERSERKER.exe` as a copy of any WeiDU v24900 setup exe:
+
+**FIRST INSTALL:**
 
 ```
 ./Setup-AKCB_BERSERKER.exe --force-install-list 0 --language 0 --no-exit-pause
 ```
+
+**UPGRADE/REINSTALL** an already-installed v2.0 component:
+
+```
+./Setup-AKCB_BERSERKER.exe --force-uninstall-list 0 --force-install-list 0 --language 0 --no-exit-pause
+```
+
+Keep both force flags in the same invocation. `--force-install-list 0` alone is
+a no-op when component 0 is already installed, while WeiDU's `--reinstall`
+only reliably handles a component that is still at the top of the install
+stack. The paired command also lets WeiDU unwind and restore any later
+components if this former tail patch is no longer last.
 
 Post-install, for each existing Berserker party member (once, in-game, fully
 restarted client):
@@ -36,8 +50,13 @@ v1.0/v1.1**. Everything else self-applies: In Extremis tiers within one round,
 Enrage on its next cast, the ranged-weapon ban on load (unequip any bow/sling
 first — it becomes unusable), Hardiness at the next HLA level-up.
 
-**v2.0** (In Extremis rebuilt — THAC0 penalty, damage/resistance double while
-Enraged, resistance regated to L14, APR at the L1 base) needs **no additional
-console step**: the tier spells are re-cast from files every round, so the new
-values, the rage-scaling op326 branch and the level gates all take effect on the
-next load. Only run `AKCBRFRM` if you haven't already for v1.2.
+**v2.1** keeps the v2.0 In Extremis rebuild (THAC0 penalty,
+damage/resistance double while Enraged, resistance gated to L14, APR at the L1
+base) and normalizes physical resistance on every install. Slashing, crushing,
+piercing, and missile resistance now use base tier **totals** of 3/6/10% and
+Enraged tier **totals** of 6/12/20%; the tiers are not cumulative across HP
+thresholds. After installing or reinstalling/upgrading the WeiDU component,
+this update needs **no additional console step**: the tier spells are re-cast
+from the newly installed files every round, so the normalized values, the
+rage-scaling op326 branch, and the level gates all take effect on the next load.
+Only run `AKCBRFRM` if you haven't already for v1.2.

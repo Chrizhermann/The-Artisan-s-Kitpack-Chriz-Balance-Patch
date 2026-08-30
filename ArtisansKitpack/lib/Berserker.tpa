@@ -29,22 +29,12 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
-// CHRIZ BALANCE: In Extremis physical resistance — higher on Spell Revisions installs
-// (SR's Revised Warrior HLAs nerfs Hardiness 40% physical -> 20% all types, so the
-// kit may carry more of its own physical mitigation without stacking past 100%).
-// v2.0: base values are the per-tier resist; while Enraged they DOUBLE (delivered as
-// an equal-magnitude op326 delta gated on STATE_ENRAGED). Gated to L14+ (see below).
-//   SR:      base 4/8/15   enraged 8/16/30
-//   vanilla: base 3/6/10   enraged 6/12/20   (Hardiness is 40% not 20% here, so lower)
-ACTION_IF MOD_IS_INSTALLED "spell_rev/setup-spell_rev.tp2" 0 BEGIN
-  OUTER_SET ie_r1 = 4
-  OUTER_SET ie_r2 = 8
-  OUTER_SET ie_r3 = 15
-END ELSE BEGIN
-  OUTER_SET ie_r1 = 3
-  OUTER_SET ie_r2 = 6
-  OUTER_SET ie_r3 = 10
-END
+// CHRIZ BALANCE: In Extremis physical resistance is normalized across all installs.
+// Base tiers are 3/6/10%; while Enraged, an equal op326 delta doubles them to
+// 6/12/20%. Downstream spell headers gate this scaling to Berserker level 14+.
+OUTER_SET ie_r1 = 3
+OUTER_SET ie_r2 = 6
+OUTER_SET ie_r3 = 10
 
 // CHRIZ BALANCE: status immunities while Enraged, mirrored from the vanilla EE
 // SPCL321 implementation (opcode set + SCS detectable-spells states + display-string
