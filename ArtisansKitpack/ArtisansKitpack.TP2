@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack~
 AUTHOR ~Artemius_I~
-VERSION ~chriz-v1.2.0~
+VERSION ~chriz-v1.3.0~
 ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/2daHandling.tph~
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
