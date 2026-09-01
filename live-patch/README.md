@@ -60,3 +60,47 @@ this update needs **no additional console step**: the tier spells are re-cast
 from the newly installed files every round, so the normalized values, the
 rage-scaling op326 branch, and the level gates all take effect on the next load.
 Only run `AKCBRFRM` if you haven't already for v1.2.
+
+## AKCB_SHAPESHIFTER
+
+Shapeshifter Overhaul pathfinding fix, component 0: the four custom
+greater-werewolf animations (brown/grey/black/white) use
+`personal_space=3`, the humanoid pathfinding footprint, instead of 5 so they
+fit through standard doors. This changes engine size only; sprite scale,
+selection circle (`ellipse=16`) and movement speed are unchanged. The regular
+werewolf forms already use 3.
+
+Requires Artisan's Kitpack custom-sprite component 5110 or 5111. With 5110,
+NPC werewolves keep their vanilla animation slots and are untouched. With
+5111, the user explicitly chose custom sprites for NPC werewolves too, so NPC
+greater werewolves share the same corrected custom INIs.
+
+The extended INI filenames are allocated per install. The patch resolves each
+animation semantically through `ANIMATE.IDS` and never hardcodes an `e0xx.ini`
+filename. Synthetic-game coverage uses deliberately remapped slots and checks
+that exactly the four greater INIs change, malformed or missing resources roll
+back, already-fixed inputs remain byte-identical, and uninstall restores the
+entire override tree byte-exactly.
+
+From the game directory, after copying the `AKCB_SHAPESHIFTER` folder there
+and creating `Setup-AKCB_SHAPESHIFTER.exe` as a copy of a WeiDU v24900 setup
+executable:
+
+**FIRST INSTALL:**
+
+```
+./Setup-AKCB_SHAPESHIFTER.exe --force-install-list 0 --language 0 --no-exit-pause
+```
+
+**UPGRADE/REINSTALL:**
+
+```
+./Setup-AKCB_SHAPESHIFTER.exe --force-uninstall-list 0 --force-install-list 0 --language 0 --no-exit-pause
+```
+
+No console step is needed. Animation INIs are runtime data rather than
+save-baked state: close the game before installing, restart it fully, and then
+load the save. Undo by uninstalling component 0 through WeiDU.
+
+Fresh installs of this fork reach the same end state directly from
+`ArtisansKitpack/Druid/Shapeshifter/animations/werewolf_greater*/exxx.ini`.
