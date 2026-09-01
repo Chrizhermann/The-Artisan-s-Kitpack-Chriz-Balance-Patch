@@ -90,6 +90,13 @@ website above.
   by an opcode-326 branch that checks `STATE_ENRAGED` each round. A
   tail-installable retrofit for live games lives in `live-patch/AKCB_BERSERKER`.
 
+- **Shapeshifter Overhaul custom sprites (components 5110/5111)** — the four
+  greater-werewolf animation templates now use the humanoid pathfinding
+  footprint (`personal_space=3` instead of 5), allowing the form to pass
+  through standard doors without changing its sprite scale, selection circle,
+  or movement speed. Existing installs can use the reversible semantic retrofit
+  in `live-patch/AKCB_SHAPESHIFTER`.
+
 - **Arcane Archer / Mage (component 1001)** — already receives one fewer Mage spell
   slot at every spell level; its description now makes that explicit.
 
