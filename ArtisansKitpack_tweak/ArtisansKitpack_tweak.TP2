@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/tweak~
 AUTHOR ~The Artisan~
-VERSION ~chriz-v1.3.0~
+VERSION ~chriz-v1.3.1~
 ALWAYS
   OUTER_SPRINT MOD_FOLDER ArtisansKitpack
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
