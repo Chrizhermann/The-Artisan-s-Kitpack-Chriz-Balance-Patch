@@ -2,6 +2,18 @@ COPY ~%MOD_FOLDER%/Thief/Assassin/2da~ ~override~
 COPY ~%MOD_FOLDER%/Thief/Assassin/bams~ ~override~
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells~ ~override~
 
+// CHRIZ BALANCE: Remove Preparation while preserving Enhanced Backstab's
+// positioning freedom, Cloak cleanup and the on-hit consumption of Death Attack.
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i1.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 272 STR_VAR match_resource = ~C0AS#01~ END
+
+// Keep the old helper resources inert, including every level-scaled header.
+// This also prevents an already-granted Preparation trigger from adding bonuses.
+ACTION_FOR_EACH preparation_spell IN ~c0as#01~ ~c0as#1a~ ~c0as#1b~ BEGIN
+  COPY ~%MOD_FOLDER%/Thief/Assassin/spells/%preparation_spell%.spl~ ~override~
+    LPF DELETE_EFFECT INT_VAR check_globals = 1 check_headers = 1 END
+END
+
 COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH02.2DA~
 	REPLACE_TEXTUALLY ~GA_SPCL412~ ~**** ~ // SET SNARE
 
@@ -14,7 +26,7 @@ COPY_EXISTING ~CLABTH01.2DA~ ~OVERRIDE/CLABTH02.2DA~
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = GA_C0A_A01 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 2 f_Increment = 1 STR_VAR f_Entry = AP_C0AS#I2 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 5 STR_VAR f_Entry = AP_C0AS#I4 END
-	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 STR_VAR f_Entry = AP_C0AS#I5 END
+	LPF set_clab_2da_entries INT_VAR f_MinLevel = 10 f_MaxLevel = 25 f_Increment = 5 STR_VAR f_Entry = GA_C0AS#I5 END
 
  	PRETTY_PRINT_2DA
 
@@ -74,11 +86,11 @@ LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Backstab: Lethal~) ST
   COPY_EXISTING ~abclsmod.2da~ ~override~
 	COUNT_2DA_COLS cols // amount of columns
 	READ_2DA_ENTRIES_NOW rows cols // read all file into memory  
-	FOR (row = 1; row < rows; ++row) BEGIN // iterate over rows
+	FOR (row = 0; row < rows; ++row) BEGIN // iterate over data rows
 	  READ_2DA_ENTRY_FORMER rows row 0 ~text~ // read column value
 	  PATCH_IF ~%text%~ STRING_EQUAL_CASE ~ASSASIN~ BEGIN
 	    SET patch_row = %row%
-		SET_2DA_ENTRY (%patch_row%) 6 cols %-2%
+		SET_2DA_ENTRY (%patch_row%) 6 cols 0 // no Assassin Charisma penalty
 	  END
 	END
 
@@ -143,9 +155,7 @@ POISON WEAPON: The assassin is capable of coating <PRO_HISHER> weapon for the ne
   16th level: Target suffers eight poison damage and loses two points of Constitution. Save modifier of -3.
   21st level: Target suffers ten poison damage and loses three points of Constitution. Save modifier of -4.
 
-– Gains the Preparation and Enhanced Backstab passive effects.
-
-PREPARATION: For every round that the assassin remains Invisible, <PRO_HESHE> gains a +1 bonus to Hit and Damage up to a cap of +2 at 1st level. This bonus increases by at +1 at 5th level and every 5 levels thereafter. Additionally, if the assassin remains Invisible for a full ten rounds, <PRO_HISHER> next attack becomes an automatic Critical Hit. Upon exiting stealth, all stacked bonuses are depleted immediately.
+– Gains the Enhanced Backstab passive effect.
 
 ENHANCED BACKSTAB: The assassin is a master of sneak attacks, capable of backstabbing from any direction while stealthed, while crippling <PRO_HISHER> victim with <PRO_HISHER> backstabs, inflicting one of the following effects. Save modifiers decrease by one for every six levels gained thereafter.
   Paralysis: Target must save vs. death at +2 or become Paralyzed for 2 rounds.
@@ -158,13 +168,11 @@ ENHANCED BACKSTAB: The assassin is a master of sneak attacks, capable of backsta
 
 HIDDEN BLADE: When the assassin kills <PRO_HISHER> target, <PRO_HESHE> briefly turns Invisible and moves at double <PRO_HISHER> Movement Rate for one round. This may not occur more than once every five rounds, reduced by one round for every 5 levels gained thereafter (no cooldown at 30th level)
 
-– From 10th level onwards, gains the Cloak of Shadows passive effect.
+– From 10th level onwards, may use Cloak of Shadows once per day. Gains one additional use every five levels, up to four uses per day at 25th level.
 
-CLOAK OF SHADOWS: The assassin's mastery of stealth renders <PRO_HIMHER> completely undetectable and untargetable by all means, whether magical or mundane, while hiding or Invisible. Even creatures that normally see through invisibility cannot perceive the assassin.
+CLOAK OF SHADOWS: This instantly activated ability lasts for three rounds. During this time, the assassin is undetectable and untargetable while hiding or Invisible, even to creatures that normally see through invisibility. The protection ends whenever the assassin becomes visible and returns if <PRO_HESHE> hides or becomes Invisible again before the three rounds expire. This ability does not itself grant invisibility.
 
 Disadvantages:
-– -2 penalty to Charisma.
-– -2 penalty to starting Reputation.
 – May not Set Traps.
 – May only be of any non-good alignment.
 – May only distribute 10 skill points per level among thieving skills.~
@@ -219,31 +227,7 @@ ACTION_IF FILE_EXISTS_IN_GAME ~clabth02.2da~ THEN BEGIN
 COPY ~%MOD_FOLDER%/Thief/Assassin/2da/clabth02.2da~ ~override~
 END
 
-ACTION_IF FILE_EXISTS_IN_GAME ~baldur.bcs~ THEN BEGIN
-EXTEND_TOP ~baldur.bcs~ ~%MOD_FOLDER%/Thief/Assassin/scripts/reputation.baf~
-END
-
-ACTION_IF FILE_EXISTS_IN_GAME ~bdbaldur.bcs~ THEN BEGIN
-EXTEND_TOP ~bdbaldur.bcs~ ~%MOD_FOLDER%/Thief/Assassin/scripts/reputation.baf~
-END
-
-ACTION_IF FILE_EXISTS_IN_GAME ~baldur25.bcs~ THEN BEGIN
-EXTEND_TOP ~baldur25.bcs~ ~%MOD_FOLDER%/Thief/Assassin/scripts/reputation.baf~
-END
-
-COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0ashla1.spl~ ~override~
-  LPF ALTER_EFFECT
-    INT_VAR
-      check_globals = 1
-      check_headers = 1
-      match_opcode = 139 // display string
-	  parameter1 = RESOLVE_STR_REF (~Vulnerable~ /* Vulnerable */)
-  END
-SAY NAME1 ~Expose Weakness~ /* Expose Weakness */
-SAY NAME2 ~Expose Weakness~ /* Expose Weakness */
-SAY UNIDENTIFIED_DESC ~Expose Weakness
-To an assassin, no enemy is without a weak point. Using this ability, the assassin may mark a target as vulnerable, reducing their Armor Class by 10 points and setting their physical resistance (if any) to zero for three rounds. Additionally, if the target is immune to backstabs, they lose their immunity permanently. This ability can be taken multiple times, but an assassin can only mark a single target at any given time.~ /* Expose Weakness
-To an assassin, no enemy is without a weak point. Using this ability, the assassin may mark a target as vulnerable, reducing their Armor Class by 10 points and setting their physical resistance (if any) to zero for three rounds. Additionally, if the target is immune to backstabs, they lose their immunity permanently. This ability can be taken multiple times, but an assassin can only mark a single target at any given time. */
+INCLUDE ~%MOD_FOLDER%/lib/assassin_expose_weakness.tpa~
 
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0ashla2.spl~ ~override~
 SAY NAME1 ~Assassin's Blade~ /* Assassin's Blade */
@@ -257,13 +241,16 @@ A master assassin's blade must be honed to the sharpest edge. This innate abilit
 Requires: Expose Weakness */
 
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0ashla3.spl~ ~override~
+  // Death Attack keeps its on-hit death effect, but uses the normal critical chance.
+  LPF DELETE_EFFECT INT_VAR match_opcode = 301 END
+  LPF ALTER_EFFECT INT_VAR match_opcode = 142 match_parameter2 = 152 parameter2 = 154 END // Deathblow icon
 SAY NAME1 ~Death Attack~ /* Death Attack */
 SAY NAME2 ~Death Attack~ /* Death Attack */
 SAY UNIDENTIFIED_DESC ~Death Attack
-A high-level assassin's intimate knowledge of vital spots on opponents allows <PRO_HIMHER> to, once per day, strike a lethal blow against a target. With this ability, the assassin's next attack within five rounds becomes a guaranteed critical hit and kills the target instantly on a failed save vs. death at -4.
+A high-level assassin's intimate knowledge of vital spots on opponents allows <PRO_HIMHER> to, once per day, strike a lethal blow against a target. With this ability, the assassin's next successful attack within five rounds kills the target instantly on a failed save vs. death at -4.
 
 Requires: Assassin's Blade~ /* Death Attack
-A high-level assassin's intimate knowledge of vital spots on opponents allows <PRO_HIMHER> to, once per day, strike a lethal blow against a target. With this ability, the assassin's next attack within five rounds becomes a guaranteed critical hit and kills the target instantly on a failed save vs. death at -4.
+A high-level assassin's intimate knowledge of vital spots on opponents allows <PRO_HIMHER> to, once per day, strike a lethal blow against a target. With this ability, the assassin's next successful attack within five rounds kills the target instantly on a failed save vs. death at -4.
 
 Requires: Assassin's Blade */
 
@@ -286,13 +273,6 @@ Bleeding: Target must save vs. death at +2 or suffer 1d4+1 piercing damage every
 Cutthroat: Target must save vs. death or be silenced for 20 rounds.
 Lethality (Level 17+): Target must save vs. death at +4 or be slain instantly. */
 
-COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#01.spl~ ~override~
-  LPF ALTER_EFFECT
-    INT_VAR
-      match_opcode = 139 // display string
-	  parameter1 = RESOLVE_STR_REF (~Analysis: Critical Bonus~)
-  END
-
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i4.spl~ ~override~
   LPF ALTER_EFFECT
     INT_VAR
@@ -300,12 +280,7 @@ COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i4.spl~ ~override~
 	  parameter1 = RESOLVE_STR_REF (~Gained Passive Ability: Hidden Blade~)
   END
 
-COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i5.spl~ ~override~
-  LPF ALTER_EFFECT
-    INT_VAR
-      match_opcode = 139 // display string
-	  parameter1 = RESOLVE_STR_REF (~Gained Passive Ability: Cloak of Shadows~)
-  END
+INCLUDE ~%MOD_FOLDER%/lib/assassin_cloak.tpa~
   
 INCLUDE ~%MOD_FOLDER%/effects/poison_weapon.tpa~
 

@@ -1,0 +1,74 @@
+// CHRIZ BALANCE: Expose Weakness lowers only piercing resistance, by at most
+// 15 percentage points for three rounds. Select an additive penalty from the
+// target's current resistance so low resistance is not pushed below zero.
+// Using additive effects also accounts for resistance supplied by equipment.
+// This samples resistance at impact; later changes to other resistance sources
+// do not recalculate the penalty. Pre-existing negative resistance is untouched.
+// Native opcode reference: https://gibberlings3.github.io/iesdp/opcodes/bgee.htm#op88
+APPEND ~splprot.2da~ ~AKCB_EW_EQ 23 -1 1~ UNLESS ~AKCB_EW_EQ~
+APPEND ~splprot.2da~ ~AKCB_EW_GE 23 -1 4~ UNLESS ~AKCB_EW_GE~
+COPY_EXISTING ~splprot.2da~ ~override~
+  READ_2DA_ENTRIES_NOW akcb_ew_rows 4
+  FOR (akcb_ew_row = 0; akcb_ew_row < akcb_ew_rows; ++akcb_ew_row) BEGIN
+    READ_2DA_ENTRY_FORMER akcb_ew_rows akcb_ew_row 0 akcb_ew_label
+    PATCH_IF ~%akcb_ew_label%~ STRING_EQUAL_CASE ~AKCB_EW_EQ~ BEGIN
+      SET akcb_ew_equal_row = akcb_ew_row
+    END
+    PATCH_IF ~%akcb_ew_label%~ STRING_EQUAL_CASE ~AKCB_EW_GE~ BEGIN
+      SET akcb_ew_at_least_row = akcb_ew_row
+    END
+  END
+BUT_ONLY
+
+// One private effects list per possible penalty. Each contains just a timed
+// piercing modifier; all visuals, feedback and backstab removal stay in the HLA.
+OUTER_FOR (akcb_ew_amount = 1; akcb_ew_amount <= 15; ++akcb_ew_amount) BEGIN
+  COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0ashla1.spl~ ~override/akcbew%akcb_ew_amount%.spl~
+    LPF DELETE_EFFECT INT_VAR check_globals = 1 check_headers = 1 END
+    LPF ADD_SPELL_EFFECT
+      INT_VAR opcode = 88 target = 2 parameter1 = 0 parameter2 = 0
+              timing = 0 duration = 18 resist_dispel = 0 probability1 = 100
+    END
+    // ALTER_EFFECT ignores negative parameter values. Write the signed delta
+    // directly to the sole generated effect instead.
+    READ_LONG 0x6a akcb_ew_fx_offset
+    WRITE_LONG (akcb_ew_fx_offset + 0x04) (0 - akcb_ew_amount)
+    READ_LONG 0x64 akcb_ew_ability_offset
+    WRITE_SHORT (akcb_ew_ability_offset + 0x26) 0 // op326 effects-list projectile
+END
+
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0ashla1.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR match_opcode = 0 END // no AC change
+  LPF DELETE_EFFECT INT_VAR match_opcode = 86 END // no slashing change
+  LPF DELETE_EFFECT INT_VAR match_opcode = 87 END // no crushing change
+  LPF DELETE_EFFECT INT_VAR match_opcode = 88 END // replace piercing zeroing
+  LPF DELETE_EFFECT INT_VAR match_opcode = 89 END // no missile change
+
+  FOR (akcb_ew_amount = 1; akcb_ew_amount <= 15; ++akcb_ew_amount) BEGIN
+    // Preserve the original one-mark cleanup, including the new child spells.
+    LPF ADD_SPELL_CFEFFECT
+      INT_VAR opcode = 321 target = 4 timing = 1 resist_dispel = 0
+              probability1 = 100
+      STR_VAR resource = EVAL ~akcbew%akcb_ew_amount%~
+    END
+    // Ascending equality checks followed by >=15 cannot select two penalties,
+    // even if a later condition sees the result of an earlier modifier.
+    SET akcb_ew_condition = akcb_ew_equal_row
+    PATCH_IF akcb_ew_amount = 15 BEGIN
+      SET akcb_ew_condition = akcb_ew_at_least_row
+    END
+    LPF ADD_SPELL_EFFECT
+      INT_VAR opcode = 326 target = 2 timing = 1 resist_dispel = 0
+              parameter1 = akcb_ew_amount parameter2 = akcb_ew_condition
+              probability1 = 100
+      STR_VAR resource = EVAL ~akcbew%akcb_ew_amount%~
+    END
+  END
+  LPF ALTER_EFFECT
+    INT_VAR check_globals = 1 check_headers = 1 match_opcode = 139
+            parameter1 = RESOLVE_STR_REF (~Vulnerable~)
+  END
+  SAY NAME1 ~Expose Weakness~
+  SAY NAME2 ~Expose Weakness~
+  SAY UNIDENTIFIED_DESC ~Expose Weakness
+To an assassin, no enemy is without a weak point. Using this ability, the assassin may mark a target as vulnerable, reducing their piercing resistance by 15 percentage points (to a minimum of 0%) for three rounds. Additionally, if the target is immune to backstabs, they lose their immunity permanently. This ability can be taken multiple times, but an assassin can only mark a single target at any given time.~

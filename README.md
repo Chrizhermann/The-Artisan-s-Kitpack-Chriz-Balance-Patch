@@ -73,6 +73,19 @@ website above.
 
 ## Changes vs upstream
 
+- **Assassin Overhaul (component 7004)** — Expose Weakness no longer changes
+  Armor Class or slashing, crushing, and missile resistance. It lowers piercing
+  resistance by **15 percentage points, to a minimum of 0%, for three rounds**.
+  Permanent backstab immunity removal and the single active target limit remain.
+  The penalty is calculated when the mark lands; later changes to other
+  resistance sources do not recalculate it.
+  Preparation is removed entirely. Death Attack keeps its death effect and
+  five-round window but no longer guarantees a critical hit. The kit's Charisma
+  and starting Reputation penalties are removed.
+  Cloak of Shadows is an activated innate with casting time 0 and a three-round
+  duration. It grants protection while hidden or invisible, without granting
+  invisibility itself. Daily uses are 1/2/3/4 at levels 10/15/20/25.
+
 - **Berserker Overhaul (component 1003)** — reworked 2026-07-05, full spec in
   `docs/plans/2026-07-05-berserker-rebalance-design.md`. Highlights: all self-harm
   removed (Enrage HP drain + missing-HP damage ladder deleted, Reckless Frenzy
