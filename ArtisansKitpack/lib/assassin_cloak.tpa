@@ -1,0 +1,97 @@
+// CHRIZ BALANCE: Cloak of Shadows is an activated, three-round window.
+// The existing invisibility-source-independent condition remains in force.
+// SPL flags and native opcode references:
+// https://gibberlings3.github.io/iesdp/file_formats/ie_formats/spl_v1.htm
+// https://gibberlings3.github.io/iesdp/opcodes/bgee.htm#op272
+APPEND ~splprot.2da~ ~AKCB_CS_INVISIBLE 0x111 16 8~ UNLESS ~AKCB_CS_INVISIBLE~
+COPY_EXISTING ~splprot.2da~ ~override~
+  READ_2DA_ENTRIES_NOW akcb_cs_rows 4
+  FOR (akcb_cs_row = 0; akcb_cs_row < akcb_cs_rows; ++akcb_cs_row) BEGIN
+    READ_2DA_ENTRY_FORMER akcb_cs_rows akcb_cs_row 0 akcb_cs_label
+    PATCH_IF ~%akcb_cs_label%~ STRING_EQUAL_CASE ~AKCB_CS_INVISIBLE~ BEGIN
+      SET akcb_cs_invisible_row = akcb_cs_row
+    END
+  END
+BUT_ONLY
+
+// Keep the original protections and their normal invisibility/on-hit cleanup,
+// but never set base Non-Detection permanently. The activation's deadline also
+// removes these effects if the assassin becomes invisible late in the window.
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#02.spl~ ~override~
+  LPF ALTER_EFFECT
+    INT_VAR check_globals = 1 check_headers = 1 timing = 0 duration = 18
+  END
+  READ_LONG 0x64 akcb_cs_payload_header
+  WRITE_SHORT (akcb_cs_payload_header + 0x26) 0 // direct opcode 326 effects-list delivery
+
+// Remove the checker before its payload at the fixed deadline. The child spell
+// completes this cleanup even though the first effect removes its parent timer.
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i5.spl~ ~override/akcbcsen.spl~
+  LPF DELETE_EFFECT INT_VAR check_globals = 1 check_headers = 1 END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 321 target = 1 timing = 1 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~C0AS#I5~
+  END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 321 target = 1 timing = 1 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~C0AS#02~
+  END
+
+// The activated checker is private, so an obsolete passive effect retained in
+// an existing save cannot keep granting protection after this conversion.
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#03.eff~ ~override/akcbcsck.eff~
+  WRITE_LONG 0x20 akcb_cs_invisible_row // opcode 326's SPLPROT row
+
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#03.eff~ ~override~
+  WRITE_LONG 0x10 146 // obsolete passive checker removes itself and its payload
+  WRITE_LONG 0x1c 0
+  WRITE_LONG 0x20 1 // cast instantly at caster level
+  WRITE_ASCII 0x30 ~AKCBCSEN~ #8
+
+COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i5.spl~ ~override~
+  LPF DELETE_EFFECT INT_VAR check_globals = 1 check_headers = 1 END
+  READ_LONG 0x18 akcb_cs_flags
+  WRITE_LONG 0x18 (akcb_cs_flags BAND 0xfffff9ff) // clear breaks-invisibility/hostile bits
+  WRITE_SHORT 0x1c 4 // innate
+  WRITE_SHORT 0x22 0 // no casting animation
+  WRITE_LONG 0x34 1 // innate spell level
+  READ_LONG 0x64 akcb_cs_header
+  WRITE_SHORT (akcb_cs_header + 0x02) 4 // innate ability button
+  WRITE_BYTE (akcb_cs_header + 0x0c) 5 // self
+  WRITE_SHORT (akcb_cs_header + 0x12) 0 // casting time
+
+  // Recasting starts a fresh window: old delayed cleanup cannot cancel it.
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 321 target = 1 timing = 1 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~C0AS#I5~
+  END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 321 target = 1 timing = 1 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~C0AS#02~
+  END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 326 target = 1 parameter1 = 16 parameter2 = akcb_cs_invisible_row
+            timing = 1 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~C0AS#02~
+  END
+  // Check throughout the full activation window. At the deadline the expiry
+  // helper removes this checker first, then clears its remaining protections.
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 272 target = 1 parameter1 = 1 parameter2 = 3
+            timing = 0 duration = 18 probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~AKCBCSCK~
+  END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 146 target = 1 parameter2 = 1 timing = 4 duration = 18
+            probability1 = 100 resist_dispel = 0
+    STR_VAR resource = ~AKCBCSEN~
+  END
+  SAY NAME1 ~Cloak of Shadows~
+  SAY NAME2 ~Cloak of Shadows~
+  SAY UNIDENTIFIED_DESC ~Cloak of Shadows
+For three rounds after activating this ability, the assassin is undetectable and untargetable by enemies while hiding or Invisible, even by creatures that normally see through invisibility. The assassin can enter or re-enter invisibility during this time. Activating the ability does not grant or break invisibility.
+
+Casting Time: 0
+Duration: 3 rounds
+
+The assassin gains one use per day at 10th level and an additional use every five levels thereafter, to a maximum of four uses per day at 25th level.~
