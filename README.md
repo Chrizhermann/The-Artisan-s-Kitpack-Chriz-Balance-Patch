@@ -74,8 +74,18 @@ website above.
 ## Changes vs upstream
 
 - **Magekiller (component 7002)** — Imprison Arcana removed from the high-level
-  ability choices; a replacement is deferred. Existing characters who already
-  learned it retain the ability.
+  ability choices. With EEex installed before Magekiller, **Witchbane Strike**
+  replaces it: selectable once after Spellstrike, it grants one use per day.
+  The next successful melee attack within two rounds forces a save vs. Spell
+  or causes 50% arcane spell failure for two rounds. Its spell-failure effect
+  bypasses weapon immunities (including Protection from Magical Weapons and
+  the Mantle spells); weapon damage and other weapon effects remain blocked.
+  Magic Resistance and immunity to spell failure still apply. A successful
+  reapplication refreshes the duration instead of stacking. The first
+  successful melee attack consumes the charge even if its damage is blocked
+  or the target saves or resists. Without EEex, the base kit remains available
+  with neither HLA offered. Existing characters who already learned Imprison
+  Arcana retain it.
 
 - **Berserker Overhaul (component 1003)** — reworked 2026-07-05, full spec in
   `docs/plans/2026-07-05-berserker-rebalance-design.md`. Highlights: all self-harm

@@ -185,6 +185,8 @@ LPF patch_remove_hla STR_VAR remove_ability = ~GA_SPCL912~ END
 LPF patch_add_hla STR_VAR 2da_row = ~C0MKIL1~ ability = ~AP_C0MK#008~ num_allowed = 3 END	
 LPF patch_add_hla STR_VAR 2da_row = ~C0MKIL3~ ability = ~GA_SPCL904~ num_allowed = 16 END	
 
+INCLUDE ~%MOD_FOLDER%/lib/magekiller_witchbane.tpa~
+
 COPY_EXISTING ~C0MK#002.spl~ ~override~
 	LPF ALTER_EFFECT
 		INT_VAR

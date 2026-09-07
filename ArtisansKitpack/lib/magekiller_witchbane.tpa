@@ -1,0 +1,70 @@
+// EEex op248 Special BIT0 bypasses op120 for the attached EFF only.
+// Weapon damage and the weapon's own effects still respect weapon immunity.
+// See EEex v1.2.0, EEex_scripts/EEex_Opcode.lua (OnAfterSwingCheckedOp248).
+ACTION_IF FILE_EXISTS_IN_GAME ~M___EEex.lua~ THEN BEGIN
+
+  COPY ~%MOD_FOLDER%/Paladin/Inquisitor/bams/c0pal02b.bam~ ~override/AKWBANE.BAM~
+
+  // Reuse the kitpack's single-header innate template, with a new effect list.
+  COPY ~%MOD_FOLDER%/Paladin/Inquisitor/spells/c0inq03.spl~ ~override/AKWBANE.SPL~
+    LPF DELETE_EFFECT END
+    SAY NAME1 ~Witchbane Strike~
+    SAY UNIDENTIFIED_DESC ~Witchbane Strike
+Once per day, the Magekiller may empower their next successful melee attack within two rounds. The target must save vs. Spell or suffer a 50% chance of arcane spell failure for two rounds.
+
+The spell-failure effect bypasses Protection from Magical Weapons, Mantle, Improved Mantle, Absolute Immunity, and other weapon immunities. The attack's weapon damage and other weapon effects remain subject to those protections. Magic Resistance and immunity to spell failure still apply.
+
+The charge is consumed by the first successful melee attack, even if weapon immunity blocks its damage or the target saves or resists the effect. Multiple applications of Witchbane Strike do not stack; a successful reapplication refreshes the duration.
+
+This ability may only be chosen once.
+
+Requires: Spellstrike~
+    WRITE_ASCII 0x3a ~AKWBANE~ #8
+    LPF ALTER_SPELL_HEADER INT_VAR speed = 1 STR_VAR icon = ~AKWBANE~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 1 resist_dispel = 2
+      STR_VAR resource = ~AKWBANE~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 142 target = 1 parameter2 = 146
+      timing = 0 duration = 12 resist_dispel = 2 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 215 target = 1 timing = 1 resist_dispel = 2
+      STR_VAR resource = ~SPPOWATK~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 248 target = 1 timing = 0 duration = 12
+      resist_dispel = 2 special = 1 STR_VAR resource = ~AKWBHIT~ END
+
+  // op248 applies its EFF to the opponent, retaining the attacker's source ID.
+  // An unsaved bridge consumes the charge before the opponent's save/MR check.
+  COPY ~%MOD_FOLDER%/Paladin/Inquisitor/spells/c0inq03a.eff~ ~override/AKWBHIT.EFF~
+    WRITE_ASCII 0x30 ~AKWBHIT~ #8
+    WRITE_LONG 0x5c 2 // Ignore MR on the bridge; the hostile wrapper checks it.
+
+  COPY ~%MOD_FOLDER%/Paladin/Inquisitor/spells/c0inq03.spl~ ~override/AKWBHIT.SPL~
+    LPF DELETE_EFFECT END
+    SAY NAME1 ~Witchbane Strike~
+    WRITE_LONG 0x18 0
+    WRITE_LONG 0x50 0xffffffff
+    WRITE_ASCII 0x3a ~~ #8
+    LPF ALTER_SPELL_HEADER INT_VAR target = 1 speed = 0 STR_VAR icon = ~~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 1 resist_dispel = 2
+      STR_VAR resource = ~AKWBANE~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 146 target = 2 parameter2 = 1 timing = 1
+      resist_dispel = 1 savingthrow = 1 savebonus = 0 STR_VAR resource = ~AKWBFAIL~ END
+
+  // This subspell is reached only after the save and MR check succeed in
+  // applying the hostile wrapper. Refresh only Witchbane's own effects.
+  COPY ~%MOD_FOLDER%/Paladin/Inquisitor/spells/c0inq03.spl~ ~override/AKWBFAIL.SPL~
+    LPF DELETE_EFFECT END
+    SAY NAME1 ~Witchbane Strike~
+    WRITE_LONG 0x18 0
+    WRITE_LONG 0x50 0xffffffff
+    WRITE_ASCII 0x3a ~~ #8
+    LPF ALTER_SPELL_HEADER INT_VAR target = 1 speed = 0 STR_VAR icon = ~~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 2 timing = 1 resist_dispel = 2
+      STR_VAR resource = ~AKWBFAIL~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 60 target = 2 parameter1 = 50 parameter2 = 0
+      timing = 0 duration = 12 resist_dispel = 3 END
+
+  COPY_EXISTING ~LUC0MKIL.2DA~ ~override~
+    LPF patch_add_hla STR_VAR 2da_row = ~AKWBANE~ ability = ~GA_AKWBANE~
+      num_allowed = 1 prerequisite = ~AP_C0MK#008~ END
+END ELSE BEGIN
+  PRINT ~Magekiller: Witchbane Strike requires EEex and will not be offered in the HLA choices.~
+END
