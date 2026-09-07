@@ -73,6 +73,10 @@ website above.
 
 ## Changes vs upstream
 
+- **Magekiller (component 7002)** — Imprison Arcana removed from the high-level
+  ability choices; a replacement is deferred. Existing characters who already
+  learned it retain the ability.
+
 - **Berserker Overhaul (component 1003)** — reworked 2026-07-05, full spec in
   `docs/plans/2026-07-05-berserker-rebalance-design.md`. Highlights: all self-harm
   removed (Enrage HP drain + missing-HP damage ladder deleted, Reckless Frenzy
