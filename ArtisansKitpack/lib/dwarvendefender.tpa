@@ -57,13 +57,13 @@ COPY_EXISTING ~C0FIG01.SPL~ ~OVERRIDE/C0DWD01.SPL~
 LPF DELETE_SPELL_HEADER INT_VAR min_level = 14 END
 SAY NAME1 ~Power Attack~
 SAY UNIDENTIFIED_DESC ~Power Attack
-The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Fighter must have 17 or greater Strength to activate this ability.~
+The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Fighter must have 17 or greater Strength to activate this ability.~
 
 COPY_EXISTING ~C0FIG02.SPL~ ~OVERRIDE/C0DWD02.SPL~
 LPF DELETE_SPELL_HEADER INT_VAR min_level = 14 END
 SAY NAME1 ~Expertise~
 SAY UNIDENTIFIED_DESC ~Expertise
-The Fighter focuses on defense at the expense of accuracy, sacrificing 3 points of THAC0 to increase their Armor Class by 3. The Fighter must have 15 or greater Intelligence to activate this ability.~
+The Fighter focuses on defense at the expense of accuracy, sacrificing 2 points of THAC0 to increase their Armor Class by 2. The Fighter must have 15 or greater Intelligence to activate this ability.~
 
 OUTER_PATCH_SAVE kit_description ~%kit_description%~ BEGIN
   REPLACE_TEXTUALLY ~KIT_DISADV_1~ ~
