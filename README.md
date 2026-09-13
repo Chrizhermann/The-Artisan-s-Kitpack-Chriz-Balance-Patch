@@ -73,6 +73,16 @@ website above.
 
 ## Changes vs upstream
 
+- **Paladins: Detect Evil** — restore the level-1 Detect Evil grant removed by
+  the Paladin overhaul. Cavalier, Inquisitor, Undead Hunter, and Mystic Fire
+  inherit it; Artisan's spell already refreshes its own use for at-will
+  casting. Blackguard retains its explicit prohibition. Existing installations
+  can use [AKCB_PALADIN](live-patch/AKCB_PALADIN/README.md). HLA selection
+  limits, including vanilla repeatable Summon Deva, are unchanged.
+
+- **Hivemaster: Insect Shroud** — reduces the aura's spell failure chance
+  from 100% to 25%.
+
 - **Magekiller (component 7002)** — Imprison Arcana removed from the high-level
   ability choices. With EEex installed before Magekiller, **Witchbane Strike**
   replaces it: selectable once after Spellstrike, it grants one use per day.

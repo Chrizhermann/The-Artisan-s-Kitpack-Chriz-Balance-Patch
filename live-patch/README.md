@@ -8,6 +8,15 @@ never-uninstall rule for the main EET install).
 Fresh installs don't need these — install the fork itself instead; the fork's
 `lib/*.tpa` produce the same end state.
 
+## AKCB_PALADIN
+
+Restores the missing level-1 Detect Evil grant for the Paladin overhaul and
+installed Cavalier, Inquisitor, Undead Hunter, and Mystic Fire overhauls.
+Blackguard remains excluded, and all HLA limits retain their existing values.
+Requires AK component 3000. See [installation and existing-character
+instructions](AKCB_PALADIN/README.md). Version 1.0.1 also provides an upgrade
+path from the unreleased combined Detect Evil/Deva build.
+
 ## AKCB_BERSERKER
 
 Berserker Overhaul rebalance (see

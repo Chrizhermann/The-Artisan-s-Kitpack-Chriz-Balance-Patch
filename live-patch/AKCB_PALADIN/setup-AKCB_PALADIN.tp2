@@ -1,0 +1,42 @@
+BACKUP ~AKCB_PALADIN/backup~
+AUTHOR ~Chriz (The Artisan's Kitpack - Chriz Balance Patch)~
+VERSION ~1.0.1~
+
+BEGIN ~Paladin: restore Detect Evil~ DESIGNATED 0
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~ArtisansKitpack/ArtisansKitpack.tp2~ 3000
+  ~This patch requires Artisan's Kitpack: Paladin Overhaul (component 3000).~
+
+// Repair only the parent and installed kits that inherit its erroneous removal.
+// Blackguard deliberately cannot Detect Evil. Divine Champion and Martyr have
+// independent progression tables which already grant it.
+ACTION_DEFINE_ASSOCIATIVE_ARRAY akcb_detect_tables BEGIN
+  3000 => CLABPA01
+  3010 => CLABPA02
+  3003 => CLABPA03
+  3011 => CLABPA04
+  3002 => C0MF
+END
+ACTION_PHP_EACH akcb_detect_tables AS akcb_component => akcb_clab BEGIN
+  ACTION_IF MOD_IS_INSTALLED ~ArtisansKitpack/ArtisansKitpack.tp2~ akcb_component BEGIN
+    COPY_EXISTING ~%akcb_clab%.2da~ ~override~
+      COUNT_2DA_COLS akcb_cols
+      COUNT_2DA_ROWS akcb_cols akcb_rows
+      SET akcb_has_detect = 0
+      FOR (akcb_row = 0; akcb_row < akcb_rows; ++akcb_row) BEGIN
+        FOR (akcb_col = 1; akcb_col < akcb_cols; ++akcb_col) BEGIN
+          READ_2DA_ENTRY akcb_row akcb_col akcb_cols akcb_entry
+          PATCH_IF (~%akcb_entry%~ STRING_EQUAL_CASE ~GA_SPCL212~) BEGIN
+            SET akcb_has_detect = 1
+          END
+        END
+      END
+      PATCH_IF NOT akcb_has_detect BEGIN
+        SPRINT akcb_grant ~AKCB_DETECT GA_SPCL212~
+        FOR (akcb_col = 2; akcb_col < akcb_cols; ++akcb_col) BEGIN
+          SPRINT akcb_grant ~%akcb_grant% ****~
+        END
+        INSERT_2DA_ROW akcb_rows akcb_cols ~%akcb_grant%~
+      END
+    BUT_ONLY
+  END
+END
