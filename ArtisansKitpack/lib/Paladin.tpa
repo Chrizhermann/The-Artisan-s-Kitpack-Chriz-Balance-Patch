@@ -2,7 +2,7 @@ COPY ~%MOD_FOLDER%/Paladin/2DA~ ~OVERRIDE~
 COPY ~%MOD_FOLDER%/Paladin/spells~ ~OVERRIDE~
 
 COPY_EXISTING ~CLABPA01.2DA~ ~OVERRIDE/CLABPA01.2DA~
-	REPLACE_TEXTUALLY ~GA_SPCL212 ~ ~**** ~ // DETECT EVIL
+	// Keep the level-1 Detect Evil grant. SPCL212 already restores its own use.
 
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 3 STR_VAR f_Entry = AP_C0PAL00 END
 	LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 STR_VAR f_Entry = AP_C0PAL00 END
