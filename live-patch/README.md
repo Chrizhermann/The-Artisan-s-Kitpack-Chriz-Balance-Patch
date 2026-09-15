@@ -8,6 +8,26 @@ never-uninstall rule for the main EET install).
 Fresh installs don't need these — install the fork itself instead; the fork's
 `lib/*.tpa` produce the same end state.
 
+## AKCB_FIGHTER_MODALS
+
+Updates the installed Fighter overhaul's Power Attack and Expertise to 2-point
+tradeoffs, or 4 points for their improved versions, while retaining other
+installed effects. Shared kit versions are updated where present. See the
+[requirements and installation instructions](AKCB_FIGHTER_MODALS/README.md).
+
+## AKCB_KIT_DESCRIPTIONS
+
+Component 0 links campaign Class screens to the existing descriptions of
+installed Artisan kits. It handles the Assassin, Archer, Beast Master and
+Avenger name aliases and updates BG1, SoD and BG2 campaign tables when present.
+It changes no kit abilities or saved characters and creates no dialogue strings.
+
+Copy the complete `AKCB_KIT_DESCRIPTIONS` directory to the closed game's root,
+copy a WeiDU 249 executable to `Setup-AKCB_KIT_DESCRIPTIONS.exe`, and run it with
+`--force-install-list 0 --language 0 --use-lang en_US --no-exit-pause`.
+Fully restart the game afterward. This repairs links to descriptions already
+installed; it does not import newer kit rules from another version.
+
 ## AKCB_PALADIN
 
 Restores the missing level-1 Detect Evil grant for the Paladin overhaul and

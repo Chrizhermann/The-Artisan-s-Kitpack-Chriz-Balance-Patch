@@ -1,4 +1,4 @@
-// CHRIZ BALANCE: Cloak of Shadows is an activated, three-round window.
+// CHRIZ BALANCE: Cloak of Shadows is an activated, four-round window.
 // The existing invisibility-source-independent condition remains in force.
 // SPL flags and native opcode references:
 // https://gibberlings3.github.io/iesdp/file_formats/ie_formats/spl_v1.htm
@@ -19,7 +19,7 @@ BUT_ONLY
 // removes these effects if the assassin becomes invisible late in the window.
 COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#02.spl~ ~override~
   LPF ALTER_EFFECT
-    INT_VAR check_globals = 1 check_headers = 1 timing = 0 duration = 18
+    INT_VAR check_globals = 1 check_headers = 1 timing = 0 duration = 24
   END
   READ_LONG 0x64 akcb_cs_payload_header
   WRITE_SHORT (akcb_cs_payload_header + 0x26) 0 // direct opcode 326 effects-list delivery
@@ -78,20 +78,20 @@ COPY ~%MOD_FOLDER%/Thief/Assassin/spells/c0as#i5.spl~ ~override~
   // helper removes this checker first, then clears its remaining protections.
   LPF ADD_SPELL_EFFECT
     INT_VAR opcode = 272 target = 1 parameter1 = 1 parameter2 = 3
-            timing = 0 duration = 18 probability1 = 100 resist_dispel = 0
+            timing = 0 duration = 24 probability1 = 100 resist_dispel = 0
     STR_VAR resource = ~AKCBCSCK~
   END
   LPF ADD_SPELL_EFFECT
-    INT_VAR opcode = 146 target = 1 parameter2 = 1 timing = 4 duration = 18
+    INT_VAR opcode = 146 target = 1 parameter2 = 1 timing = 4 duration = 24
             probability1 = 100 resist_dispel = 0
     STR_VAR resource = ~AKCBCSEN~
   END
   SAY NAME1 ~Cloak of Shadows~
   SAY NAME2 ~Cloak of Shadows~
   SAY UNIDENTIFIED_DESC ~Cloak of Shadows
-For three rounds after activating this ability, the assassin is undetectable and untargetable by enemies while hiding or Invisible, even by creatures that normally see through invisibility. The assassin can enter or re-enter invisibility during this time. Activating the ability does not grant or break invisibility.
+For four rounds after activating this ability, the assassin is undetectable and untargetable by enemies while hiding or Invisible, even by creatures that normally see through invisibility. The assassin can enter or re-enter invisibility during this time. Activating the ability does not grant or break invisibility.
 
 Casting Time: 0
-Duration: 3 rounds
+Duration: 4 rounds
 
 The assassin gains one use per day at 10th level and an additional use every five levels thereafter, to a maximum of four uses per day at 25th level.~

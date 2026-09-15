@@ -1,3 +1,5 @@
 
 *.zip
 *.DEBUG
+__pycache__/
+*.py[cod]
