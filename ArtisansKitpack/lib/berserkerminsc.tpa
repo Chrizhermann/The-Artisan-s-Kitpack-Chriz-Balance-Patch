@@ -63,7 +63,7 @@ Once the duration has ended, the Rashemi berserker becomes Winded, reducing his 
 
 – 5th level: May use the Power Attack modal ability.
 
-POWER ATTACK: The Berserker forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Berserker must have 17 or greater Strength to activate this ability.
+POWER ATTACK: The Berserker forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Berserker must have 17 or greater Strength to activate this ability.
 
 – 8th level: Gains Unbreakable Will.
 
@@ -73,7 +73,7 @@ UNBREAKABLE WILL: Rashemi berserkers have tremendous willpower. The berserker pe
 
 UNSTOPPABLE RAGE: The Rashemi berserker has become a juggernaut while Enraged, truly a being to be feared. The berserker is immune to all movement-hindering effects and Imprisonment while Enraged.
 
-– 14th level: May use Improved Power Attack, which provide 6 points to the original ability's bonuses and penalties.
+– 14th level: May use Improved Power Attack, which provides 4 points to the original ability's bonuses and penalties.
 – 16th level: Gains Tireless Rage.
 
 TIRELESS RAGE: The Rashemi berserker is no longer Winded and will not suffer damage after his rage has ended.
@@ -207,7 +207,7 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_ST
 COPY_EXISTING ~C0FIG01.SPL~ OVERRIDE
 SAY NAME1 ~Power Attack~
 SAY UNIDENTIFIED_DESC ~Power Attack
-The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Fighter must have 17 or greater Strength to activate this ability.~
+The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Fighter must have 17 or greater Strength to activate this ability.~
 	
 COPY_EXISTING ~C0FIG01a.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_STR_REF (~Power Attack Active~) END

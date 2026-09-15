@@ -167,7 +167,7 @@ ACTION_FOR_EACH description IN
           SPRINT old_barbarian ~– 11th level: Gains 10% resistance to crushing, slashing, piercing, and missile damage. An additional 5% is gained at levels 15 and 19.~
           SPRINT new_barbarian ~– 5th level: May use the Power Attack modal ability.
 
-POWER ATTACK: The Barbarian forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Barbarian must have 17 or greater Strength to activate this ability.
+POWER ATTACK: The Barbarian forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Barbarian must have 17 or greater Strength to activate this ability.
 
 – 6th level: May use the Rapid Shot modal ability.
 
@@ -175,7 +175,7 @@ RAPID SHOT: The Barbarian may make an additional ranged attack per round at a -4
 
 – 11th level: Gains 10% resistance to crushing, slashing, piercing, and missile damage. An additional 5% is gained at levels 15 and 19.
 – 12th level: Improved Rapid Shot: The Barbarian’s penalty to hit while Rapid Shot is active is reduced to -2.
-– 14th level: May use Improved Power Attack, which provide 6 points to the original ability's bonuses and penalties.~
+– 14th level: May use Improved Power Attack, which provides 4 points to the original ability's bonuses and penalties.~
 
           GET_STRREF %barbarian_desc% barbarian_text
           INNER_PATCH_SAVE barbarian_text ~%barbarian_text%~ BEGIN
@@ -212,16 +212,16 @@ CLASS FEATURES:
 – May achieve Specialization (two slots) in any fighting style and allocate three slots in Two-Weapon Style.
 – 5th level: May use the Power Attack and Expertise modal abilities. Only one of the two may be activated at any time.
 
-POWER ATTACK: The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Fighter must have 17 or greater Strength to activate this ability.
+POWER ATTACK: The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Fighter must have 17 or greater Strength to activate this ability.
 
-EXPERTISE: The Fighter focuses on defense at the expense of accuracy, sacrificing 3 points of THAC0 to increase their Armor Class by 3. The Fighter must have 15 or greater Intelligence to activate this ability.
+EXPERTISE: The Fighter focuses on defense at the expense of accuracy, sacrificing 2 points of THAC0 to increase their Armor Class by 2. The Fighter must have 15 or greater Intelligence to activate this ability.
 
 – 6th level: May use the Rapid Shot modal ability.
 
 RAPID SHOT: The Fighter may make an additional ranged attack per round at a -4 penalty to hit.
 
 – 12th level: Improved Rapid Shot: The Fighter’s penalty to hit while Rapid Shot is active is reduced to -2.
-– 14th level: May use Improved Power Attack and Improved Expertise, which provide 6 points to the original abilities' bonuses and penalties.
+– 14th level: May use Improved Power Attack and Improved Expertise, which provide 4 points to the original abilities' bonuses and penalties.
 – 16th level: Gains Specialization in all weapons that the Fighter is not already Specialized or greater in.
 – 20th level: Improved Initiative: The Fighter gains a bonus half attack per round.
 
@@ -446,7 +446,7 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_ST
 COPY_EXISTING ~C0FIG01.SPL~ OVERRIDE
 SAY NAME1 ~Power Attack~
 SAY UNIDENTIFIED_DESC ~Power Attack
-The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Fighter must have 17 or greater Strength to activate this ability.~
+The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Fighter must have 17 or greater Strength to activate this ability.~
 	
 COPY_EXISTING ~C0FIG01a.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_STR_REF (~Power Attack Active~) END
@@ -464,7 +464,7 @@ LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_ST
 COPY_EXISTING ~C0FIG02.SPL~ OVERRIDE
 SAY NAME1 ~Expertise~
 SAY UNIDENTIFIED_DESC ~Expertise
-The Fighter focuses on defense at the expense of accuracy, sacrificing 3 points of THAC0 to increase their Armor Class by 3. The Fighter must have 15 or greater Intelligence to activate this ability.~
+The Fighter focuses on defense at the expense of accuracy, sacrificing 2 points of THAC0 to increase their Armor Class by 2. The Fighter must have 15 or greater Intelligence to activate this ability.~
 
 COPY_EXISTING ~C0FIG02a.SPL~ OVERRIDE
 LPF ALTER_EFFECT INT_VAR match_opcode = 139 opcode = 330 parameter1 = RESOLVE_STR_REF (~Expertise Active~) END

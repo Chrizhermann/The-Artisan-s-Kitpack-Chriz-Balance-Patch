@@ -83,6 +83,11 @@ website above.
 - **Hivemaster: Insect Shroud** — reduces the aura's spell failure chance
   from 100% to 25%.
 
+- **Power Attack and Expertise** - Regular versions now trade a 2-point
+  THAC0 penalty for 2 melee damage or 2 AC against each physical damage type.
+  Improved versions use 4 points for both the bonus and penalty. Shared kit
+  versions, including Minsc's standalone Power Attack, use the same values.
+
 - **Magekiller (component 7002)** — Imprison Arcana removed from the high-level
   ability choices. With EEex installed before Magekiller, **Witchbane Strike**
   replaces it: selectable once after Spellstrike, it grants one use per day.

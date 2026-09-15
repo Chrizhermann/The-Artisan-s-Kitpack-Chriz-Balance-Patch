@@ -11,7 +11,7 @@ ACTION_IF FILE_EXISTS_IN_GAME ~C0FIG01.SPL~ BEGIN
 COPY_EXISTING ~C0FIG01.SPL~ ~OVERRIDE~
 SAY NAME1 ~^0xFF100001 ^-Power Attack~
 SAY UNIDENTIFIED_DESC ~Power Attack
-The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Fighter must have 17 or greater Strength to activate this ability.~
+The Fighter forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Fighter must have 17 or greater Strength to activate this ability.~
 END
 
 ACTION_IF FILE_EXISTS_IN_GAME ~C0FIG02.SPL~ BEGIN

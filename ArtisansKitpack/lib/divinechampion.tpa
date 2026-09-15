@@ -180,16 +180,16 @@ ACTION_FOR_EACH description IN
           SPRINT old_divinechampion ~Disadvantages:~
           SPRINT new_divinechampion ~– 5th level: May use the Power Attack and Expertise modal abilities. Only one of the two may be activated at any time.
 
-POWER ATTACK: The Divine Champion forgoes accuracy for heavier, more damaging blows, sacrificing 3 points of melee THAC0 to increase their melee damage by 3. The Divine Champion must have 17 or greater Strength to activate this ability.
+POWER ATTACK: The Divine Champion forgoes accuracy for heavier, more damaging blows, sacrificing 2 points of melee THAC0 to increase their melee damage by 2. The Divine Champion must have 17 or greater Strength to activate this ability.
 
-EXPERTISE: The Divine Champion focuses on defense at the expense of accuracy, sacrificing 3 points of THAC0 to increase their Armor Class by 3. The Divine Champion must have 15 or greater Intelligence to activate this ability.
+EXPERTISE: The Divine Champion focuses on defense at the expense of accuracy, sacrificing 2 points of THAC0 to increase their Armor Class by 2. The Divine Champion must have 15 or greater Intelligence to activate this ability.
 
 – 6th level: May use the Rapid Shot modal ability.
 
 RAPID SHOT: The Divine Champion may make an additional ranged attack per round at a -4 penalty to hit.
 
 – 12th level: Improved Rapid Shot: The Divine Champion’s penalty to hit while Rapid Shot is active is reduced to -2.
-– 14th level: May use Improved Power Attack and Improved Expertise, which provide 6 points to the original abilities' bonuses and penalties.
+– 14th level: May use Improved Power Attack and Improved Expertise, which provide 4 points to the original abilities' bonuses and penalties.
 
 Disadvantages:~
           GET_STRREF %divinechampion_desc% divinechampion_text
