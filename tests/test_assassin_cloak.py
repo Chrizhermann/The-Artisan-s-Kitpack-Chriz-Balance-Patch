@@ -176,11 +176,11 @@ class AssassinCloakTests(unittest.TestCase):
         for effect in (reset, clear_payload, immediate):
             self.assertEqual((1, 0), (effect.timing, effect.duration))
         self.assertEqual((16, condition_row), (immediate.parameter1, immediate.parameter2))
-        self.assertEqual((1, 3, 0, 18), (
+        self.assertEqual((1, 3, 0, 24), (
             poller.parameter1, poller.parameter2, poller.timing, poller.duration,
         ))
-        self.assertEqual((1, 4, 18), (deadline.parameter2, deadline.timing, deadline.duration))
-        self.assertEqual(poller.duration, deadline.duration)  # full three-round window
+        self.assertEqual((1, 4, 24), (deadline.parameter2, deadline.timing, deadline.duration))
+        self.assertEqual(poller.duration, deadline.duration)  # full four-round window
         for effect in main.effects:
             self.assertEqual(1, effect.target)
             self.assertEqual(0, effect.raw[13])  # no dispel/MR interference
@@ -216,8 +216,8 @@ class AssassinCloakTests(unittest.TestCase):
         self.assertEqual(len(original_payload.effects), len(payload.effects))
         self.assertTrue(any(effect.opcode == 69 for effect in payload.effects))
         for before, after in zip(original_payload.effects, payload.effects):
-            self.assertEqual((0, 18), (after.timing, after.duration))
-            expected = before.raw[:12] + b"\0" + before.raw[13:14] + struct.pack("<I", 18) + before.raw[18:]
+            self.assertEqual((0, 24), (after.timing, after.duration))
+            expected = before.raw[:12] + b"\0" + before.raw[13:14] + struct.pack("<I", 24) + before.raw[18:]
             self.assertEqual(expected, after.raw)
         self.assertNotIn(20, [effect.opcode for spell in (main, expiry, payload) for effect in spell.effects])
 
@@ -237,7 +237,7 @@ class AssassinCloakTests(unittest.TestCase):
             self.assertEqual(game.source_spells[resource], output[resource])
 
         description = read_tlk_string(game.tlk, struct.unpack_from("<I", main.raw, 0x50)[0])
-        for phrase in ("three rounds", "while hiding or Invisible", "does not grant or break invisibility",
+        for phrase in ("four rounds", "Duration: 4 rounds", "while hiding or Invisible", "does not grant or break invisibility",
                        "Casting Time: 0", "10th level", "four uses per day at 25th level"):
             self.assertIn(phrase, description)
         self.assertEqual("Cloak of Shadows", read_tlk_string(game.tlk, struct.unpack_from("<I", main.raw, 8)[0]))

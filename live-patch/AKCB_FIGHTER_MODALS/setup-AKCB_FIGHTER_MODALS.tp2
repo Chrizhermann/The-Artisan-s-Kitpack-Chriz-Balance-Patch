@@ -1,0 +1,230 @@
+BACKUP ~AKCB_FIGHTER_MODALS/backup~
+AUTHOR ~Chriz (The Artisan's Kitpack - Chriz Balance Patch)~
+VERSION ~1.0.0~
+
+// Narrow retrofit of commit 4602fd1. Never copy a source SPL over an installed
+// resource: retain portrait icons, localized references and downstream effects.
+ALWAYS
+DEFINE_PATCH_FUNCTION akfm_payload
+  INT_VAR old_value = 3 new_value = 2 power_attack = 1
+BEGIN
+  PATCH_IF SOURCE_SIZE < 0x72 BEGIN
+    PATCH_FAIL ~AKCB_FIGHTER_MODALS: truncated SPL.~
+  END
+  READ_ASCII 0 signature (8)
+  PATCH_IF NOT (~%signature%~ STRING_EQUAL ~SPL V1  ~) BEGIN
+    PATCH_FAIL ~AKCB_FIGHTER_MODALS: expected SPL V1.~
+  END
+  READ_LONG 0x64 header_offset
+  READ_SHORT 0x68 header_count
+  READ_LONG 0x6a effect_offset
+  PATCH_IF (header_count != 1 OR header_offset < 0x72 OR header_offset + header_count * 0x28 > effect_offset OR
+            effect_offset > SOURCE_SIZE) BEGIN
+    PATCH_FAIL ~AKCB_FIGHTER_MODALS: invalid SPL offsets.~
+  END
+  SET effect_count = (SOURCE_SIZE - effect_offset) / 0x30
+  PATCH_IF effect_offset + effect_count * 0x30 != SOURCE_SIZE BEGIN
+    PATCH_FAIL ~AKCB_FIGHTER_MODALS: unexpected trailing SPL data.~
+  END
+  READ_SHORT 0x6e first_global
+  READ_SHORT 0x70 global_count
+  PATCH_IF first_global + global_count > effect_count BEGIN
+    PATCH_FAIL ~AKCB_FIGHTER_MODALS: casting effects out of bounds.~
+  END
+  FOR (h = 0; h < header_count; ++h) BEGIN
+    READ_SHORT (header_offset + h * 0x28 + 0x1e) count
+    READ_SHORT (header_offset + h * 0x28 + 0x20) first
+    PATCH_IF first + count > effect_count BEGIN
+      PATCH_FAIL ~AKCB_FIGHTER_MODALS: ability effects out of bounds.~
+    END
+  END
+
+  // Each expected stat effect must occur exactly once. Accept the committed
+  // old value or the new value, and leave every other effect byte untouched.
+  CLEAR_ARRAY akfm_stats
+  PATCH_IF power_attack BEGIN
+    DEFINE_ASSOCIATIVE_ARRAY akfm_stats BEGIN 284, 0 => ~-1~ 73, 0 => 1 286, 0 => ~-1~ END
+  END ELSE BEGIN
+    DEFINE_ASSOCIATIVE_ARRAY akfm_stats BEGIN 54, 0 => ~-1~ 0, 1 => 1 0, 2 => 1 0, 4 => 1 0, 8 => 1 END
+  END
+  PHP_EACH akfm_stats AS stat => sign BEGIN
+    SET seen = 0
+    FOR (i = 0; i < effect_count; ++i) BEGIN
+      SET p = effect_offset + i * 0x30
+      READ_SHORT p opcode
+      READ_SLONG (p + 4) value
+      READ_LONG (p + 8) mode
+      PATCH_IF opcode = stat_0 AND mode = stat_1 BEGIN
+        SET seen += 1
+        READ_BYTE (p + 2) target
+        READ_BYTE (p + 0x0c) timing
+        READ_LONG (p + 0x0e) duration
+        READ_BYTE (p + 0x12) probability1
+        READ_BYTE (p + 0x13) probability2
+        READ_SHORT (header_offset + 0x1e) ability_effect_count
+        READ_SHORT (header_offset + 0x20) ability_first_effect
+        PATCH_IF (target != 2 OR timing != 9 OR duration != 0 OR
+                  probability1 != 100 OR probability2 != 0 OR
+                  i < ability_first_effect OR i >= ability_first_effect + ability_effect_count) BEGIN
+          PATCH_FAIL ~AKCB_FIGHTER_MODALS: unexpected modal stat effect shape.~
+        END
+        PATCH_IF value != sign * old_value AND value != sign * new_value BEGIN
+          PATCH_FAIL ~AKCB_FIGHTER_MODALS: unexpected modal stat value.~
+        END
+        WRITE_LONG (p + 4) (sign * new_value)
+      END
+    END
+    PATCH_IF seen != 1 BEGIN
+      PATCH_FAIL ~AKCB_FIGHTER_MODALS: missing or duplicate modal stat effect.~
+    END
+  END
+END
+END
+
+BEGIN ~Fighter modals: Power Attack and Expertise use 2/4 tradeoffs~ DESIGNATED 0
+REQUIRE_PREDICATE MOD_IS_INSTALLED ~ArtisansKitpack/ArtisansKitpack.TP2~ 1100
+  ~Install the Artisan Fighter overhaul (component 1100) before this tail patch.~
+
+COPY_EXISTING ~C0FIG01A.SPL~ ~override~
+  LPF akfm_payload INT_VAR old_value = 3 new_value = 2 power_attack = 1 END
+BUT_ONLY
+COPY_EXISTING ~C0FIG01B.SPL~ ~override~
+  LPF akfm_payload INT_VAR old_value = 6 new_value = 4 power_attack = 1 END
+BUT_ONLY
+COPY_EXISTING ~C0FIG02A.SPL~ ~override~
+  LPF akfm_payload INT_VAR old_value = 3 new_value = 2 power_attack = 0 END
+BUT_ONLY
+COPY_EXISTING ~C0FIG02B.SPL~ ~override~
+  LPF akfm_payload INT_VAR old_value = 6 new_value = 4 power_attack = 0 END
+BUT_ONLY
+
+// Resolve installed descriptions. Optional Dwarven Defender entry spells and
+// kit rows may be absent. Rashemi Minsc shares the C0FIG01 payload chain.
+ACTION_CLEAR_ARRAY akfm_refs
+ACTION_FOR_EACH spell IN C0FIG01 C0FIG02 C0DWD01 C0DWD02 BEGIN
+  ACTION_IF (FILE_EXISTS_IN_GAME ~%spell%.SPL~) BEGIN
+  COPY_EXISTING ~%spell%.SPL~ ~override~
+    PATCH_IF SOURCE_SIZE < 0x54 BEGIN
+      PATCH_FAIL ~AKCB_FIGHTER_MODALS: truncated modal entry spell.~
+    END
+    READ_SLONG 0x50 description
+    PATCH_IF description < 0 BEGIN
+      PATCH_FAIL ~AKCB_FIGHTER_MODALS: modal description is missing.~
+    END
+    INNER_ACTION BEGIN OUTER_SET $akfm_refs(~%description%~) = 1 END
+  BUT_ONLY
+  END ELSE ACTION_IF (~%spell%~ STRING_EQUAL_CASE ~C0FIG01~ OR ~%spell%~ STRING_EQUAL_CASE ~C0FIG02~) BEGIN
+    FAIL ~AKCB_FIGHTER_MODALS: required modal entry %spell% is missing.~
+  END
+END
+
+ACTION_FOR_EACH kit IN BARBARIAN C0DC C0TBM BEGIN
+  OUTER_SET found = 0
+  COPY_EXISTING ~KITLIST.2DA~ ~override~
+    COUNT_2DA_COLS cols
+    COUNT_2DA_ROWS cols rows
+    FOR (row = 0; row < rows; ++row) BEGIN
+      READ_2DA_ENTRY row 1 cols symbol
+      PATCH_IF ~%symbol%~ STRING_EQUAL_CASE ~%kit%~ BEGIN
+        READ_2DA_ENTRY row 4 cols description
+        PATCH_IF NOT IS_AN_INT ~%description%~ BEGIN
+          PATCH_FAIL ~AKCB_FIGHTER_MODALS: invalid kit description.~
+        END
+        PATCH_IF description < 0 BEGIN
+          PATCH_FAIL ~AKCB_FIGHTER_MODALS: missing kit description.~
+        END
+        SET found += 1
+        INNER_ACTION BEGIN
+          ACTION_IF NOT VARIABLE_IS_SET $akfm_refs(~%description%~) BEGIN
+            OUTER_SET $akfm_refs(~%description%~) = 0
+          END
+        END
+      END
+    END
+  BUT_ONLY
+  ACTION_IF found > 1 BEGIN
+    FAIL ~AKCB_FIGHTER_MODALS: duplicate installed %kit% kit rows.~
+  END
+END
+
+ACTION_FOR_EACH table IN CLASTEXT BGCLATXT SODCLTXT BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%table%.2DA~ BEGIN
+    OUTER_SET found = 0
+    COPY_EXISTING ~%table%.2DA~ ~override~
+      COUNT_2DA_COLS cols
+      COUNT_2DA_ROWS cols rows
+      FOR (row = 0; row < rows; ++row) BEGIN
+        READ_2DA_ENTRY row 0 cols symbol
+        PATCH_IF (~%symbol%~ STRING_EQUAL_CASE ~FIGHTER~ OR
+                  ~%symbol%~ STRING_EQUAL_CASE ~BARBARIAN~ OR
+                  ~%symbol%~ STRING_EQUAL_CASE ~C0DC~ OR
+                  ~%symbol%~ STRING_EQUAL_CASE ~C0TBM~) BEGIN
+          READ_2DA_ENTRY row 4 cols description
+          PATCH_IF NOT IS_AN_INT ~%description%~ BEGIN
+            PATCH_FAIL ~AKCB_FIGHTER_MODALS: invalid Fighter description.~
+          END
+          PATCH_IF description < 0 BEGIN
+            PATCH_FAIL ~AKCB_FIGHTER_MODALS: missing Fighter description.~
+          END
+          PATCH_IF ~%symbol%~ STRING_EQUAL_CASE ~FIGHTER~ BEGIN SET found += 1 END
+          INNER_ACTION BEGIN
+            ACTION_IF ~%symbol%~ STRING_EQUAL_CASE ~FIGHTER~ BEGIN
+              OUTER_SET $akfm_refs(~%description%~) = 1
+            END ELSE ACTION_IF NOT VARIABLE_IS_SET $akfm_refs(~%description%~) BEGIN
+              OUTER_SET $akfm_refs(~%description%~) = 0
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF found != 1 BEGIN
+      FAIL ~AKCB_FIGHTER_MODALS: expected one Fighter row in %table%.~
+    END
+  END
+END
+
+ACTION_PHP_EACH akfm_refs AS ref => required BEGIN
+  ACTION_GET_STRREF ref text
+  // Fighter 1100 itself may add Barbarian modals without the Barbarian
+  // overhaul. Inspect actual optional descriptions: preserve nonmodal text,
+  // but require recognized wording wherever a modal is described.
+  ACTION_IF (required OR
+             ~%text%~ STRING_CONTAINS_REGEXP ~Power Attack\|Expertise\|sacrificing [0-9]+ points~ = 0) BEGIN
+  OUTER_TEXT_SPRINT original ~%text%~
+  ACTION_IF NOT (~%text%~ STRING_CONTAINS_REGEXP ~sacrificing [23] points~ = 0) BEGIN
+    FAIL ~AKCB_FIGHTER_MODALS: description %ref% does not contain the expected modal text.~
+  END
+  OUTER_PATCH ~%text%~ BEGIN
+    REPLACE_TEXTUALLY ~sacrificing 3 points of melee THAC0 to increase their melee damage by 3\.~
+      ~sacrificing 2 points of melee THAC0 to increase their melee damage by 2.~
+    REPLACE_TEXTUALLY ~sacrificing 3 points of THAC0 to increase their Armor Class by 3\.~
+      ~sacrificing 2 points of THAC0 to increase their Armor Class by 2.~
+    REPLACE_TEXTUALLY ~which provide 6 points to the original ability's bonuses and penalties\.~
+      ~which provides 4 points to the original ability's bonuses and penalties.~
+    REPLACE_TEXTUALLY ~which provide 6 points to the original abilities' bonuses and penalties\.~
+      ~which provide 4 points to the original abilities' bonuses and penalties.~
+    // OUTER_PATCH_SAVE evaluates the entire resulting buffer a second time.
+    // READ_ASCII preserves literal percent tokens inside installed prose.
+    READ_ASCII 0 text (BUFFER_LENGTH)
+  END
+  ACTION_IF ~%text%~ STRING_CONTAINS_REGEXP ~sacrificing 3 points\|provide 6 points to the original~ = 0 BEGIN
+    FAIL ~AKCB_FIGHTER_MODALS: unrecognized old wording remains at description %ref%.~
+  END
+  // Remove all supported final wording from a temporary copy. Any remaining
+  // modal tradeoff wording is unsupported and must roll back the component.
+  OUTER_PATCH ~%text%~ BEGIN
+    REPLACE_TEXTUALLY ~sacrificing 2 points of melee THAC0 to increase their melee damage by 2\.~ ~~
+    REPLACE_TEXTUALLY ~sacrificing 2 points of THAC0 to increase their Armor Class by 2\.~ ~~
+    REPLACE_TEXTUALLY ~which provides 4 points to the original ability's bonuses and penalties\.~ ~~
+    REPLACE_TEXTUALLY ~which provide 4 points to the original abilities' bonuses and penalties\.~ ~~
+    READ_ASCII 0 remainder (BUFFER_LENGTH)
+  END
+  ACTION_IF ~%remainder%~ STRING_CONTAINS_REGEXP ~sacrificing [0-9]+ points\|provide[s]? [0-9]+ points to the original~ = 0 BEGIN
+    FAIL ~AKCB_FIGHTER_MODALS: unsupported English modal wording at description %ref%.~
+  END
+  ACTION_IF NOT (~%text%~ STRING_EQUAL ~%original%~) BEGIN
+    STRING_SET_EVALUATE ref ~%text%~
+  END
+  END
+END
+PRINT ~Fighter modal tradeoffs updated to 2/4; shared Minsc and Dwarven Defender chains preserved. Restart the game and turn active modals off and on.~

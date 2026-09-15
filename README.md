@@ -73,6 +73,11 @@ website above.
 
 ## Changes vs upstream
 
+- **Class descriptions** — campaign Class screens use the installed Kitpack
+  descriptions, including Assassin, Archer, Beast Master, and Avenger aliases.
+  Existing installations can apply the `AKCB_KIT_DESCRIPTIONS` component in
+  [live-patch](live-patch/README.md).
+
 - **Paladins: Detect Evil** — restore the level-1 Detect Evil grant removed by
   the Paladin overhaul. Cavalier, Inquisitor, Undead Hunter, and Mystic Fire
   inherit it; Artisan's spell already refreshes its own use for at-will
@@ -82,6 +87,11 @@ website above.
 
 - **Hivemaster: Insect Shroud** — reduces the aura's spell failure chance
   from 100% to 25%.
+
+- **Power Attack and Expertise** - Regular versions now trade a 2-point
+  THAC0 penalty for 2 melee damage or 2 AC against each physical damage type.
+  Improved versions use 4 points for both the bonus and penalty. Shared kit
+  versions, including Minsc's standalone Power Attack, use the same values.
 
 - **Magekiller (component 7002)** — Imprison Arcana removed from the high-level
   ability choices. With EEex installed before Magekiller, **Witchbane Strike**
@@ -106,7 +116,7 @@ website above.
   Preparation is removed entirely. Death Attack keeps its death effect and
   five-round window but no longer guarantees a critical hit. The kit's Charisma
   and starting Reputation penalties are removed.
-  Cloak of Shadows is an activated innate with casting time 0 and a three-round
+  Cloak of Shadows is an activated innate with casting time 0 and a four-round
   duration. It grants protection while hidden or invisible, without granting
   invisibility itself. Daily uses are 1/2/3/4 at levels 10/15/20/25.
 

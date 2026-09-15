@@ -212,7 +212,7 @@ class AssassinBalanceTests(unittest.TestCase):
         self.assertNotIn("PREPARATION", description.upper())
         self.assertNotIn("penalty to Charisma", description)
         self.assertNotIn("penalty to starting Reputation", description)
-        for retained in ("ENHANCED BACKSTAB:", "CLOAK OF SHADOWS:", "May not Set Traps.", "10 skill points"):
+        for retained in ("ENHANCED BACKSTAB:", "CLOAK OF SHADOWS:", "lasts for four rounds", "before the four rounds expire", "May not Set Traps.", "10 skill points"):
             self.assertIn(retained, description)
         self.assertEqual(game.before["UNRELATED.IDS"], output["UNRELATED.IDS"])
         process = game.run("--force-uninstall-list")
