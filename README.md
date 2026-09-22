@@ -88,6 +88,23 @@ website above.
 - **Hivemaster: Insect Shroud** — reduces the aura's spell failure chance
   from 100% to 25%.
 
+- **Archer Overhaul (component 2010)** — removes Manyshot's extra projectiles,
+  Farsighted, Sniper, and Greater Called Shot; Hardiness stays available.
+  With EEex installed first, **Aimed Shot** begins at level 7: the next arrow
+  or bolt fired deals 50% more physical damage, rounded down, then
+  recharges for six seconds. A miss spends the bonus. There are no later
+  Manyshot upgrades, extra ammunition effects, or new immunity bypasses.
+  Without EEex, the other changes apply and Aimed Shot is omitted.
+  **Called Shot** lasts 10 seconds. Hits impose a 25% movement penalty for
+  two rounds on a failed save vs. Death, with no save penalty; reapplication
+  refreshes instead of stacking. From level 16 it also grants +2 missile
+  weapon damage during the activation, independent of the save. Dexterity
+  halving and APR reduction are removed. Uses begin at level 4, then increase
+  every four levels. Rapid Shot and the existing kit restrictions remain.
+  The old late-install Manyshot component (20101) now only removes legacy
+  item effects; Aimed Shot automatically covers later mod-added bows and
+  crossbows. See the [implementation and playtest notes](docs/plans/2026-09-22-archer-rebalance.md).
+
 - **Power Attack and Expertise** - Regular versions now trade a 2-point
   THAC0 penalty for 2 melee damage or 2 AC against each physical damage type.
   Improved versions use 4 points for both the bonus and penalty. Shared kit

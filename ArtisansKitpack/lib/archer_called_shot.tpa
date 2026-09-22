@@ -1,0 +1,133 @@
+// CHRIZ BALANCE: Called Shot only impairs movement, with a save on each hit.
+// Gate the whole payload, including its refresh, behind the existing op146
+// ranged-hit dispatcher. A successful save must not remove an earlier slow.
+// https://gibberlings3.github.io/iesdp/opcodes/bgee.htm#op249
+// WeiDU's effect-insertion macros expect casting effects before ability effects.
+// Move that indexed slice first if needed, retaining every original effect.
+DEFINE_PATCH_FUNCTION akcb_cs_globals_first BEGIN
+  READ_LONG 0x64 akcb_cs_g_headers
+  READ_SHORT 0x68 akcb_cs_g_header_count
+  READ_LONG 0x6a akcb_cs_g_effects
+  READ_SHORT 0x6e akcb_cs_g_first
+  READ_SHORT 0x70 akcb_cs_g_count
+  PATCH_IF (akcb_cs_g_count > 0) AND (akcb_cs_g_first > 0) BEGIN
+    READ_ASCII (akcb_cs_g_effects + akcb_cs_g_first * 0x30) akcb_cs_g_bytes (akcb_cs_g_count * 0x30)
+    DELETE_BYTES (akcb_cs_g_effects + akcb_cs_g_first * 0x30) (akcb_cs_g_count * 0x30)
+    INSERT_BYTES akcb_cs_g_effects (akcb_cs_g_count * 0x30)
+    WRITE_ASCIIE akcb_cs_g_effects ~%akcb_cs_g_bytes%~ (akcb_cs_g_count * 0x30)
+    WRITE_SHORT 0x6e 0
+    FOR (akcb_cs_g_i = 0; akcb_cs_g_i < akcb_cs_g_header_count; ++akcb_cs_g_i) BEGIN
+      SET akcb_cs_g_header = akcb_cs_g_headers + akcb_cs_g_i * 0x28
+      READ_SHORT (akcb_cs_g_header + 0x20) akcb_cs_g_index
+      PATCH_IF akcb_cs_g_index < akcb_cs_g_first BEGIN
+        WRITE_SHORT (akcb_cs_g_header + 0x20) (akcb_cs_g_index + akcb_cs_g_count)
+      END
+    END
+  END
+END
+
+COPY_EXISTING ~C0ARCCS1.EFF~ ~override~
+  WRITE_LONG 0x40 4 // save vs. Death negates the cast of the payload
+  WRITE_LONG 0x44 0 // no saving-throw modifier
+
+COPY_EXISTING ~C0ARCCS1.SPL~ ~override~
+  LPF akcb_cs_globals_first END
+  LPF DELETE_EFFECT INT_VAR match_opcode = 15 END // Dexterity halving
+  LPF DELETE_EFFECT INT_VAR match_opcode = 1 END // lost attack per round
+  LPF DELETE_EFFECT INT_VAR match_opcode = 176 END // old severe slow
+  LPF DELETE_EFFECT INT_VAR match_opcode = 89 END // missile-resistance bypass
+  LPF DELETE_EFFECT INT_VAR match_opcode = 12 END // separate unmitigated damage
+  LPF DELETE_EFFECT INT_VAR match_opcode = 142 match_parameter2 = 91 END
+  LPF DELETE_EFFECT INT_VAR match_opcode = 142 match_parameter2 = 41 END
+  // The original first op321 clears only the previous C0ARCCS1 payload.
+  // Every tier now uses the same modest slow. Standard movement opcode126
+  // permits normal movement immunities; mode5 preserves other movement modifiers.
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 126 target = 2 parameter1 = 75 parameter2 = 5
+            timing = 0 duration = 12 resist_dispel = 0 probability1 = 100
+            insert_point = ~-1~
+  END
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 142 target = 2 parameter2 = 41
+            timing = 0 duration = 12 resist_dispel = 0 probability1 = 100
+            insert_point = ~-1~
+  END
+
+COPY_EXISTING ~SPCL121.SPL~ ~override~
+  LPF akcb_cs_globals_first END
+  // Add a level16 variant without reconstructing the original spell metadata,
+  // casting effects, or ranged-hit/visual effects. Follow effect indexes so
+  // casting features may precede or follow the ability's effect slice.
+  READ_LONG 0x64 akcb_cs_abilities
+  READ_SHORT 0x68 akcb_cs_ability_count
+  READ_LONG 0x6a akcb_cs_effects
+  READ_SHORT 0x6e akcb_cs_global_first
+  READ_SHORT 0x70 akcb_cs_global_count
+  SET akcb_cs_effect_end = akcb_cs_global_first + akcb_cs_global_count
+  SET akcb_cs_level16 = (0 - 1)
+  SET akcb_cs_copy = (0 - 1)
+  SET akcb_cs_insert = akcb_cs_ability_count
+  FOR (akcb_cs_i = 0; akcb_cs_i < akcb_cs_ability_count; ++akcb_cs_i) BEGIN
+    SET akcb_cs_header = akcb_cs_abilities + akcb_cs_i * 0x28
+    READ_SHORT (akcb_cs_header + 0x10) akcb_cs_level
+    READ_SHORT (akcb_cs_header + 0x1e) akcb_cs_count
+    READ_SHORT (akcb_cs_header + 0x20) akcb_cs_first
+    PATCH_IF akcb_cs_first + akcb_cs_count > akcb_cs_effect_end BEGIN
+      SET akcb_cs_effect_end = akcb_cs_first + akcb_cs_count
+    END
+    PATCH_IF akcb_cs_level <= 16 BEGIN
+      SET akcb_cs_copy = akcb_cs_i
+    END
+    PATCH_IF akcb_cs_level = 16 BEGIN
+      SET akcb_cs_level16 = akcb_cs_i
+    END
+    PATCH_IF (akcb_cs_level > 16) AND (akcb_cs_insert = akcb_cs_ability_count) BEGIN
+      SET akcb_cs_insert = akcb_cs_i
+    END
+  END
+  PATCH_IF akcb_cs_level16 < 0 BEGIN
+    PATCH_IF akcb_cs_copy < 0 BEGIN
+      PATCH_FAIL ~AKCB: Called Shot has no ability usable at level 16.~
+    END
+    SET akcb_cs_header = akcb_cs_abilities + akcb_cs_copy * 0x28
+    READ_SHORT (akcb_cs_header + 0x1e) akcb_cs_count
+    READ_SHORT (akcb_cs_header + 0x20) akcb_cs_first
+    READ_ASCII akcb_cs_header akcb_cs_header_bytes (0x28)
+    READ_ASCII (akcb_cs_effects + akcb_cs_first * 0x30) akcb_cs_effect_bytes (akcb_cs_count * 0x30)
+    SET akcb_cs_new_header = akcb_cs_abilities + akcb_cs_insert * 0x28
+    INSERT_BYTES akcb_cs_new_header 0x28
+    WRITE_ASCIIE akcb_cs_new_header ~%akcb_cs_header_bytes%~ (0x28)
+    SET akcb_cs_effects += 0x28
+    SET akcb_cs_ability_count += 1
+    WRITE_LONG 0x6a akcb_cs_effects
+    WRITE_SHORT 0x68 akcb_cs_ability_count
+    WRITE_SHORT (akcb_cs_new_header + 0x10) 16
+    WRITE_SHORT (akcb_cs_new_header + 0x20) akcb_cs_effect_end
+    INSERT_BYTES (akcb_cs_effects + akcb_cs_effect_end * 0x30) (akcb_cs_count * 0x30)
+    WRITE_ASCIIE (akcb_cs_effects + akcb_cs_effect_end * 0x30) ~%akcb_cs_effect_bytes%~ (akcb_cs_count * 0x30)
+  END
+
+  // Recasting refreshes one window; it cannot stack the on-hit checks or damage.
+  LPF ADD_SPELL_EFFECT
+    INT_VAR opcode = 321 target = 1 timing = 1 resist_dispel = 0
+            probability1 = 100 insert_point = 0
+    STR_VAR resource = ~SPCL121~
+  END
+  // A native missile-weapon damage modifier participates in the normal attack,
+  // including criticals/resistance/protections, and does not depend on the save.
+  // https://gibberlings3.github.io/iesdp/opcodes/bgee.htm#op286
+  FOR (akcb_cs_i = 0; akcb_cs_i < akcb_cs_ability_count; ++akcb_cs_i) BEGIN
+    READ_SHORT (akcb_cs_abilities + akcb_cs_i * 0x28 + 0x10) akcb_cs_level
+    PATCH_IF akcb_cs_level >= 16 BEGIN
+      LPF ADD_SPELL_EFFECT
+        INT_VAR opcode = 286 target = 1 parameter1 = 2 parameter2 = 0
+                timing = 0 duration = 10 resist_dispel = 0 probability1 = 100
+                header = (akcb_cs_i + 1) insert_point = ~-1~
+      END
+    END
+  END
+  SAY NAME1 ~Called Shot~
+  SAY UNIDENTIFIED_DESC ~Called Shot
+For the next 10 seconds, each successful ranged attack reduces the target's movement rate by 25% for two rounds unless they save vs. Death. The movement penalty does not stack; another failed save refreshes its duration.
+
+From 16th level, the archer also gains a +2 bonus to missile weapon damage during Called Shot. This bonus is part of the normal weapon damage and does not depend on the target's saving throw.~
