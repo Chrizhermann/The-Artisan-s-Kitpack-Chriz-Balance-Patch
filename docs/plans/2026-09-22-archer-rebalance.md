@@ -1,8 +1,10 @@
 # Archer rebalance
 
-Implemented on `codex/archer-rebalance`. Source and synthetic checks only;
-live-engine acceptance is pending. This change does not patch an installed
-game, migrate a saved character, or publish a release.
+Included in `chriz-v1.6.0`. On 2026-09-22 the owner explicitly waived
+playtesting and authorized merge, push, tag, release and closure. Validation
+is limited to source review and automated checks; no live-engine acceptance
+is claimed. Release preparation does not modify an installed game or migrate
+a saved character.
 
 ## Rules
 
@@ -56,7 +58,7 @@ Old Farsighted/Sniper and Greater Called Shot spell helpers are inert, and the
 old stun EFF is harmless. Existing saves can still contain previously granted
 innates, passive effects or item instances. Reinstalling is not proof of a
 complete saved-character migration; no HLA refund or live-save retrofit is
-included. Test with a newly generated Archer first.
+included.
 
 ## Validation
 
@@ -76,7 +78,10 @@ passed WeiDU 249 parsing; `git diff --check` passed.
   handoff. These checks cannot establish engine callback order, projectile
   behavior, or live combat results.
 
-## Required engine playtest
+## Optional future engine checks
+
+Retained as a troubleshooting reference. These checks were waived for the
+v1.6.0 release and are not outstanding release requirements.
 
 1. At levels 6/7, 12/13 and 19/20, compare ordinary arrows, bolts and launchers
    with unlimited ammunition. Only level 7 adds Aimed Shot; no level adds
