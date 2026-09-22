@@ -1,0 +1,22 @@
+// A firing callback is required: op249 would reward the first successful hit
+// instead, and would keep the bonus available after a miss.
+OUTER_SPRINT akcb_archer_first_shot_description ~~
+ACTION_IF MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~ BEGIN
+  COPY ~%MOD_FOLDER%/lua/M_AKCBAR.lua~ ~override~
+
+  COPY_EXISTING ~C0ARC01.SPL~ ~override/AKCBAS01.SPL~
+    LPF DELETE_EFFECT INT_VAR check_globals = 1 check_headers = 1 END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 1 timing = 1 insert_point = ~-1~
+      STR_VAR resource = ~AKCBAS01~ END
+    LPF ADD_SPELL_EFFECT INT_VAR opcode = 408 target = 1 timing = 9 resist_dispel = 2 insert_point = ~-1~
+      STR_VAR resource = ~AKCBAS~ END
+
+  COPY_EXISTING ~CLABRN02.2DA~ ~override~
+    LPF set_clab_2da_entries INT_VAR f_MinLevel = 7 f_MaxLevel = 7
+      STR_VAR f_Entry = ~AP_AKCBAS01~ END
+    PRETTY_PRINT_2DA
+
+  OUTER_SPRINT akcb_archer_first_shot_description ~– 7th level: Aimed Shot: Once every six seconds, the next arrow or bolt fired deals 50% more physical damage, rounded down. A miss spends the bonus. Other ammunition effects are unchanged.~
+END ELSE BEGIN
+  PRINT ~Archer: legacy Manyshot removed. Aimed Shot requires EEex installed before this component; the other Archer changes are available without EEex.~
+END

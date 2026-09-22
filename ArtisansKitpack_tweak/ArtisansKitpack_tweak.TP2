@@ -16,8 +16,8 @@ ALWAYS
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
-BEGIN ~Artisan's Kitpack: Archer - Apply Manyshot to mod-added items (install this after any mods that add mod bows and crossbows)~ DESIGNATED 20101
-REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2010~ ~The Beastmaster Overhaul must be installed.~
+BEGIN ~Artisan's Kitpack: Archer - Remove legacy Manyshot from mod-added items (compatibility cleanup)~ DESIGNATED 20101
+REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2010~ ~The Archer Overhaul must be installed.~
 INCLUDE ~%MOD_FOLDER%/lib/archer-items.tpa~
 
 BEGIN ~Artisan's Kitpack: Beastmaster - Modify Restrictions for Mod Items (install this after any mods that add mod axes, daggers, spears, armor, etc.)~ DESIGNATED 12012
