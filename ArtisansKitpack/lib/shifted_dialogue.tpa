@@ -1,0 +1,30 @@
+// Optional, late tweak: remove only the equipped self-targeted Talk restriction
+// from the installed Artisan form items. Do not enable Talk globally, cure Silence,
+// alter polymorph/spellcasting, replace items, or touch stored character effects.
+ACTION_CLEAR_ARRAY akcb_dialogue_forms
+ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 5100 BEGIN
+  OUTER_SPRINT $akcb_dialogue_forms(~C0SS-W~) ~1~
+  OUTER_SPRINT $akcb_dialogue_forms(~C0SS-F~) ~1~
+END
+ACTION_IF MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 5002 BEGIN
+  ACTION_FOR_EACH form IN ~C0PHIVE1~ ~C0PHIVE2~ ~C0PHIVE3~ ~C0PHIVE4~ BEGIN
+    OUTER_SPRINT $akcb_dialogue_forms(~%form%~) ~1~
+  END
+END
+
+ACTION_PHP_EACH akcb_dialogue_forms AS form => unused BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~%form%.ITM~ BEGIN
+    COPY_EXISTING ~%form%.ITM~ ~override~
+      LPF DELETE_EFFECT INT_VAR
+        check_globals = 1
+        check_headers = 0
+        match_opcode = 144
+        match_parameter2 = 7
+        match_target = 1
+        match_timing = 2
+      END
+    BUT_ONLY
+  END ELSE BEGIN
+    WARN ~Optional shifted dialogue: %form%.ITM is missing; that form was left unchanged.~
+  END
+END

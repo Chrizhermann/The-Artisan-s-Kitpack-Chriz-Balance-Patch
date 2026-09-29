@@ -13,6 +13,15 @@ The Artisan's Kitpack is designed and maintained by **Artemius_I**. If you enjoy
 
 This fork exists strictly because I wanted a few balance knobs turned differently in my own install — it is not a replacement for, or a competing project against, the upstream mod.
 
+## Version identity
+
+This release is **`v4.81a-dev.85928f9-chriz.1`**: the upstream
+release and included development snapshot, followed by our patch revision.
+This replaces independent `chriz-v1.x` numbering for future releases. Published
+`chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
+See the [versioning rules](docs/fork-versioning.md)
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.1.md).
+
 ## Installation
 
 Same as upstream. Drop the mod folder into your BG2:EE / EET install and
@@ -72,6 +81,14 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Optional: talk while shapeshifted** — tweak component `51010` removes the
+  form items' Talk-button restriction for the Shapeshifter and Hivemaster.
+  Install it after the chosen kits and other form changes. It does not change
+  transformations, combat stats, Natural Spell progression, spellcasting or item
+  restrictions, and does not cure genuine Silence. This is a separate opt-in QoL
+  choice, not part of either kit's default behavior. See the
+  [scope and verification notes](docs/plans/2026-09-27-shifted-dialogue.md).
 
 - **Class descriptions** — campaign Class screens use the installed Kitpack
   descriptions, including Assassin, Archer, Beast Master, and Avenger aliases.
