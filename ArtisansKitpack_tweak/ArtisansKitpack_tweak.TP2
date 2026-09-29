@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/tweak~
 AUTHOR ~The Artisan~
-VERSION ~chriz-v1.6.0~
+VERSION ~v4.81a-dev.85928f9-chriz.1~
 ALWAYS
   OUTER_SPRINT MOD_FOLDER ArtisansKitpack
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
@@ -15,6 +15,14 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
+
+BEGIN ~Artisan's Kitpack: Allow talking in Shapeshifter and Hivemaster forms (optional QoL)~ DESIGNATED 51010
+LABEL ~AKCB_SHIFTED_DIALOGUE~
+REQUIRE_PREDICATE (GAME_IS ~bgee bg2ee eet~) ~This option requires BG:EE, BG2:EE or EET.~
+REQUIRE_PREDICATE ((MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 5100) OR
+                   (MOD_IS_INSTALLED ~Setup-ArtisansKitpack.tp2~ 5002))
+  ~Install the Shapeshifter Overhaul or Hivemaster kit first.~
+INCLUDE ~%MOD_FOLDER%/lib/shifted_dialogue.tpa~
 
 BEGIN ~Artisan's Kitpack: Archer - Remove legacy Manyshot from mod-added items (compatibility cleanup)~ DESIGNATED 20101
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~2010~ ~The Archer Overhaul must be installed.~
