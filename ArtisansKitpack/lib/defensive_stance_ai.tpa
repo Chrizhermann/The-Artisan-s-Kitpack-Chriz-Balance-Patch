@@ -1,0 +1,134 @@
+// CHRIZ FIX: party AI uses Defensive Stance only while "Use special abilities" is on.
+// The record screen's smart AI comes from PARTYAI.2DA: its default script (BDDEFAI)
+// runs the protagonist and unlisted NPCs, listed companions get their own script.
+// "Use special abilities" off sets the creature's LOCALS BDAI_DISABLE_SPECIAL. EET
+// appends a BG1-only Defensive Stance block to BDDEFAI without that check, so the
+// protagonist kept using the stance with the option off. Gate every smart-script
+// block that casts the stance and ignores the option; leave all other blocks alone.
+
+// Decompiled BAF in the current buffer. Returns how many blocks were gated.
+DEFINE_PATCH_FUNCTION akcb_dsai_gate_baf
+  STR_VAR
+    ability = ~SPDWD02~
+  RET
+    gated
+BEGIN
+  SET gated = 0
+  SPRINT akcb_dsai_nl ~%LNL%~
+  PATCH_IF (INDEX_BUFFER (CASE_SENSITIVE EXACT_MATCH ~%WNL%~) >= 0) BEGIN
+    SPRINT akcb_dsai_nl ~%WNL%~
+  END
+  SPRINT akcb_dsai_gate ~  Global("BDAI_DISABLE_SPECIAL","LOCALS",0)%akcb_dsai_nl%~
+  SET akcb_dsai_cursor = 0
+  WHILE (akcb_dsai_cursor >= 0) BEGIN
+    SET akcb_dsai_if = INDEX_BUFFER (CASE_SENSITIVE EVALUATE_REGEXP ~^IF[ %TAB%%MNL%]*$~ akcb_dsai_cursor)
+    PATCH_IF (akcb_dsai_if < 0) BEGIN
+      SET akcb_dsai_cursor = 0 - 1
+    END ELSE BEGIN
+      SET akcb_dsai_then = INDEX_BUFFER (CASE_SENSITIVE EVALUATE_REGEXP ~^THEN[ %TAB%%MNL%]*$~ akcb_dsai_if)
+      SET akcb_dsai_end = 0 - 1
+      PATCH_IF (akcb_dsai_then >= 0) BEGIN
+        SET akcb_dsai_end = INDEX_BUFFER (CASE_SENSITIVE EVALUATE_REGEXP ~^END[ %TAB%%MNL%]*$~ akcb_dsai_then)
+      END
+      PATCH_IF (akcb_dsai_end < 0) BEGIN
+        PATCH_FAIL ~Defensive Stance AI: decompiled script block at offset %akcb_dsai_if% has no THEN/END.~
+      END
+      READ_ASCII akcb_dsai_if akcb_dsai_triggers (akcb_dsai_then - akcb_dsai_if)
+      READ_ASCII akcb_dsai_then akcb_dsai_responses (akcb_dsai_end - akcb_dsai_then)
+      SET akcb_dsai_casts = 0
+      INNER_PATCH ~%akcb_dsai_responses%~ BEGIN
+        // Any spell action naming the stance: SpellRES, ForceSpellRES, ApplySpellRES...
+        SET akcb_dsai_casts = (INDEX_BUFFER (CASE_INSENSITIVE EVALUATE_REGEXP
+          ~[A-Za-z]*Spell[A-Za-z]*([ %TAB%]*"%ability%"~) >= 0)
+      END
+      SET akcb_dsai_toggled = 0
+      INNER_PATCH ~%akcb_dsai_triggers%~ BEGIN
+        // A block that already reads the option keeps its own condition.
+        SET akcb_dsai_toggled = (INDEX_BUFFER (CASE_INSENSITIVE EXACT_MATCH ~"BDAI_DISABLE_SPECIAL"~) >= 0)
+      END
+      PATCH_IF (akcb_dsai_casts AND NOT akcb_dsai_toggled) BEGIN
+        // First condition of the block, so an OR() group below keeps its members.
+        SET akcb_dsai_at = INDEX_BUFFER (CASE_SENSITIVE EXACT_MATCH ~%LNL%~ akcb_dsai_if) + 1
+        SET akcb_dsai_size = STRING_LENGTH ~%akcb_dsai_gate%~
+        INSERT_BYTES akcb_dsai_at akcb_dsai_size
+        WRITE_ASCIIE akcb_dsai_at ~%akcb_dsai_gate%~ (akcb_dsai_size)
+        SET akcb_dsai_end += akcb_dsai_size
+        SET gated += 1
+      END
+      SET akcb_dsai_cursor = akcb_dsai_end + 3
+    END
+  END
+END
+
+// strict = 1: fail instead of warning when PARTYAI.2DA cannot be read.
+DEFINE_ACTION_FUNCTION akcb_gate_defensive_stance_party_ai
+  INT_VAR
+    strict = 0
+  STR_VAR
+    ability = ~SPDWD02~
+  RET
+    gated_blocks
+BEGIN
+  OUTER_SET gated_blocks = 0
+  ACTION_CLEAR_ARRAY akcb_dsai_scripts
+  ACTION_IF NOT FILE_EXISTS_IN_GAME ~partyai.2da~ BEGIN
+    PRINT ~Defensive Stance AI: no PARTYAI.2DA, so this game has no smart party AI options; nothing to gate.~
+  END ELSE BEGIN
+    OUTER_SET akcb_dsai_valid = 0
+    COPY_EXISTING ~partyai.2da~ ~override~
+      // Rows: signature, default script, column header, then one row per companion.
+      READ_2DA_ENTRIES_NOW akcb_dsai_rows 1
+      PATCH_IF (akcb_dsai_rows > 2) BEGIN
+        READ_2DA_ENTRY_FORMER akcb_dsai_rows 0 0 akcb_dsai_signature
+        PATCH_IF (~%akcb_dsai_signature%~ STRING_EQUAL_CASE ~2DA~) BEGIN
+          SET akcb_dsai_valid = 1
+          READ_2DA_ENTRY_FORMER akcb_dsai_rows 1 0 akcb_dsai_script
+          TO_UPPER akcb_dsai_script
+          SET $akcb_dsai_scripts(~%akcb_dsai_script%~) = 1
+          FOR (akcb_dsai_row = 3; akcb_dsai_row < akcb_dsai_rows; ++akcb_dsai_row) BEGIN
+            PATCH_IF (VARIABLE_IS_SET $akcb_dsai_rows(~%akcb_dsai_row%~ ~1~)) BEGIN
+              READ_2DA_ENTRY_FORMER akcb_dsai_rows akcb_dsai_row 1 akcb_dsai_script
+              TO_UPPER akcb_dsai_script
+              SET $akcb_dsai_scripts(~%akcb_dsai_script%~) = 1
+            END
+          END
+        END
+      END
+    BUT_ONLY
+    ACTION_IF NOT akcb_dsai_valid BEGIN
+      ACTION_IF strict BEGIN
+        FAIL ~Defensive Stance AI: PARTYAI.2DA is not a readable 2DA table, so the smart party AI scripts are unknown.~
+      END ELSE BEGIN
+        WARN ~Defensive Stance AI: PARTYAI.2DA is not a readable 2DA table, so the smart party AI scripts are unknown; Defensive Stance AI gate not applied.~
+      END
+    END
+    ACTION_PHP_EACH akcb_dsai_scripts AS akcb_dsai_script => akcb_dsai_unused BEGIN
+      // A listed script that is not installed never runs.
+      ACTION_IF FILE_EXISTS_IN_GAME ~%akcb_dsai_script%.bcs~ BEGIN
+        OUTER_SET akcb_dsai_script_gated = 0
+        COPY_EXISTING ~%akcb_dsai_script%.bcs~ ~override~
+          PATCH_IF (INDEX_BUFFER (CASE_INSENSITIVE EXACT_MATCH ~"%ability%"~) >= 0) BEGIN
+            // Recompile only scripts that change, so the others stay byte-identical.
+            READ_ASCII 0 akcb_dsai_bcs (BUFFER_LENGTH)
+            INNER_PATCH ~%akcb_dsai_bcs%~ BEGIN
+              DECOMPILE_BCS_TO_BAF
+              LPF akcb_dsai_gate_baf STR_VAR ability RET akcb_dsai_script_gated = gated END
+            END
+            PATCH_IF akcb_dsai_script_gated BEGIN
+              DECOMPILE_AND_PATCH BEGIN
+                LPF akcb_dsai_gate_baf STR_VAR ability RET akcb_dsai_script_gated = gated END
+              END
+            END
+          END
+        BUT_ONLY
+        ACTION_IF akcb_dsai_script_gated BEGIN
+          OUTER_SET gated_blocks += akcb_dsai_script_gated
+          PRINT ~Defensive Stance AI: %akcb_dsai_script%.BCS now checks "Use special abilities" in %akcb_dsai_script_gated% block(s).~
+        END
+      END
+    END
+    ACTION_IF akcb_dsai_valid AND gated_blocks = 0 BEGIN
+      PRINT ~Defensive Stance AI: every smart party AI use of %ability% already checks "Use special abilities".~
+    END
+  END
+END

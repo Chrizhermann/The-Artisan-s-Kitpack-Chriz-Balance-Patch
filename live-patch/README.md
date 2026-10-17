@@ -133,3 +133,48 @@ load the save. Undo by uninstalling component 0 through WeiDU.
 
 Fresh installs of this fork reach the same end state directly from
 `ArtisansKitpack/Druid/Shapeshifter/animations/werewolf_greater*/exxx.ini`.
+
+## AKCB_DEFENSIVE_STANCE_AI
+
+Smart party AI now respects the record screen's **Use special abilities**
+option for Defensive Stance (`SPDWD02`). The default party AI script named by
+`PARTYAI.2DA` (`BDDEFAI`) runs the protagonist and every NPC without their own
+entry. EET appends a BG1-only Defensive Stance block to it that ignored the
+option, so in BG1 the protagonist kept using the stance with the option off.
+The BG2/SoD block already checked it.
+
+Component 0 reads `PARTYAI.2DA` for the default and companion scripts. In each
+installed script that casts the stance without reading the option, it adds
+`Global("BDAI_DISABLE_SPECIAL","LOCALS",0)` as the block's first condition.
+Other blocks keep their triggers, and scripts that need no change stay
+byte-identical. If every stance block already checks the option, it changes
+nothing and says so. A missing `PARTYAI.2DA` blocks the install, since such a
+game has no smart party AI options; an unreadable one fails without changes.
+
+No Kitpack component is required. Vanilla Dwarven Defenders use the same
+`SPDWD02`, and the patch changes only scripts that already cast it. Synthetic-game
+coverage checks LF and CRLF tables, a renamed default script, already-gated
+blocks, unrelated blocks and scripts, and byte-exact uninstall and reinstall.
+
+From the game directory, after copying the `AKCB_DEFENSIVE_STANCE_AI` folder
+there and creating `Setup-AKCB_DEFENSIVE_STANCE_AI.exe` as a copy of a WeiDU
+v24900 setup executable:
+
+**FIRST INSTALL:**
+
+```
+./Setup-AKCB_DEFENSIVE_STANCE_AI.exe --force-install-list 0 --language 0 --no-exit-pause
+```
+
+**UPGRADE/REINSTALL:**
+
+```
+./Setup-AKCB_DEFENSIVE_STANCE_AI.exe --force-uninstall-list 0 --force-install-list 0 --language 0 --no-exit-pause
+```
+
+No console step is needed. Saves store only the script name, so close the game
+before installing, restart it fully, and then load the save. Undo by
+uninstalling component 0 through WeiDU.
+
+Fresh installs of this fork apply the same change from component 1002
+(Vanguard Fighter Kit) or 1007 (Dwarven Defender Overhaul + Vanguard).

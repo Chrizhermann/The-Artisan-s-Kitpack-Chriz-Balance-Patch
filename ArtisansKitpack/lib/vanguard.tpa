@@ -1,5 +1,8 @@
 COPY_EXISTING ~clabfi06.2da~ ~override~
 
+INCLUDE ~%MOD_FOLDER%/lib/defensive_stance_ai.tpa~
+LAF akcb_gate_defensive_stance_party_ai END
+
 OUTER_SPRINT kit_description ~VANGUARD: The vanguard is a frontline warrior trained to fight in the middle of enemy lines. Tough and durable, a vanguard is a reliable defender capable of holding the line and enduring blows that would fell a lesser man.
 
 Advantages:
