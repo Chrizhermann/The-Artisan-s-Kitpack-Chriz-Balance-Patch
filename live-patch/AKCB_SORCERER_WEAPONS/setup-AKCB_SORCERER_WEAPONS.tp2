@@ -1,0 +1,178 @@
+// AKCB_SORCERER_WEAPONS -- live-install tail patch for the Artisan's Kitpack
+// EEex weapon usability system (Chriz Balance Patch fork).
+//
+// With EEex, Kitpack clears the class usability bits of weapons that fighters
+// can use and gates each one with opcode 319 on a per-weapon stat instead.
+// C0PR#CL.SPL grants those stats twice over: from proficiency pips for every
+// creature, and from the class's WEAPPROF.2DA column for each class. Upstream
+// commit 7464043 (2026-02-21) began generating the class grants from WEAPPROF
+// columns. WEAPPROF has no SORCERER column, so sorcerers of every kit lost
+// their dagger, quarterstaff, dart and sling grants and can equip those only
+// with proficiency pips.
+//
+// For each class weapon grant mages receive in the installed C0PR#CL.SPL, this
+// component adds the same grant for sorcerers: a byte copy of the mage entry
+// with only the class changed. Existing sorcerer grants, other classes and
+// every other effect are kept. A fresh install of the fixed fork
+// (eeex/profs_eeex.tpa) produces the same file.
+
+BACKUP ~AKCB_SORCERER_WEAPONS/backup~
+AUTHOR ~Chriz (The Artisan's Kitpack - Chriz Balance Patch)~
+VERSION ~1.0.0~
+
+BEGIN ~Sorcerer weapon usability: sorcerers get the class weapons mages get~
+DESIGNATED 0
+
+// The same capability check as Kitpack's own "Update EEex-based Weapon
+// Usability Changes" tweak: without C0PR#CL.SPL nothing gates these weapons.
+REQUIRE_PREDICATE FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~
+  ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL is absent, so Artisan's Kitpack EEex weapon usability is not installed and this repair is not needed.~
+
+OUTER_SET akcb_mage = IDS_OF_SYMBOL (~CLASS~ ~MAGE~)
+OUTER_SET akcb_sorcerer = IDS_OF_SYMBOL (~CLASS~ ~SORCERER~)
+ACTION_IF (akcb_mage < 0) OR (akcb_sorcerer < 0) BEGIN
+  FAIL ~AKCB_SORCERER_WEAPONS: CLASS.IDS must define both MAGE and SORCERER.~
+END
+// Kitpack writes every class grant as opcode 326 on SPLPROT row 105_CLASS=n.
+OUTER_SET akcb_class_row = 105
+
+COPY_EXISTING ~C0PR#CL.SPL~ ~override~
+  PATCH_IF (SOURCE_SIZE < 0x72) BEGIN
+    PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL is too short for an SPL V1 header.~
+  END
+  READ_ASCII 0x00 akcb_signature (8)
+  PATCH_IF NOT (~%akcb_signature%~ STRING_EQUAL ~SPL V1  ~) BEGIN
+    PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL is not an SPL V1 resource.~
+  END
+  READ_LONG  0x64 akcb_ability_offset
+  READ_SHORT 0x68 akcb_ability_count
+  READ_LONG  0x6a akcb_effect_offset
+  READ_SHORT 0x6e akcb_casting_first
+  READ_SHORT 0x70 akcb_casting_count
+  PATCH_IF (akcb_effect_offset < 0x72) OR (akcb_effect_offset > SOURCE_SIZE) BEGIN
+    PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL has an invalid effect table offset.~
+  END
+  // New effects are inserted into the effect table, so the ability table must
+  // lie entirely before it; otherwise the insertion would move it.
+  PATCH_IF (akcb_ability_count > 0) AND
+           ((akcb_ability_offset < 0x72) OR
+            (akcb_ability_offset + akcb_ability_count * 0x28 > akcb_effect_offset)) BEGIN
+    PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL needs its ability table before its effect table.~
+  END
+
+  // Every effect range must lie inside the file, and no two ranges may share
+  // effects: an insertion into one would otherwise also change the other.
+  SET akcb_ranges = 0
+  PATCH_IF (akcb_casting_count > 0) BEGIN
+    SET $akcb_range_first(~%akcb_ranges%~) = akcb_casting_first
+    SET $akcb_range_count(~%akcb_ranges%~) = akcb_casting_count
+    SET akcb_ranges += 1
+  END
+  FOR (akcb_h = 0; akcb_h < akcb_ability_count; ++akcb_h) BEGIN
+    READ_SHORT (akcb_ability_offset + akcb_h * 0x28 + 0x1e) akcb_count
+    READ_SHORT (akcb_ability_offset + akcb_h * 0x28 + 0x20) akcb_first
+    PATCH_IF (akcb_count > 0) BEGIN
+      SET $akcb_range_first(~%akcb_ranges%~) = akcb_first
+      SET $akcb_range_count(~%akcb_ranges%~) = akcb_count
+      SET akcb_ranges += 1
+    END
+  END
+  FOR (akcb_a = 0; akcb_a < akcb_ranges; ++akcb_a) BEGIN
+    SET akcb_a_first = $akcb_range_first(~%akcb_a%~)
+    SET akcb_a_end = akcb_a_first + $akcb_range_count(~%akcb_a%~)
+    PATCH_IF (akcb_effect_offset + akcb_a_end * 0x30 > SOURCE_SIZE) BEGIN
+      PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL has effects beyond the end of the file.~
+    END
+    FOR (akcb_b = akcb_a + 1; akcb_b < akcb_ranges; ++akcb_b) BEGIN
+      SET akcb_b_first = $akcb_range_first(~%akcb_b%~)
+      SET akcb_b_end = akcb_b_first + $akcb_range_count(~%akcb_b%~)
+      PATCH_IF (akcb_a_first < akcb_b_end) AND (akcb_b_first < akcb_a_end) BEGIN
+        PATCH_FAIL ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL has effect blocks shared by several abilities.~
+      END
+    END
+  END
+
+  SET akcb_mage_grants = 0
+  SET akcb_added = 0
+  FOR (akcb_h = 0; akcb_h < akcb_ability_count; ++akcb_h) BEGIN
+    SET akcb_ability = akcb_ability_offset + akcb_h * 0x28
+    READ_SHORT (akcb_ability + 0x1e) akcb_count
+    READ_SHORT (akcb_ability + 0x20) akcb_first
+
+    // Pass 1: which class weapon grants do sorcerers already have here?
+    PATCH_FOR_EACH akcb_weapon IN 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 115 BEGIN
+      SET $akcb_sorcerer_has(~%akcb_weapon%~) = 0
+    END
+    FOR (akcb_pass = 1; akcb_pass <= 2; ++akcb_pass) BEGIN
+      SET akcb_new = 0
+      FOR (akcb_e = 0; akcb_e < akcb_count; ++akcb_e) BEGIN
+        SET akcb_fx = akcb_effect_offset + (akcb_first + akcb_e) * 0x30
+        READ_SHORT akcb_fx akcb_opcode
+        READ_LONG (akcb_fx + 0x04) akcb_parameter1
+        READ_LONG (akcb_fx + 0x08) akcb_parameter2
+        READ_ASCII (akcb_fx + 0x14) akcb_resource (8) NULL
+        SET akcb_found = 0
+        PATCH_IF (akcb_opcode = 326) AND (akcb_parameter2 = akcb_class_row) BEGIN
+          // Class grants apply one weapon stat spell: C0PR#89-107 or C0PR#115.
+          PATCH_FOR_EACH akcb_weapon IN 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 115 BEGIN
+            PATCH_IF (~%akcb_resource%~ STRING_EQUAL_CASE ~C0PR#%akcb_weapon%~) BEGIN
+              SET akcb_found = akcb_weapon
+            END
+          END
+        END
+        PATCH_IF (akcb_found > 0) AND (akcb_pass = 1) AND (akcb_parameter1 = akcb_sorcerer) BEGIN
+          SET $akcb_sorcerer_has(~%akcb_found%~) = 1
+        END
+        // Pass 2: copy the first mage grant of each weapon sorcerers lack, in
+        // file order, so the result matches a fresh fork install.
+        PATCH_IF (akcb_found > 0) AND (akcb_pass = 2) AND (akcb_parameter1 = akcb_mage) BEGIN
+          SET akcb_mage_grants += 1
+          PATCH_IF ($akcb_sorcerer_has(~%akcb_found%~) = 0) BEGIN
+            SET $akcb_sorcerer_has(~%akcb_found%~) = 1
+            SET $akcb_donor(~%akcb_new%~) = akcb_first + akcb_e
+            SET akcb_new += 1
+            PATCH_PRINT ~AKCB_SORCERER_WEAPONS: ability %akcb_h%: sorcerers now receive %akcb_resource% like mages.~
+          END
+        END
+      END
+    END
+
+    PATCH_IF (akcb_new > 0) BEGIN
+      SET akcb_insert = akcb_first + akcb_count
+      SET akcb_insert_offset = akcb_effect_offset + akcb_insert * 0x30
+      INSERT_BYTES akcb_insert_offset (akcb_new * 0x30)
+      FOR (akcb_i = 0; akcb_i < akcb_new; ++akcb_i) BEGIN
+        // Donors precede the insertion point, so their offsets are unchanged.
+        SET akcb_from = akcb_effect_offset + $akcb_donor(~%akcb_i%~) * 0x30
+        SET akcb_to = akcb_insert_offset + akcb_i * 0x30
+        FOR (akcb_byte_index = 0; akcb_byte_index < 0x30; ++akcb_byte_index) BEGIN
+          READ_BYTE (akcb_from + akcb_byte_index) akcb_byte
+          WRITE_BYTE (akcb_to + akcb_byte_index) akcb_byte
+        END
+        WRITE_LONG (akcb_to + 0x04) akcb_sorcerer
+      END
+      WRITE_SHORT (akcb_ability + 0x1e) (akcb_count + akcb_new)
+      FOR (akcb_k = 0; akcb_k < akcb_ability_count; ++akcb_k) BEGIN
+        PATCH_IF (akcb_k != akcb_h) BEGIN
+          READ_SHORT (akcb_ability_offset + akcb_k * 0x28 + 0x20) akcb_other_first
+          PATCH_IF (akcb_other_first >= akcb_insert) BEGIN
+            WRITE_SHORT (akcb_ability_offset + akcb_k * 0x28 + 0x20) (akcb_other_first + akcb_new)
+          END
+        END
+      END
+      PATCH_IF (akcb_casting_first >= akcb_insert) BEGIN
+        SET akcb_casting_first += akcb_new
+        WRITE_SHORT 0x6e akcb_casting_first
+      END
+      SET akcb_added += akcb_new
+    END
+  END
+
+  PATCH_IF (akcb_mage_grants = 0) BEGIN
+    PATCH_WARN ~AKCB_SORCERER_WEAPONS: C0PR#CL.SPL grants mages no class weapons, so there is nothing to give sorcerers; nothing changed.~
+  END ELSE PATCH_IF (akcb_added = 0) BEGIN
+    PATCH_PRINT ~AKCB_SORCERER_WEAPONS: sorcerers already receive every class weapon mages receive; nothing changed.~
+  END ELSE BEGIN
+    PATCH_PRINT ~AKCB_SORCERER_WEAPONS: added %akcb_added% sorcerer class weapon grant(s) to C0PR#CL.SPL.~
+  END
+BUT_ONLY

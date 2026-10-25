@@ -416,6 +416,13 @@ COPY_EXISTING ~splprot.2da~ ~override~
 COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
   LPF DELETE_EFFECT INT_VAR match_special = 99999 END
 
+// Class weapon dispatch: CLASS.IDS symbol => WEAPPROF.2DA data column.
+// WEAPPROF has no SORCERER column; the engine gives sorcerers the MAGE
+// column's weapon choices, so SORCERER reads column 4 as well. Without it
+// every sorcerer kit (Dragon Disciple included) could only equip the
+// EEex-gated daggers, quarterstaves, darts and slings it had pips in.
+// SORCERER stays last so these entries follow all other classes in C0PR#CL,
+// matching live-patch/AKCB_SORCERER_WEAPONS on existing installs.
 ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_CLASS	BEGIN
 	~MAGE~		=>	4
 	~FIGHTER~		=>	5
@@ -437,6 +444,7 @@ ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_CLASS	BEGIN
   ~CLERIC_RANGER~ => 21
   ~MONK~ => 51
   ~SHAMAN~ => 60
+  ~SORCERER~ => 4
 END
 ACTION_PHP_EACH WEAPPROF_CLASS AS class => class_number BEGIN
 
