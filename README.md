@@ -15,12 +15,12 @@ This fork exists strictly because I wanted a few balance knobs turned differentl
 
 ## Version identity
 
-This release is **`v4.81a-dev.85928f9-chriz.2`**: the upstream
+This release is **`v4.81a-dev.85928f9-chriz.3`**: the upstream
 release and included development snapshot, followed by our patch revision.
 This replaces independent `chriz-v1.x` numbering for future releases. Published
 `chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
 See the [versioning rules](docs/fork-versioning.md)
-and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.2.md).
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.3.md).
 
 ## Installation
 
@@ -81,6 +81,16 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Kit weapons: kept at level-ups with EEex** — with the EEex-based weapon
+  usability, the Eldritch Knight and Arcane Trickster sorcerers and the Favored
+  Soul keep their extra kit weapons when `C0PR#CL` runs again, as at every
+  level-up and on joining the party, and a new Arcane Trickster sorcerer has
+  them right away. Upstream clears every weapon grant there and gives only pip
+  and class weapons back until the helper creature appears; `C0PR#CL` now
+  re-applies the kit chains through `C0PR#KG` under their own class and kit
+  conditions. New installations only; install the "Update EEex-based Weapon
+  Usability Changes" tweak after mods that add their own kit chains.
 
 - **Sorcerers: weapon use with EEex** — with the EEex-based weapon usability,
   sorcerers of every kit, the Dragon Disciple included, can again equip

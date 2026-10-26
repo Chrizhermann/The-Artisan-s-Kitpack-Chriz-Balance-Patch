@@ -32,8 +32,10 @@ Upstream master (85928f9) is still affected.
 - Skip when `C0PR#CL.SPL` does not exist, because the EEex usability system is
   not installed. Stop without changes if the spell's tables are malformed.
 
-A fresh install of this fork gives the same file directly from
-`ArtisansKitpack/eeex/profs_eeex.tpa`.
+A fresh install of this fork gives the same sorcerer grants directly from
+`ArtisansKitpack/eeex/profs_eeex.tpa`. Since v4.81a-dev.85928f9-chriz.3 a fresh
+install's `C0PR#CL.SPL` also ends with an entry that re-applies the kit weapon
+chains; this patch does not add it to existing installations.
 
 ## Install
 

@@ -1,0 +1,379 @@
+///////////////////////////////////////////////////////////////////////////
+// Kit weapon grants that survive C0PR#CL                                //
+///////////////////////////////////////////////////////////////////////////
+// C0PR#CL first removes the effects of every weapon grant spell (its
+// opcode 321 entries: C0PR#89-107 and C0PR#111-115) and then grants the
+// weapons of the creature's proficiency pips and class again. Kit chains
+// registered in the helper spell C0PR#XX apply the same grant spells; the
+// Eldritch Knight and Arcane Trickster sorcerers and the Favored Soul do.
+// So every C0PR#CL application (each level-up, joining the party, creature
+// creation) took their extra weapons away until Kitpack's helper creature
+// applied C0PR#XX again.
+//
+// c0_sync_kit_weapon_grants rebuilds C0PR#KG from C0PR#XX and makes "apply
+// C0PR#KG" the last effect of every C0PR#CL ability. The kit chains then run
+// again right after C0PR#CL, as the helper runs them, under their own class
+// and kit conditions, so they grant nothing they did not grant before.
+// - C0PR#KG holds one opcode 326 entry for each C0PR#XX entry whose spell
+//   chain applies or removes a spell that C0PR#CL clears. Chains are followed
+//   through opcodes 146, 148 and 326 and through EFF files (opcodes 177, 183,
+//   272 and 283). The entries are byte copies of the C0PR#XX entries, in
+//   C0PR#XX order, aimed at C0PR#CL's creature (target 2) instead of every
+//   creature in the area.
+// - Chains that lead back to C0PR#CL or C0PR#KG are left out: they would
+//   apply C0PR#CL again without end. C0PR#X1, which reapplies C0PR#CL, is one.
+// - A chain that cannot be read is left out with a warning.
+// Call it after a component registers a chain in C0PR#XX and after anything
+// that rewrites C0PR#CL. A second call without changes changes nothing.
+// Chains that other mods register after Kitpack's last call are covered once
+// Kitpack's "Update EEex-based Weapon Usability Changes" tweak runs after them.
+
+// Reads the effect ranges of the SPL V1 resource in the buffer: c0_kwg_ranges
+// ranges, the abilities 0 .. c0_kwg_ability_count - 1 and then the casting
+// effects, each with first effect $c0_kwg_first(r) and $c0_kwg_count(r)
+// effects. c0_kwg_ok is 0 for other resources and for tables that point
+// outside the buffer. Reads only.
+DEFINE_PATCH_MACRO c0_kwg_read_ranges BEGIN
+  SET c0_kwg_ok = 0
+  SET c0_kwg_ranges = 0
+  SPRINT c0_kwg_signature ~~
+  PATCH_IF (BUFFER_LENGTH >= 8) BEGIN
+    READ_ASCII 0x00 c0_kwg_signature (8)
+  END
+  PATCH_IF (~%c0_kwg_signature%~ STRING_EQUAL ~SPL V1  ~) AND (BUFFER_LENGTH >= 0x72) BEGIN
+    READ_LONG  0x64 c0_kwg_ability_offset
+    READ_SHORT 0x68 c0_kwg_ability_count
+    READ_LONG  0x6a c0_kwg_effect_offset
+    SET c0_kwg_ok = 1
+    PATCH_IF (c0_kwg_effect_offset < 0x72) OR (c0_kwg_effect_offset > BUFFER_LENGTH) BEGIN
+      SET c0_kwg_ok = 0
+    END
+    PATCH_IF (c0_kwg_ability_count > 0) AND
+             ((c0_kwg_ability_offset < 0x72) OR
+              (c0_kwg_ability_offset + c0_kwg_ability_count * 0x28 > BUFFER_LENGTH)) BEGIN
+      SET c0_kwg_ok = 0
+    END
+    PATCH_IF c0_kwg_ok BEGIN
+      SET c0_kwg_ranges = c0_kwg_ability_count + 1
+      FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+        PATCH_IF (c0_kwg_r < c0_kwg_ability_count) BEGIN
+          READ_SHORT (c0_kwg_ability_offset + c0_kwg_r * 0x28 + 0x1e) c0_kwg_count
+          READ_SHORT (c0_kwg_ability_offset + c0_kwg_r * 0x28 + 0x20) c0_kwg_first
+        END ELSE BEGIN
+          READ_SHORT 0x70 c0_kwg_count
+          READ_SHORT 0x6e c0_kwg_first
+        END
+        SET $c0_kwg_first(~%c0_kwg_r%~) = c0_kwg_first
+        SET $c0_kwg_count(~%c0_kwg_r%~) = c0_kwg_count
+        PATCH_IF (c0_kwg_effect_offset + (c0_kwg_first + c0_kwg_count) * 0x30 > BUFFER_LENGTH) BEGIN
+          SET c0_kwg_ok = 0
+        END
+      END
+    END
+  END
+END
+
+// Lists the effects of the SPL V1 or EFF V2 resource in the buffer: c0_kwg_n
+// effects, each with opcode $c0_kwg_op(i), upper-case resource $c0_kwg_res(i)
+// and, in an SPL, the offset of its 0x30-byte record $c0_kwg_at(i); every
+// ability in order, then the casting effects. c0_kwg_ok is 0, with no effects
+// listed, for other resources and for tables that point outside the buffer.
+// Reads only.
+DEFINE_PATCH_MACRO c0_kwg_list_effects BEGIN
+  SET c0_kwg_n = 0
+  LPM c0_kwg_read_ranges
+  PATCH_IF c0_kwg_ok BEGIN
+    FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+      SET c0_kwg_first = $c0_kwg_first(~%c0_kwg_r%~)
+      SET c0_kwg_count = $c0_kwg_count(~%c0_kwg_r%~)
+      FOR (c0_kwg_e = 0; c0_kwg_e < c0_kwg_count; ++c0_kwg_e) BEGIN
+        SET c0_kwg_record = c0_kwg_effect_offset + (c0_kwg_first + c0_kwg_e) * 0x30
+        READ_SHORT c0_kwg_record c0_kwg_opcode
+        READ_ASCII (c0_kwg_record + 0x14) c0_kwg_resource (8) NULL
+        TO_UPPER c0_kwg_resource
+        SET $c0_kwg_op(~%c0_kwg_n%~) = c0_kwg_opcode
+        SPRINT $c0_kwg_res(~%c0_kwg_n%~) ~%c0_kwg_resource%~
+        SET $c0_kwg_at(~%c0_kwg_n%~) = c0_kwg_record
+        SET c0_kwg_n += 1
+      END
+    END
+  END ELSE PATCH_IF (~%c0_kwg_signature%~ STRING_EQUAL ~EFF V2.0~) AND (BUFFER_LENGTH >= 0x38) BEGIN
+    READ_LONG 0x10 c0_kwg_opcode
+    READ_ASCII 0x30 c0_kwg_resource (8) NULL
+    TO_UPPER c0_kwg_resource
+    SET $c0_kwg_op(~0~) = c0_kwg_opcode
+    SPRINT $c0_kwg_res(~0~) ~%c0_kwg_resource%~
+    SET $c0_kwg_at(~0~) = 0 - 1
+    SET c0_kwg_n = 1
+    SET c0_kwg_ok = 1
+  END
+END
+
+// c0_kwg_ok is 1 when the SPL V1 in the buffer can take new effects: its
+// tables lie inside the buffer, the ability table lies before the effect
+// table (inserted effects would move it otherwise) and no two ranges share
+// effects (an insertion into one would also change the other). Reads only.
+DEFINE_PATCH_MACRO c0_kwg_check_tables BEGIN
+  LPM c0_kwg_read_ranges
+  PATCH_IF c0_kwg_ok AND (c0_kwg_ability_count > 0) AND
+           (c0_kwg_ability_offset + c0_kwg_ability_count * 0x28 > c0_kwg_effect_offset) BEGIN
+    SET c0_kwg_ok = 0
+  END
+  FOR (c0_kwg_a = 0; c0_kwg_ok AND (c0_kwg_a < c0_kwg_ranges); ++c0_kwg_a) BEGIN
+    SET c0_kwg_a_first = $c0_kwg_first(~%c0_kwg_a%~)
+    SET c0_kwg_a_end = c0_kwg_a_first + $c0_kwg_count(~%c0_kwg_a%~)
+    FOR (c0_kwg_b = c0_kwg_a + 1; c0_kwg_b < c0_kwg_ranges; ++c0_kwg_b) BEGIN
+      SET c0_kwg_b_first = $c0_kwg_first(~%c0_kwg_b%~)
+      SET c0_kwg_b_end = c0_kwg_b_first + $c0_kwg_count(~%c0_kwg_b%~)
+      PATCH_IF (c0_kwg_a_first < c0_kwg_b_end) AND (c0_kwg_b_first < c0_kwg_a_end) BEGIN
+        SET c0_kwg_ok = 0
+      END
+    END
+  END
+END
+
+// Leaves exactly one "apply C0PR#KG" effect at the end of every ability of the
+// SPL V1 in the buffer, or none when c0_kwg_keep is 0. Every other effect stays
+// in place; the other abilities and the casting effects keep their effects.
+// Requires c0_kwg_check_tables to accept the buffer.
+DEFINE_PATCH_MACRO c0_kwg_place_kg BEGIN
+  LPM c0_kwg_check_tables
+  PATCH_IF NOT c0_kwg_ok BEGIN
+    PATCH_FAIL ~Artisan's Kitpack: C0PR#CL.SPL changed while kit weapon grants were synchronised.~
+  END
+  SET c0_kwg_end = 0
+  FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+    SET c0_kwg_range_end = $c0_kwg_first(~%c0_kwg_r%~) + $c0_kwg_count(~%c0_kwg_r%~)
+    PATCH_IF ($c0_kwg_count(~%c0_kwg_r%~) > 0) AND (c0_kwg_range_end > c0_kwg_end) BEGIN
+      SET c0_kwg_end = c0_kwg_range_end
+    END
+  END
+  // Remove the existing entries, last effect first.
+  FOR (c0_kwg_j = c0_kwg_end - 1; c0_kwg_j >= 0; c0_kwg_j -= 1) BEGIN
+    SET c0_kwg_owner = 0 - 1
+    FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+      SET c0_kwg_first = $c0_kwg_first(~%c0_kwg_r%~)
+      PATCH_IF (c0_kwg_first <= c0_kwg_j) AND (c0_kwg_j < c0_kwg_first + $c0_kwg_count(~%c0_kwg_r%~)) BEGIN
+        SET c0_kwg_owner = c0_kwg_r
+      END
+    END
+    PATCH_IF (c0_kwg_owner >= 0) BEGIN
+      SET c0_kwg_record = c0_kwg_effect_offset + c0_kwg_j * 0x30
+      READ_SHORT c0_kwg_record c0_kwg_opcode
+      READ_ASCII (c0_kwg_record + 0x14) c0_kwg_resource (8) NULL
+      TO_UPPER c0_kwg_resource
+      PATCH_IF (c0_kwg_opcode = 326) AND (~%c0_kwg_resource%~ STRING_EQUAL ~C0PR#KG~) BEGIN
+        DELETE_BYTES c0_kwg_record 0x30
+        FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+          PATCH_IF (c0_kwg_r = c0_kwg_owner) BEGIN
+            SET $c0_kwg_count(~%c0_kwg_r%~) = $c0_kwg_count(~%c0_kwg_r%~) - 1
+          END ELSE PATCH_IF ($c0_kwg_first(~%c0_kwg_r%~) > c0_kwg_j) BEGIN
+            SET $c0_kwg_first(~%c0_kwg_r%~) = $c0_kwg_first(~%c0_kwg_r%~) - 1
+          END
+        END
+      END
+    END
+  END
+  // Add one entry at the end of every ability.
+  PATCH_IF (c0_kwg_keep > 0) BEGIN
+    FOR (c0_kwg_h = 0; c0_kwg_h < c0_kwg_ability_count; ++c0_kwg_h) BEGIN
+      SET c0_kwg_insert = $c0_kwg_first(~%c0_kwg_h%~) + $c0_kwg_count(~%c0_kwg_h%~)
+      SET c0_kwg_record = c0_kwg_effect_offset + c0_kwg_insert * 0x30
+      INSERT_BYTES c0_kwg_record 0x30
+      WRITE_SHORT c0_kwg_record 326
+      WRITE_BYTE  (c0_kwg_record + 0x02) 2     // C0PR#CL's creature
+      WRITE_BYTE  (c0_kwg_record + 0x12) 100   // probability 0-100
+      WRITE_ASCII (c0_kwg_record + 0x14) ~C0PR#KG~ (8)
+      SET $c0_kwg_count(~%c0_kwg_h%~) = $c0_kwg_count(~%c0_kwg_h%~) + 1
+      FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+        PATCH_IF (c0_kwg_r != c0_kwg_h) AND ($c0_kwg_first(~%c0_kwg_r%~) >= c0_kwg_insert) BEGIN
+          SET $c0_kwg_first(~%c0_kwg_r%~) = $c0_kwg_first(~%c0_kwg_r%~) + 1
+        END
+      END
+    END
+  END
+  FOR (c0_kwg_r = 0; c0_kwg_r < c0_kwg_ranges; ++c0_kwg_r) BEGIN
+    SET c0_kwg_first = $c0_kwg_first(~%c0_kwg_r%~)
+    SET c0_kwg_count = $c0_kwg_count(~%c0_kwg_r%~)
+    PATCH_IF (c0_kwg_r < c0_kwg_ability_count) BEGIN
+      WRITE_SHORT (c0_kwg_ability_offset + c0_kwg_r * 0x28 + 0x1e) c0_kwg_count
+      WRITE_SHORT (c0_kwg_ability_offset + c0_kwg_r * 0x28 + 0x20) c0_kwg_first
+    END ELSE BEGIN
+      WRITE_SHORT 0x70 c0_kwg_count
+      WRITE_SHORT 0x6e c0_kwg_first
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION c0_sync_kit_weapon_grants BEGIN
+  // Linked resources one chain may reach before it counts as unreadable.
+  OUTER_SET c0_kwg_chain_limit = 64
+  ACTION_IF (FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~) AND (FILE_EXISTS_IN_GAME ~C0PR#XX.SPL~) BEGIN
+
+    // The spells C0PR#CL clears: the resources of its opcode 321 effects.
+    OUTER_SET c0_kwg_cl_ok = 0
+    OUTER_SET c0_kwg_cl_abilities = 0
+    COPY_EXISTING ~C0PR#CL.SPL~ ~override~
+      LPM c0_kwg_check_tables
+      SET c0_kwg_cl_ok = c0_kwg_ok
+      LPM c0_kwg_list_effects
+      PATCH_IF c0_kwg_cl_ok BEGIN
+        SET c0_kwg_cl_abilities = c0_kwg_ability_count
+      END
+      FOR (c0_kwg_i = 0; c0_kwg_i < c0_kwg_n; ++c0_kwg_i) BEGIN
+        SPRINT c0_kwg_resource $c0_kwg_res(~%c0_kwg_i%~)
+        PATCH_IF ($c0_kwg_op(~%c0_kwg_i%~) = 321) AND NOT (~%c0_kwg_resource%~ STRING_EQUAL ~~) BEGIN
+          SET $c0_kwg_cleared(~%c0_kwg_resource%~) = 1
+        END
+      END
+    BUT_ONLY
+
+    // The chains C0PR#XX applies: its opcode 326 entries, first entry per spell.
+    OUTER_SET c0_kwg_xx_ok = 0
+    OUTER_SET c0_kwg_entries = 0
+    COPY_EXISTING ~C0PR#XX.SPL~ ~override~
+      LPM c0_kwg_list_effects
+      SET c0_kwg_xx_ok = c0_kwg_ok
+      FOR (c0_kwg_i = 0; c0_kwg_i < c0_kwg_n; ++c0_kwg_i) BEGIN
+        SPRINT c0_kwg_resource $c0_kwg_res(~%c0_kwg_i%~)
+        PATCH_IF ($c0_kwg_op(~%c0_kwg_i%~) = 326) AND NOT (~%c0_kwg_resource%~ STRING_EQUAL ~~) BEGIN
+          PATCH_IF NOT VARIABLE_IS_SET $c0_kwg_entry_of(~%c0_kwg_resource%~) BEGIN
+            SET $c0_kwg_entry_of(~%c0_kwg_resource%~) = c0_kwg_entries
+            SPRINT $c0_kwg_entry(~%c0_kwg_entries%~) ~%c0_kwg_resource%~
+            SET c0_kwg_record = $c0_kwg_at(~%c0_kwg_i%~)
+            FOR (c0_kwg_w = 0; c0_kwg_w < 0x30; c0_kwg_w += 4) BEGIN
+              READ_LONG (c0_kwg_record + c0_kwg_w) c0_kwg_word
+              SET $c0_kwg_word(~%c0_kwg_entries%~ ~%c0_kwg_w%~) = c0_kwg_word
+            END
+            SET c0_kwg_entries += 1
+          END
+        END
+      END
+    BUT_ONLY
+
+    ACTION_IF NOT c0_kwg_cl_ok BEGIN
+      WARN ~Artisan's Kitpack: C0PR#CL.SPL has an unreadable effect table or one that cannot take new effects, so kit weapon grants are not re-applied after it; C0PR#CL and C0PR#KG are unchanged.~
+    END ELSE ACTION_IF NOT c0_kwg_xx_ok BEGIN
+      WARN ~Artisan's Kitpack: C0PR#XX.SPL has an unreadable effect table, so kit weapon grants are not re-applied after C0PR#CL; C0PR#CL and C0PR#KG are unchanged.~
+    END ELSE BEGIN
+
+      // Walk each chain. $c0_kwg_use(k) = 1 keeps C0PR#XX entry k for C0PR#KG.
+      OUTER_SET c0_kwg_keep = 0
+      OUTER_SPRINT c0_kwg_kept ~~
+      OUTER_PATCH ~~ BEGIN
+        FOR (c0_kwg_k = 0; c0_kwg_k < c0_kwg_entries; ++c0_kwg_k) BEGIN
+          SPRINT c0_kwg_dispatch $c0_kwg_entry(~%c0_kwg_k%~)
+          SET $c0_kwg_use(~%c0_kwg_k%~) = 0
+          SET c0_kwg_grants = 0
+          SET c0_kwg_loops = 0
+          SPRINT c0_kwg_unreadable ~~
+          SET c0_kwg_head = 0
+          SET c0_kwg_tail = 1
+          SPRINT $c0_kwg_queue(~%c0_kwg_k%~ ~0~) ~%c0_kwg_dispatch%.SPL~
+          SET $c0_kwg_seen(~%c0_kwg_k%~ ~%c0_kwg_dispatch%.SPL~) = 1
+          WHILE (c0_kwg_head < c0_kwg_tail) AND (c0_kwg_head < c0_kwg_chain_limit) BEGIN
+            SPRINT c0_kwg_file $c0_kwg_queue(~%c0_kwg_k%~ ~%c0_kwg_head%~)
+            SET c0_kwg_head += 1
+            // A missing resource applies nothing in the game either.
+            PATCH_IF FILE_EXISTS_IN_GAME ~%c0_kwg_file%~ BEGIN
+              INNER_PATCH_FILE ~%c0_kwg_file%~ BEGIN
+                LPM c0_kwg_list_effects
+              END
+              PATCH_IF NOT c0_kwg_ok BEGIN
+                SPRINT c0_kwg_unreadable ~%c0_kwg_file%~
+              END
+              FOR (c0_kwg_i = 0; c0_kwg_i < c0_kwg_n; ++c0_kwg_i) BEGIN
+                SET c0_kwg_opcode = $c0_kwg_op(~%c0_kwg_i%~)
+                SPRINT c0_kwg_resource $c0_kwg_res(~%c0_kwg_i%~)
+                SPRINT c0_kwg_next ~~
+                PATCH_IF NOT (~%c0_kwg_resource%~ STRING_EQUAL ~~) BEGIN
+                  PATCH_IF (c0_kwg_opcode = 146) OR (c0_kwg_opcode = 148) OR
+                           (c0_kwg_opcode = 321) OR (c0_kwg_opcode = 326) BEGIN
+                    PATCH_IF VARIABLE_IS_SET $c0_kwg_cleared(~%c0_kwg_resource%~) BEGIN
+                      // Applies or removes a grant that C0PR#CL clears.
+                      SET c0_kwg_grants = 1
+                    END ELSE PATCH_IF (c0_kwg_opcode != 321) BEGIN
+                      PATCH_IF (~%c0_kwg_resource%~ STRING_EQUAL ~C0PR#CL~) OR
+                               (~%c0_kwg_resource%~ STRING_EQUAL ~C0PR#KG~) BEGIN
+                        SET c0_kwg_loops = 1
+                      END ELSE BEGIN
+                        SPRINT c0_kwg_next ~%c0_kwg_resource%.SPL~
+                      END
+                    END
+                  END ELSE PATCH_IF (c0_kwg_opcode = 177) OR (c0_kwg_opcode = 183) OR
+                                    (c0_kwg_opcode = 272) OR (c0_kwg_opcode = 283) BEGIN
+                    SPRINT c0_kwg_next ~%c0_kwg_resource%.EFF~
+                  END
+                END
+                PATCH_IF NOT (~%c0_kwg_next%~ STRING_EQUAL ~~) BEGIN
+                  PATCH_IF NOT VARIABLE_IS_SET $c0_kwg_seen(~%c0_kwg_k%~ ~%c0_kwg_next%~) BEGIN
+                    SET $c0_kwg_seen(~%c0_kwg_k%~ ~%c0_kwg_next%~) = 1
+                    SPRINT $c0_kwg_queue(~%c0_kwg_k%~ ~%c0_kwg_tail%~) ~%c0_kwg_next%~
+                    SET c0_kwg_tail += 1
+                  END
+                END
+              END
+            END
+          END
+          PATCH_IF (c0_kwg_head < c0_kwg_tail) BEGIN
+            SPRINT c0_kwg_unreadable ~more than %c0_kwg_chain_limit% linked resources~
+          END
+
+          PATCH_IF c0_kwg_loops BEGIN
+            PATCH_IF c0_kwg_grants BEGIN
+              PATCH_WARN ~Artisan's Kitpack: the C0PR#XX chain %c0_kwg_dispatch% grants weapons but also applies C0PR#CL or C0PR#KG again, so C0PR#CL cannot re-apply it; its weapons still vanish at each C0PR#CL until the helper creature re-applies them.~
+            END
+          END ELSE PATCH_IF NOT (~%c0_kwg_unreadable%~ STRING_EQUAL ~~) BEGIN
+            PATCH_WARN ~Artisan's Kitpack: the C0PR#XX chain %c0_kwg_dispatch% could not be read (%c0_kwg_unreadable%), so C0PR#CL does not re-apply it.~
+          END ELSE PATCH_IF c0_kwg_grants BEGIN
+            SET $c0_kwg_use(~%c0_kwg_k%~) = 1
+            SET c0_kwg_keep += 1
+            SPRINT c0_kwg_kept ~%c0_kwg_kept% %c0_kwg_dispatch%~
+          END
+        END
+      END
+
+      ACTION_IF (c0_kwg_keep > 0) AND (c0_kwg_cl_abilities = 0) BEGIN
+        WARN ~Artisan's Kitpack: C0PR#CL.SPL has no ability to re-apply C0PR#KG from, so kit weapon grants are still cleared by it.~
+      END
+
+      // C0PR#KG: copies of the kept C0PR#XX entries, aimed at C0PR#CL's
+      // creature. Without kept entries an existing C0PR#KG is emptied.
+      ACTION_IF (c0_kwg_keep > 0) OR (FILE_EXISTS_IN_GAME ~C0PR#KG.SPL~) BEGIN
+        COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#KG.SPL~
+          READ_LONG  0x64 c0_kwg_ability_offset
+          READ_SHORT 0x68 c0_kwg_ability_count
+          READ_LONG  0x6a c0_kwg_effect_offset
+          PATCH_IF (c0_kwg_ability_count != 1) OR (c0_kwg_effect_offset != BUFFER_LENGTH) BEGIN
+            PATCH_FAIL ~Artisan's Kitpack: eeex/profs/C0PR#CL.spl must be an empty spell with one ability.~
+          END
+          PATCH_IF (c0_kwg_keep > 0) BEGIN
+            INSERT_BYTES c0_kwg_effect_offset (c0_kwg_keep * 0x30)
+          END
+          SET c0_kwg_slot = 0
+          FOR (c0_kwg_k = 0; c0_kwg_k < c0_kwg_entries; ++c0_kwg_k) BEGIN
+            PATCH_IF ($c0_kwg_use(~%c0_kwg_k%~) = 1) BEGIN
+              SET c0_kwg_record = c0_kwg_effect_offset + c0_kwg_slot * 0x30
+              FOR (c0_kwg_w = 0; c0_kwg_w < 0x30; c0_kwg_w += 4) BEGIN
+                SET c0_kwg_word = $c0_kwg_word(~%c0_kwg_k%~ ~%c0_kwg_w%~)
+                WRITE_LONG (c0_kwg_record + c0_kwg_w) c0_kwg_word
+              END
+              WRITE_BYTE (c0_kwg_record + 0x02) 2
+              SET c0_kwg_slot += 1
+            END
+          END
+          WRITE_SHORT (c0_kwg_ability_offset + 0x1e) c0_kwg_keep
+          WRITE_SHORT (c0_kwg_ability_offset + 0x20) 0
+      END
+
+      // Exactly one "apply C0PR#KG", at the end of every C0PR#CL ability.
+      COPY_EXISTING ~C0PR#CL.SPL~ ~override~
+        LPM c0_kwg_place_kg
+      BUT_ONLY
+
+      ACTION_IF (c0_kwg_keep > 0) BEGIN
+        PRINT ~Artisan's Kitpack: C0PR#CL re-applies the kit weapon grants of%c0_kwg_kept% through C0PR#KG.~
+      END
+    END
+  END
+END

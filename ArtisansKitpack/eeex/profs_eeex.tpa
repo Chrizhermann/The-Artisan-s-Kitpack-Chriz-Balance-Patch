@@ -979,3 +979,8 @@ COPY_EXISTING ~KITLIST.2DA~ ~override~
       END
   END
 END
+
+// Kit chains registered in C0PR#XX so far grant their weapons again after
+// every C0PR#CL application, not only when the helper creature next appears.
+INCLUDE ~%MOD_FOLDER%/eeex/kit_weapon_grants.tpa~
+LAF c0_sync_kit_weapon_grants END

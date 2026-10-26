@@ -108,6 +108,12 @@ COPY ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#AT2.SPL~
 COPY_EXISTING ~C0PR#XX.SPL~ ~OVERRIDE~
 	LPF CLONE_EFFECT INT_VAR match_opcode = 326 STR_VAR match_resource = C0PR#X1 resource = C0PR#AT	END
 
+// C0PR#CL clears C0PR#AT2's weapon grants; let C0PR#CL re-apply C0PR#AT. The
+// kit's level 1 abilities do not include C0PR#AT, so a new Arcane Trickster
+// gets these weapons from C0PR#CL there.
+INCLUDE ~%MOD_FOLDER%/eeex/kit_weapon_grants.tpa~
+LAF c0_sync_kit_weapon_grants END
+
 ACTION_FOR_EACH description IN 
     BGCLATXT
     CLASTEXT
