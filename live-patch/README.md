@@ -37,6 +37,16 @@ Requires AK component 3000. See [installation and existing-character
 instructions](AKCB_PALADIN/README.md). Version 1.0.1 also provides an upgrade
 path from the unreleased combined Detect Evil/Deva build.
 
+## AKCB_SORCERER_WEAPONS
+
+Restores the class weapon grants that Kitpack's EEex weapon usability system
+lost for sorcerers in upstream commit 7464043. Every sorcerer kit, the Dragon
+Disciple included, can again equip daggers, quarterstaves, darts and slings
+without proficiency pips. The patch copies each mage class grant in the
+installed `C0PR#CL.SPL` for sorcerers and keeps everything else; it is skipped
+when that spell does not exist. Saves need no migration. See [installation and
+existing-character instructions](AKCB_SORCERER_WEAPONS/README.md).
+
 ## AKCB_BERSERKER
 
 Berserker Overhaul rebalance (see

@@ -15,12 +15,12 @@ This fork exists strictly because I wanted a few balance knobs turned differentl
 
 ## Version identity
 
-This release is **`v4.81a-dev.85928f9-chriz.1`**: the upstream
+This release is **`v4.81a-dev.85928f9-chriz.2`**: the upstream
 release and included development snapshot, followed by our patch revision.
 This replaces independent `chriz-v1.x` numbering for future releases. Published
 `chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
 See the [versioning rules](docs/fork-versioning.md)
-and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.1.md).
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.2.md).
 
 ## Installation
 
@@ -81,6 +81,15 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Sorcerers: weapon use with EEex** — with the EEex-based weapon usability,
+  sorcerers of every kit, the Dragon Disciple included, can again equip
+  daggers, quarterstaves, darts and slings without proficiency pips, like
+  mages. Upstream builds the class weapon grants from `WEAPPROF.2DA`, which has
+  no sorcerer column; sorcerers now use the mage column, as the engine does.
+  Existing installations can use
+  [AKCB_SORCERER_WEAPONS](live-patch/AKCB_SORCERER_WEAPONS/README.md); existing
+  characters receive the grants at their next level-up.
 
 - **Optional: talk while shapeshifted** — tweak component `51010` removes the
   form items' Talk-button restriction for the Shapeshifter and Hivemaster.

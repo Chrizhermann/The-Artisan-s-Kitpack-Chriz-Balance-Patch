@@ -454,6 +454,8 @@ BUT_ONLY_IF_IT_CHANGES
 COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
   LPF DELETE_EFFECT INT_VAR match_special = 99999 END
 
+// Keep in sync with eeex/profs_eeex.tpa: WEAPPROF has no SORCERER column, so
+// sorcerers read the MAGE column (4). SORCERER stays last there and here.
 ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_CLASS	BEGIN
 	~MAGE~		=>	4
 	~FIGHTER~		=>	5
@@ -475,6 +477,7 @@ ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_CLASS	BEGIN
   ~CLERIC_RANGER~ => 21
   ~MONK~ => 51
   ~SHAMAN~ => 60
+  ~SORCERER~ => 4
 END
 ACTION_PHP_EACH WEAPPROF_CLASS AS class => class_number BEGIN
 
