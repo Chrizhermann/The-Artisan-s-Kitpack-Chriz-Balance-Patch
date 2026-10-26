@@ -89,8 +89,12 @@ website above.
   weapon grants only when the generator first runs, which in CEBG's order is
   before Monk Revisions allows monks quarterstaves. It also never adds "apply
   `C0PR#CL`" to the shaman's own ability table (`CLABSH01.2DA`), so such a
-  shaman could equip every weapon until the helper creature appeared. New
-  installations only.
+  shaman could equip every weapon until the helper creature appeared. Kits
+  and ability tables that a Kitpack component adds or replaces after the
+  generator's last run, such as the Sacred Fist, Enlightened Fist and Ninja
+  after the Favored Soul, now get that entry from the component itself, so
+  their characters are held to their weapons from joining the party on in
+  every install order. New installations only.
 
 - **Kit weapons: kept at level-ups with EEex** — with the EEex-based weapon
   usability, the Eldritch Knight and Arcane Trickster sorcerers and the Favored

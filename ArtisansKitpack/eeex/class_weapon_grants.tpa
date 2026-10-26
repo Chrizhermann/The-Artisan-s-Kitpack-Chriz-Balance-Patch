@@ -18,8 +18,13 @@
 //   tables, so a shaman without a kit never had C0PR#CL applied when joining
 //   the party or levelling up, and could equip any weapon until Kitpack's
 //   helper creature applied C0PR#CL;
-// - a kit that a component added after its own inclusion of the generator
-//   (the Favored Soul) only got "AP_C0PR#CL" from a later inclusion.
+// - a component installed after the last inclusion of the generator that
+//   added a kit (Sacred and Enlightened Fist and the Ninja after the Favored
+//   Soul, for instance) or replaced an ability table left that table without
+//   "AP_C0PR#CL"; the "Dual-Classes Keep Kit Names" tweak even took it out
+//   of fighter, cleric, thief, druid and ranger kit tables; and a later
+//   component of the main installer left the levels that extend_tables.tpa
+//   adds to 40-level tables without it.
 //
 // c0_build_class_weapon_grants writes the class entries again from WEAPPROF
 // as it is now, in place of the earlier ones (the other effects of C0PR#CL
@@ -29,8 +34,11 @@
 //
 // c0_add_c0pr_cl_to_ability_tables gives the ability tables of the true
 // classes, the shaman included, and the ability table of every kit in
-// KITLIST.2DA one "AP_C0PR#CL" at every level. Every inclusion of the
-// generator calls it, the Favored Soul after it adds its kit, and the tweak.
+// KITLIST.2DA one "AP_C0PR#CL" at every level, and writes only the tables it
+// changes. Every inclusion of the generator and the tweak call it, every
+// component of the main installer ends with it, and so do the components of
+// the NPC and tweak installers that add a kit or replace or rewrite an
+// ability table.
 //
 // Both do nothing without C0PR#CL.SPL (no EEex-based weapon usability), and a
 // second call without changes in between changes nothing.
@@ -201,6 +209,7 @@ DEFINE_ACTION_FUNCTION c0_add_c0pr_cl_to_ability_tables BEGIN
         REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
         LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
         PRETTY_PRINT_2DA
+      BUT_ONLY
     END
 
     // The ability tables of the kits.
@@ -214,6 +223,7 @@ DEFINE_ACTION_FUNCTION c0_add_c0pr_cl_to_ability_tables BEGIN
               REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
               LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
               PRETTY_PRINT_2DA
+            BUT_ONLY
           END
         END
       END

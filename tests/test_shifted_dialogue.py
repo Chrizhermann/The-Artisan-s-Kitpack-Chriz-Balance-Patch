@@ -70,7 +70,9 @@ class ShiftedDialogueTests(unittest.TestCase):
         root = Path(temporary.name)
         (root / "override").mkdir()
         shutil.copy2(WEIDU, root / "weidu.exe")
-        shutil.copytree(ROOT / "ArtisansKitpack/lib", root / "ArtisansKitpack/lib")
+        # The libraries that the installer's ALWAYS block includes.
+        for folder in ("lib", "eeex"):
+            shutil.copytree(ROOT / "ArtisansKitpack" / folder, root / "ArtisansKitpack" / folder)
         (root / TP2).parent.mkdir()
         shutil.copy2(ROOT / TP2, root / TP2)
         _write_marker_key_and_bif(root)
