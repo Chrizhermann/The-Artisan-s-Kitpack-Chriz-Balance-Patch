@@ -55,10 +55,10 @@ such a reinstall.
 
 Saves need no migration: the class grants are not stored as part of the
 character's build but reapplied from `C0PR#CL.SPL`. The class and kit
-progression tables Kitpack patched apply it at each level-up. Kitpack's helper
-creature `C0PR#EF` also makes the creatures in the protagonist's area reapply
-it when the helper appears there. This helper path is read from the installed
-scripts, not confirmed in a running game.
+progression tables Kitpack patched apply it at each level-up. In the lab,
+Kitpack's helper creature `C0PR#EF` did not apply it to party members: a new
+helper gave the Eldritch Knight and Arcane Trickster sorcerers their extra
+weapons back and they kept them, which a later `C0PR#CL` would have cleared.
 
 To refresh a sorcerer at once, open the console and let that character cast the
 spell on themselves (replace `Player2` with the sorcerer's slot):
@@ -78,4 +78,11 @@ as every level-up does. For an Eldritch Knight or Arcane Trickster sorcerer,
 reapply the kit's extra weapons the same way afterwards with `C0PR#EK` or
 `C0PR#AT` in place of `C0PR#CL`.
 
-Installer tests do not establish these in-game results.
+Lab check (2026-10-26, BG2:EE 2.7.3.0 with EEex 1.3.1, test characters created
+after installing this patch): a sorcerer and a Dragon Disciple without pips
+equipped a dagger, a quarterstaff and darts after joining the party, after a
+level-up and after loading a save, and mages were unchanged. A level-up
+removed the Eldritch Knight and Arcane Trickster sorcerers' extra weapons; the
+next helper, here after loading the save, gave them back. The console commands
+above and characters created before installing this patch were not part of the
+lab check.
