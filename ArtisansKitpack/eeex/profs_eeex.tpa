@@ -1,4 +1,5 @@
 INCLUDE ~%MOD_FOLDER%/eeex/on_load_eeex.tpa~
+INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
 
 ACTION_IF NOT FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~ BEGIN
 
@@ -413,176 +414,9 @@ COPY_EXISTING ~splprot.2da~ ~override~
 	  END
 	END
 
-COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-  LPF DELETE_EFFECT INT_VAR match_special = 99999 END
-
-// Class weapon dispatch: CLASS.IDS symbol => WEAPPROF.2DA data column.
-// WEAPPROF has no SORCERER column; the engine gives sorcerers the MAGE
-// column's weapon choices, so SORCERER reads column 4 as well. Without it
-// every sorcerer kit (Dragon Disciple included) could only equip the
-// EEex-gated daggers, quarterstaves, darts and slings it had pips in.
-// SORCERER stays last so these entries follow all other classes in C0PR#CL,
-// matching live-patch/AKCB_SORCERER_WEAPONS on existing installs.
-ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_CLASS	BEGIN
-	~MAGE~		=>	4
-	~FIGHTER~		=>	5
-	~CLERIC~		=>	6
-  ~THIEF~ => 7
-  ~BARD~ => 8
-  ~PALADIN~ => 9
-  ~DRUID~ => 10
-  ~RANGER~ => 11
-  ~FIGHTER_MAGE~ => 12
-  ~FIGHTER_CLERIC~ => 13
-  ~FIGHTER_THIEF~ => 14
-  ~FIGHTER_MAGE_THIEF~ => 15
-  ~MAGE_THIEF~ => 16
-  ~CLERIC_MAGE~ => 17
-  ~CLERIC_THIEF~ => 18
-  ~FIGHTER_DRUID~ => 19
-  ~FIGHTER_MAGE_CLERIC~ => 20
-  ~CLERIC_RANGER~ => 21
-  ~MONK~ => 51
-  ~SHAMAN~ => 60
-  ~SORCERER~ => 4
-END
-ACTION_PHP_EACH WEAPPROF_CLASS AS class => class_number BEGIN
-
-ACTION_DEFINE_ASSOCIATIVE_ARRAY	WEAPPROF_WEAPONTYPE	BEGIN
-	~BASTARDSWORD~		          =>	8
-	~LONGSWORD~		              =>	9
-	~SHORTSWORD~	              =>	10
-	~AXE~	                      =>	11
-	~TWOHANDEDSWORD~	          =>	12
-	~KATANA~	                  =>	13
-	~SCIMITARWAKISASHININJATO~  =>	14
-	~DAGGER~	                  =>	15
-	~WARHAMMER~                 =>	16
-	~CLUB~	                    =>	17
-	~SPEAR~	                    =>	18
-	~HALBERD~	                  =>	19
-	~FLAILMORNINGSTAR~	        =>	20
-	~MACE~	                    =>	21
-	~QUARTERSTAFF~	            =>	22
-	~CROSSBOW~	                =>	23
-	~LONGBOW~	                  =>	24
-	~SHORTBOW~	                =>	25
-	~DART~	                    =>	26
-	~SLING~	                    =>	27
-END
-ACTION_PHP_EACH WEAPPROF_WEAPONTYPE AS weapon => weapon_number BEGIN
-COPY_EXISTING ~weapprof.2da~  ~override~
-  COUNT_2DA_COLS col_count
-    READ_2DA_ENTRY ~%weapon_number%~ ~%class_number%~ col_count ~%weapon%_%class%~
-      PATCH_IF (EVAL ~%weapon%_%class%~ > 0) BEGIN
-        SET EVAL ~%weapon%_%class%_1~ = 1
-      END ELSE BEGIN
-        SET EVAL ~%weapon%_%class%_1~ = 0
-      END
-      
-END
-
-ACTION_IF (EVAL ~BASTARDSWORD_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#89 END
-END
- 
-ACTION_IF (EVAL ~LONGSWORD_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#90 END
-END
- 
-ACTION_IF (EVAL ~SHORTSWORD_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#91 END
-END
- 
-ACTION_IF (EVAL ~AXE_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#92 END
-END
- 
-ACTION_IF (EVAL ~TWOHANDEDSWORD_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#93 END
-END
- 
-ACTION_IF (EVAL ~KATANA_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#94 END
-END
- 
-ACTION_IF (EVAL ~SCIMITARWAKISASHININJATO_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#95 END
-END
- 
-ACTION_IF (EVAL ~DAGGER_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#96 END
-END
- 
-ACTION_IF (EVAL ~WARHAMMER_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#97 END
-END
- 
-ACTION_IF (EVAL ~CLUB_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#115 END
-END
- 
-ACTION_IF (EVAL ~SPEAR_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#98 END
-END
- 
-ACTION_IF (EVAL ~HALBERD_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#99 END
-END
- 
-ACTION_IF (EVAL ~FLAILMORNINGSTAR_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#100 END
-END
- 
-ACTION_IF (EVAL ~MACE_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#101 END
-END
- 
-ACTION_IF (EVAL ~QUARTERSTAFF_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#102 END
-END
- 
-ACTION_IF (EVAL ~CROSSBOW_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#103 END
-END
- 
-ACTION_IF (EVAL ~LONGBOW_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#104 END
-END
- 
-ACTION_IF (EVAL ~SHORTBOW_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#105 END
-END
- 
-ACTION_IF (EVAL ~DART_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#106 END
-END
- 
-ACTION_IF (EVAL ~SLING_%class%_1~ = 1) THEN BEGIN
-  COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
-    LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%class%~) parameter2 = 105 special = 99999 STR_VAR resource = EVAL C0PR#107 END
-END
- 
-END
+// C0PR#CL's class weapon grants, from WEAPPROF.2DA as it is now
+// (eeex/class_weapon_grants.tpa).
+LAF c0_build_class_weapon_grants END
 
 COPY_EXISTING ~%MOD_FOLDER%/eeex/profs/C0PR#CL.spl~ ~override/C0PR#89.SPL~
     LPF ADD_SPELL_EFFECT INT_VAR opcode = 321 target = 2 timing = 1 STR_VAR resource = C0PR#89 END
@@ -915,70 +749,9 @@ COPY_EXISTING_REGEXP GLOB ~^.+\.cre$~ ~override~
 
 END
 
-ACTION_IF !(FILE_EXISTS_IN_GAME ~CLABMA01.2DA~) BEGIN
-	COPY ~%MOD_FOLDER%/eeex/2da/blankclab.2DA~ ~override/CLABMA01.2DA~
-END
-
-ACTION_IF !(FILE_EXISTS_IN_GAME ~CLABSO01.2DA~) BEGIN
-	COPY ~%MOD_FOLDER%/eeex/2da/blankclab.2DA~ ~override/CLABSO01.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA02.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA02.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA03.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA03.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA04.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA04.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA05.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA05.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA06.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA06.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA07.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA07.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA08.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA08.2DA~
-END
-
-ACTION_IF NOT FILE_EXISTS_IN_GAME ~CLABMA09.2DA~ BEGIN
-COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/CLABMA09.2DA~
-END
-
-ACTION_FOR_EACH base_clab IN clabba01 clabdr01 clabfi01 clabmo01 clabpa01 clabpr01 clabrn01 clabth01 clabma01 clabso01 BEGIN
-COPY_EXISTING ~%base_clab%.2DA~ OVERRIDE
-  // Borrowed from Rogue Rebalancing
-  REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
-        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
-  PRETTY_PRINT_2DA
-END
-
-COPY_EXISTING ~KITLIST.2DA~ ~override~
-  READ_2DA_ENTRIES_NOW ~fig_kitlist~ 10
-  FOR (row = 1; row < fig_kitlist; row += 1) BEGIN
-  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 5 kit_clab
-  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 1 kit_label
-  READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 8 kit_class
-  
-    PATCH_IF FILE_EXISTS_IN_GAME ~%kit_clab%.2da~ BEGIN
-      INNER_ACTION BEGIN
-      COPY_EXISTING ~%kit_clab%.2DA~ override
-        REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
-        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
-        PRETTY_PRINT_2DA
-      END
-  END
-END
+// "AP_C0PR#CL" at every level of every class and kit ability table
+// (eeex/class_weapon_grants.tpa).
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 // Kit chains registered in C0PR#XX so far grant their weapons again after
 // every C0PR#CL application, not only when the helper creature next appears.

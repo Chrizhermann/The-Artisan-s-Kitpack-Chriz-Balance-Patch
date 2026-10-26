@@ -1,0 +1,222 @@
+///////////////////////////////////////////////////////////////////////////
+// Class weapon grants of C0PR#CL and its entries in the ability tables  //
+///////////////////////////////////////////////////////////////////////////
+// C0PR#CL grants each class the weapons its WEAPPROF.2DA column allows: one
+// "apply C0PR#<weapon> if the creature has class <class>" entry per class and
+// weapon (opcode 326, SPLPROT row 105, special 99999). Joining the party and
+// every level-up apply C0PR#CL through an "AP_C0PR#CL" entry at each level of
+// the class or kit ability table.
+//
+// Both used to be written only when eeex/profs_eeex.tpa was included, the
+// class entries only on its first inclusion. So
+// - a component that changes a class column of WEAPPROF.2DA afterwards left
+//   the class entries stale: after Monk Revisions, monks may put proficiency
+//   points into quarterstaves, but C0PR#CL never granted the monk class
+//   quarterstaves unless the "Update EEex-based Weapon Usability Changes"
+//   tweak ran later;
+// - the shaman's own ability table (CLABSH01) was not among the true class
+//   tables, so a shaman without a kit never had C0PR#CL applied when joining
+//   the party or levelling up, and could equip any weapon until Kitpack's
+//   helper creature applied C0PR#CL;
+// - a kit that a component added after its own inclusion of the generator
+//   (the Favored Soul) only got "AP_C0PR#CL" from a later inclusion.
+//
+// c0_build_class_weapon_grants writes the class entries again from WEAPPROF
+// as it is now, in place of the earlier ones (the other effects of C0PR#CL
+// stay as they are), and then puts "apply C0PR#KG" back at the end of
+// C0PR#CL (kit_weapon_grants.tpa). The first inclusion of the generator calls
+// it, Monk Revisions after it changes WEAPPROF, and the tweak.
+//
+// c0_add_c0pr_cl_to_ability_tables gives the ability tables of the true
+// classes, the shaman included, and the ability table of every kit in
+// KITLIST.2DA one "AP_C0PR#CL" at every level. Every inclusion of the
+// generator calls it, the Favored Soul after it adds its kit, and the tweak.
+//
+// Both do nothing without C0PR#CL.SPL (no EEex-based weapon usability), and a
+// second call without changes in between changes nothing.
+
+INCLUDE ~%MOD_FOLDER%/eeex/kit_weapon_grants.tpa~
+
+DEFINE_ACTION_FUNCTION c0_build_class_weapon_grants BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~ BEGIN
+
+    // Class weapon dispatch: CLASS.IDS symbol => WEAPPROF.2DA data column.
+    // WEAPPROF has no SORCERER column; the engine gives sorcerers the MAGE
+    // column's weapon choices, so SORCERER reads column 4 as well. Without it
+    // every sorcerer kit (Dragon Disciple included) could only equip the
+    // EEex-gated daggers, quarterstaves, darts and slings it had pips in.
+    // SORCERER stays last so these entries follow all other classes in C0PR#CL,
+    // matching live-patch/AKCB_SORCERER_WEAPONS on existing installs.
+    ACTION_DEFINE_ASSOCIATIVE_ARRAY WEAPPROF_CLASS BEGIN
+      ~MAGE~ => 4
+      ~FIGHTER~ => 5
+      ~CLERIC~ => 6
+      ~THIEF~ => 7
+      ~BARD~ => 8
+      ~PALADIN~ => 9
+      ~DRUID~ => 10
+      ~RANGER~ => 11
+      ~FIGHTER_MAGE~ => 12
+      ~FIGHTER_CLERIC~ => 13
+      ~FIGHTER_THIEF~ => 14
+      ~FIGHTER_MAGE_THIEF~ => 15
+      ~MAGE_THIEF~ => 16
+      ~CLERIC_MAGE~ => 17
+      ~CLERIC_THIEF~ => 18
+      ~FIGHTER_DRUID~ => 19
+      ~FIGHTER_MAGE_CLERIC~ => 20
+      ~CLERIC_RANGER~ => 21
+      ~MONK~ => 51
+      ~SHAMAN~ => 60
+      ~SORCERER~ => 4
+    END
+
+    // WEAPPROF.2DA weapon row => the C0PR# spell that grants the weapon.
+    ACTION_DEFINE_ASSOCIATIVE_ARRAY WEAPPROF_WEAPONTYPE BEGIN
+      ~BASTARDSWORD~ => 8
+      ~LONGSWORD~ => 9
+      ~SHORTSWORD~ => 10
+      ~AXE~ => 11
+      ~TWOHANDEDSWORD~ => 12
+      ~KATANA~ => 13
+      ~SCIMITARWAKISASHININJATO~ => 14
+      ~DAGGER~ => 15
+      ~WARHAMMER~ => 16
+      ~CLUB~ => 17
+      ~SPEAR~ => 18
+      ~HALBERD~ => 19
+      ~FLAILMORNINGSTAR~ => 20
+      ~MACE~ => 21
+      ~QUARTERSTAFF~ => 22
+      ~CROSSBOW~ => 23
+      ~LONGBOW~ => 24
+      ~SHORTBOW~ => 25
+      ~DART~ => 26
+      ~SLING~ => 27
+    END
+    ACTION_DEFINE_ASSOCIATIVE_ARRAY WEAPPROF_GRANT BEGIN
+      ~BASTARDSWORD~ => ~C0PR#89~
+      ~LONGSWORD~ => ~C0PR#90~
+      ~SHORTSWORD~ => ~C0PR#91~
+      ~AXE~ => ~C0PR#92~
+      ~TWOHANDEDSWORD~ => ~C0PR#93~
+      ~KATANA~ => ~C0PR#94~
+      ~SCIMITARWAKISASHININJATO~ => ~C0PR#95~
+      ~DAGGER~ => ~C0PR#96~
+      ~WARHAMMER~ => ~C0PR#97~
+      ~CLUB~ => ~C0PR#115~
+      ~SPEAR~ => ~C0PR#98~
+      ~HALBERD~ => ~C0PR#99~
+      ~FLAILMORNINGSTAR~ => ~C0PR#100~
+      ~MACE~ => ~C0PR#101~
+      ~QUARTERSTAFF~ => ~C0PR#102~
+      ~CROSSBOW~ => ~C0PR#103~
+      ~LONGBOW~ => ~C0PR#104~
+      ~SHORTBOW~ => ~C0PR#105~
+      ~DART~ => ~C0PR#106~
+      ~SLING~ => ~C0PR#107~
+    END
+
+    // Which weapons each class column allows (a value above 0).
+    COPY_EXISTING ~weapprof.2da~ ~override~
+      COUNT_2DA_COLS c0_cwg_col_count
+      PHP_EACH WEAPPROF_CLASS AS c0_cwg_class => c0_cwg_column BEGIN
+        PHP_EACH WEAPPROF_WEAPONTYPE AS c0_cwg_weapon => c0_cwg_row BEGIN
+          READ_2DA_ENTRY c0_cwg_row c0_cwg_column c0_cwg_col_count c0_cwg_value
+          SET $c0_cwg_allows(~%c0_cwg_class%~ ~%c0_cwg_weapon%~) = (c0_cwg_value > 0)
+        END
+      END
+    BUT_ONLY
+
+    // The earlier class entries out, one entry per class and allowed weapon in,
+    // in class order and, within a class, in weapon order. In each ability the
+    // new entries take the place of the first earlier one (the end of the
+    // ability when it has none), so effects other mods put before or after the
+    // class entries keep their place.
+    COPY_EXISTING ~C0PR#CL.SPL~ ~OVERRIDE~
+      READ_LONG  0x64 c0_cwg_abilities
+      READ_SHORT 0x68 c0_cwg_ability_count
+      READ_LONG  0x6a c0_cwg_effects
+      FOR (c0_cwg_ability = 0; c0_cwg_ability < c0_cwg_ability_count; ++c0_cwg_ability) BEGIN
+        READ_SHORT (c0_cwg_abilities + c0_cwg_ability * 0x28 + 0x1e) c0_cwg_count
+        READ_SHORT (c0_cwg_abilities + c0_cwg_ability * 0x28 + 0x20) c0_cwg_first
+        SET c0_cwg_insert = 0 - 1
+        FOR (c0_cwg_index = 0; c0_cwg_index < c0_cwg_count AND c0_cwg_insert < 0; ++c0_cwg_index) BEGIN
+          PATCH_IF (LONG_AT (c0_cwg_effects + (c0_cwg_first + c0_cwg_index) * 0x30 + 0x2c) = 99999) BEGIN
+            SET c0_cwg_insert = c0_cwg_index
+          END
+        END
+        SET $c0_cwg_insert(~%c0_cwg_ability%~) = c0_cwg_insert
+      END
+      LPF DELETE_EFFECT INT_VAR match_special = 99999 END
+      FOR (c0_cwg_ability = 0; c0_cwg_ability < c0_cwg_ability_count; ++c0_cwg_ability) BEGIN
+        SET c0_cwg_insert = $c0_cwg_insert(~%c0_cwg_ability%~)
+        PHP_EACH WEAPPROF_CLASS AS c0_cwg_class => c0_cwg_column BEGIN
+          PHP_EACH WEAPPROF_WEAPONTYPE AS c0_cwg_weapon => c0_cwg_row BEGIN
+            PATCH_IF $c0_cwg_allows(~%c0_cwg_class%~ ~%c0_cwg_weapon%~) BEGIN
+              SPRINT c0_cwg_grant $WEAPPROF_GRANT(~%c0_cwg_weapon%~)
+              LPF ADD_SPELL_EFFECT INT_VAR opcode = 326 target = 2 parameter1 = IDS_OF_SYMBOL (~CLASS~ ~%c0_cwg_class%~) parameter2 = 105 special = 99999 header = (c0_cwg_ability + 1) insert_point = c0_cwg_insert STR_VAR resource = EVAL ~%c0_cwg_grant%~ END
+              PATCH_IF c0_cwg_insert >= 0 BEGIN
+                SET c0_cwg_insert += 1
+              END
+            END
+          END
+        END
+      END
+
+    // Class entries added at the end now follow C0PR#CL's "apply C0PR#KG"
+    // entry; move it back to the end (and rebuild C0PR#KG from the chains now
+    // in C0PR#XX).
+    LAF c0_sync_kit_weapon_grants END
+  END
+END
+
+DEFINE_ACTION_FUNCTION c0_add_c0pr_cl_to_ability_tables BEGIN
+  ACTION_IF FILE_EXISTS_IN_GAME ~C0PR#CL.SPL~ BEGIN
+
+    ACTION_IF !(FILE_EXISTS_IN_GAME ~CLABMA01.2DA~) BEGIN
+      COPY ~%MOD_FOLDER%/eeex/2da/blankclab.2DA~ ~override/CLABMA01.2DA~
+    END
+
+    ACTION_IF !(FILE_EXISTS_IN_GAME ~CLABSO01.2DA~) BEGIN
+      COPY ~%MOD_FOLDER%/eeex/2da/blankclab.2DA~ ~override/CLABSO01.2DA~
+    END
+
+    // Every EE game since 2.0 has the shaman's table; like the mage and
+    // sorcerer tables above, an empty one stands in where it is missing.
+    ACTION_IF !(FILE_EXISTS_IN_GAME ~CLABSH01.2DA~) BEGIN
+      COPY ~%MOD_FOLDER%/eeex/2da/blankclab.2DA~ ~override/CLABSH01.2DA~
+    END
+
+    ACTION_FOR_EACH c0_cwg_mage_clab IN CLABMA02 CLABMA03 CLABMA04 CLABMA05 CLABMA06 CLABMA07 CLABMA08 CLABMA09 BEGIN
+      ACTION_IF NOT FILE_EXISTS_IN_GAME ~%c0_cwg_mage_clab%.2DA~ BEGIN
+        COPY_EXISTING ~CLABMA01.2DA~ ~OVERRIDE/%c0_cwg_mage_clab%.2DA~
+      END
+    END
+
+    // The ability tables of the true classes. CLABSH01 is the shaman's.
+    ACTION_FOR_EACH base_clab IN clabba01 clabdr01 clabfi01 clabmo01 clabpa01 clabpr01 clabrn01 clabth01 clabma01 clabso01 clabsh01 BEGIN
+      COPY_EXISTING ~%base_clab%.2DA~ OVERRIDE
+        // Borrowed from Rogue Rebalancing
+        REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
+        LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
+        PRETTY_PRINT_2DA
+    END
+
+    // The ability tables of the kits.
+    COPY_EXISTING ~KITLIST.2DA~ ~override~
+      READ_2DA_ENTRIES_NOW ~fig_kitlist~ 10
+      FOR (row = 1; row < fig_kitlist; row += 1) BEGIN
+        READ_2DA_ENTRY_FORMER ~fig_kitlist~ row 5 kit_clab
+        PATCH_IF FILE_EXISTS_IN_GAME ~%kit_clab%.2da~ BEGIN
+          INNER_ACTION BEGIN
+            COPY_EXISTING ~%kit_clab%.2DA~ override
+              REPLACE_TEXTUALLY ~AP_C0PR#CL~ ~****      ~
+              LPF set_clab_2da_entries INT_VAR f_MinLevel = 1 f_Increment = 1 STR_VAR f_Entry = AP_C0PR#CL END
+              PRETTY_PRINT_2DA
+          END
+        END
+      END
+    BUT_ONLY
+  END
+END

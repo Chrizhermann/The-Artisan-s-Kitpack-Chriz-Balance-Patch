@@ -1200,3 +1200,10 @@ GROUP ~Other~
 INCLUDE ~%MOD_FOLDER%/eeex/profs_eeex.tpa~
 
 INCLUDE ~%MOD_FOLDER%/lib/FavoredSoul.tpa~
+
+// FavoredSoul.tpa adds the Favored Soul kit after eeex/profs_eeex.tpa above
+// gave the ability tables of the kits so far "AP_C0PR#CL"; give the new
+// kit's table one as well, so that joining the party and level-ups apply
+// C0PR#CL to Favored Souls in every install order.
+INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
