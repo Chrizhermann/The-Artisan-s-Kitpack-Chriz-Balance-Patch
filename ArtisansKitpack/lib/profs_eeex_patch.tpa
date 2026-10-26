@@ -616,3 +616,9 @@ ACTION_IF (EVAL ~SLING_%class%_1~ = 1) THEN BEGIN
 END
  
 END
+
+// The class grants above now follow C0PR#CL's "apply C0PR#KG" entry; move it
+// back to the end and rebuild C0PR#KG from every chain now in C0PR#XX,
+// including chains that mods installed after Kitpack registered.
+INCLUDE ~%MOD_FOLDER%/eeex/kit_weapon_grants.tpa~
+LAF c0_sync_kit_weapon_grants END
