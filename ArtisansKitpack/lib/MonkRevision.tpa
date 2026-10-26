@@ -312,6 +312,13 @@ LAF mod_monk_profs END
 
 INCLUDE ~%MOD_FOLDER%/lib/monk_staves.tpa~
 
+// Monk Revisions lets monks put proficiency points into quarterstaves
+// (WEAPPROF.2DA). When the EEex-based weapon usability changes are already
+// installed, C0PR#CL has to grant the monk class quarterstaves as well, in
+// whichever order the components were installed.
+INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
+LAF c0_build_class_weapon_grants END
+
 ACTION_FOR_EACH CLASSTEXT IN CLASTEXT SODCLTXT BEGIN
 ACTION_IF (FILE_EXISTS_IN_GAME ~%CLASSTEXT%.2da~) BEGIN
   COPY_EXISTING ~%CLASSTEXT%.2da~ ~override~

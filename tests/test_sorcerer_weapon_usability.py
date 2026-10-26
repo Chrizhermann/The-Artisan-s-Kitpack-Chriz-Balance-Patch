@@ -30,6 +30,9 @@ from test_shapeshifter_personal_space import (
 MOD_FOLDER = ROOT / "ArtisansKitpack"
 GENERATOR = MOD_FOLDER / "eeex/profs_eeex.tpa"
 REGENERATOR = MOD_FOLDER / "lib/profs_eeex_patch.tpa"
+# The class weapon grants the generator and the tweak write (WEAPPROF_CLASS).
+CLASS_GRANTS = MOD_FOLDER / "eeex/class_weapon_grants.tpa"
+CLASS_GRANTS_INCLUDE = b"INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~"
 BASE_SPL = MOD_FOLDER / "eeex/profs/C0PR#CL.spl"
 BLANK_CLAB = MOD_FOLDER / "eeex/2da/blankclab.2da"
 PATCH_DIR = ROOT / "live-patch/AKCB_SORCERER_WEAPONS"
@@ -153,7 +156,7 @@ KITLIST = (
 )
 BASE_CLABS = (
     "CLABBA01", "CLABDR01", "CLABFI01", "CLABMO01", "CLABPA01", "CLABPR01",
-    "CLABRN01", "CLABTH01", "CLABMA01", "CLABSO01", "C0TSTSO",
+    "CLABRN01", "CLABTH01", "CLABMA01", "CLABSO01", "CLABSH01", "C0TSTSO",
 )
 # Vanilla-like sorcerer weapons: usable by fighters and mages, but not by
 # every class, so the generator replaces their class bits with an op319 gate.
@@ -345,11 +348,18 @@ class GeneratorGame(SyntheticGame):
             (self.override / name).write_bytes(data)
         for table in BASE_CLABS:
             shutil.copyfile(BLANK_CLAB, self.override / f"{table}.2DA")
-        legacy = root / "legacy_profs_eeex.tpa"
-        source, removed = SORCERER_ARRAY_LINE.subn(b"", GENERATOR.read_bytes())
+        # The generator before the fix: its class weapon grants without SORCERER.
+        legacy_grants = root / "legacy_class_weapon_grants.tpa"
+        source, removed = SORCERER_ARRAY_LINE.subn(b"", CLASS_GRANTS.read_bytes())
         if removed != 1:
-            raise AssertionError("profs_eeex.tpa must map SORCERER exactly once")
-        legacy.write_bytes(source)
+            raise AssertionError("class_weapon_grants.tpa must map SORCERER exactly once")
+        legacy_grants.write_bytes(source)
+        legacy = root / "legacy_profs_eeex.tpa"
+        generator = GENERATOR.read_bytes()
+        if generator.count(CLASS_GRANTS_INCLUDE) != 1:
+            raise AssertionError("profs_eeex.tpa must include class_weapon_grants.tpa exactly once")
+        legacy.write_bytes(generator.replace(
+            CLASS_GRANTS_INCLUDE, f"INCLUDE ~{legacy_grants.as_posix()}~".encode("ascii")))
         (root / "harness.tp2").write_text(
             "BACKUP ~harness-backup~\n"
             "AUTHOR ~Sorcerer weapon usability regression tests~\n"

@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack~
 AUTHOR ~Artemius_I~
-VERSION ~v4.81a-dev.85928f9-chriz.3~
+VERSION ~v4.81a-dev.85928f9-chriz.4~
 ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/2daHandling.tph~
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
@@ -14,12 +14,19 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
   INCLUDE ~%MOD_FOLDER%/lib/extend_tables.tpa~
+  // Every component of this installer ends with
+  // "LAF c0_add_c0pr_cl_to_ability_tables END" (eeex/class_weapon_grants.tpa):
+  // it may add a kit or replace an ability table, and extend_tables.tpa above
+  // widens narrower tables before every component, so each component puts
+  // "AP_C0PR#CL" back at every level of every class and kit ability table.
+  INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
 BEGIN ~Artisan's Kitpack: Enable All Classes for All Races~ DESIGNATED 0001
 GROUP ~Rule Tweaks~
 INCLUDE ~%MOD_FOLDER%/lib/unlock_classes.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~All Races~ DESIGNATED 0002
 GROUP ~Rule Tweaks~
@@ -182,6 +189,7 @@ OUTER_INNER_PATCH_SAVE text ~%text%~ BEGIN
   REPLACE_TEXTUALLY ~%old%~ ~~ // delete text if found
 END
 STRING_SET_EVALUATE 9550 ~%text%~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~All Races Except Human~ DESIGNATED 0003
 GROUP ~Rule Tweaks~
@@ -207,6 +215,7 @@ COPY_EXISTING ~clsrcreq.2da~ ~override~
   END
   PRETTY_PRINT_2DA
   BUT_ONLY
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Eldritch Knight (Fighter / Mage Kit)~ DESIGNATED 20000
 GROUP ~Multi-Class Kits~
@@ -217,14 +226,17 @@ ACTION_IF (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) THEN BEGIN
 INCLUDE ~ArtisansKitpack/lib/Eldritch_Knight_Sorc.tpa~
 
 END
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Arcane Trickster (Mage / Thief Kit)~ DESIGNATED 20001
 GROUP ~Multi-Class Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Arcane_Trickster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Pale Master Sorcerer Kit~ DESIGNATED 8001
 GROUP ~Sorcerer Kits~
 INCLUDE ~%MOD_FOLDER%/lib/PaleMaster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~'Unholy' Necromancy Spells Only (Cause Wounds, Disease, Poison, etc.)~ DESIGNATED 8101
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~8001~ ~The Pale Master Sorcerer Kit must be installed.~
@@ -517,6 +529,7 @@ COPY_EXISTING ~SPPR610.spl~ ~override/C0PM610.spl~
 WRITE_SHORT 0x1C 1
 WRITE_LONG 0x34 6
 END
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~All Necromancy Divine Spells (including Cure Wounds, Neutralize Poison, etc.)~ DESIGNATED 8102
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~8001~ ~The Pale Master Sorcerer Kit must be installed.~
@@ -953,103 +966,125 @@ ACTION_FOR_EACH description IN
       BUT_ONLY
     END
   END
+LAF c0_add_c0pr_cl_to_ability_tables END
   
 BEGIN ~Original Stat Bonuses~ DESIGNATED 8002
 SUBCOMPONENT ~Artisan's Kitpack: 3e-accurate Dragon Disciple~
 GROUP ~Sorcerer Kits~
 OUTER_SET dd = 1
 INCLUDE ~%MOD_FOLDER%/lib/DragonDisciple.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Nerfed stat bonuses (net +2 to STR)~ DESIGNATED 8003
 SUBCOMPONENT ~Artisan's Kitpack: 3e-accurate Dragon Disciple~
 GROUP ~Sorcerer Kits~
 OUTER_SET dd = 2
 INCLUDE ~%MOD_FOLDER%/lib/DragonDisciple.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Arcane Trickster Sorcerer Kit—EEEx required~ DESIGNATED 8004
 GROUP ~Sorcerer Kits~
 REQUIRE_PREDICATE (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) ~This component requires EEEx.~ //EEX required!
 INCLUDE ~%MOD_FOLDER%/lib/Arcane_Trickster_Sorc.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Monk Revisions~ DESIGNATED 10001
 GROUP ~Monk Kits~
 INCLUDE ~%MOD_FOLDER%/lib/MonkRevision.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Brawler Kit~ DESIGNATED 10002
 GROUP ~Monk Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Brawler.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Sacred Fist (Cleric) and Enlightened Fist (Sorcerer) Kits—EEEx required~ DESIGNATED 10003
 GROUP ~Monk Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~10001~ ~Monk Revisions must be installed.~
 REQUIRE_PREDICATE (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) ~This component requires EEEx.~ //EEX required!
 INCLUDE ~%MOD_FOLDER%/lib/MonkRevision-Mystic.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Ninja "Class" (Monk Kit)—EEEx required~ DESIGNATED 10004
 GROUP ~Monk Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~10001~ ~Monk Revisions must be installed.~
 REQUIRE_PREDICATE (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) ~This component requires EEEx.~ //EEX required!
 INCLUDE ~%MOD_FOLDER%/lib/Ninja.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Fighter Overhaul~ DESIGNATED 1100
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Fighter.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Berserker Overhaul~ DESIGNATED 1003
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Berserker.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Wizard Slayer Overhaul~ DESIGNATED 1006
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/WizardSlayer.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Kensai Overhaul~ DESIGNATED 1004
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Kensai.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Barbarian Overhaul~ DESIGNATED 1005
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Barbarian.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Dwarven Defender Overhaul + Vanguard Fighter Kit~ DESIGNATED 1007
 FORBID_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~1002~ ~The Vanguard Fighter Kit is already installed.~
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/dwarvendefender.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Vanguard Fighter Kit~ DESIGNATED 1002
 FORBID_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~1007~ ~The Dwarven Defender Overhaul is already installed.~
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/vanguard.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Arcane Archer Fighter Kit~ DESIGNATED 1000
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/ArcaneArcher.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Arcane Archer (Fighter/Mage)~ DESIGNATED 1001
 GROUP ~Fighter Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~1000~ ~The Arcane Archer Kit must be installed.~
 INCLUDE ~%MOD_FOLDER%/lib/aamage.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Siegemaster Fighter Kit~ DESIGNATED 1008
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Siegemaster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Dreadnought Fighter Kit~ DESIGNATED 1009
 GROUP ~Fighter Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Dreadnought.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Samurai Fighter Kit~ DESIGNATED 1010
 GROUP ~Fighter Kits~
 
 INCLUDE ~%MOD_FOLDER%/lib/Samurai.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Ranger Overhaul~ DESIGNATED 2000
 GROUP ~Ranger Kits~
 INCLUDE ~%MOD_FOLDER%/lib/ranger.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Archer Overhaul~ DESIGNATED 2010
 GROUP ~Ranger Kits~
 INCLUDE ~%MOD_FOLDER%/lib/archer.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Stalker Overhaul~ DESIGNATED 2011
 GROUP ~Ranger Kits~
@@ -1059,60 +1094,74 @@ INCLUDE ~%MOD_FOLDER%/effects/analyze.tpa~
 END
 
 INCLUDE ~%MOD_FOLDER%/lib/stalker.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Beast Master Overhaul~ DESIGNATED 2012
 GROUP ~Ranger Kits~
 
 INCLUDE ~%MOD_FOLDER%/lib/beastmaster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Dark Hunter Ranger Kit~ DESIGNATED 2002
 GROUP ~Ranger Kits~
 INCLUDE ~%MOD_FOLDER%/lib/darkhunter.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Arcane Archer (Ranger variant)~ DESIGNATED 2003
 GROUP ~Ranger Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~1000~ ~The Arcane Archer Kit must be installed.~
 INCLUDE ~%MOD_FOLDER%/lib/ArcaneArcher_Ranger.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Paladin Overhaul~ DESIGNATED 3000
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/paladin.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Cavalier Overhaul~ DESIGNATED 3010
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Cavalier.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Inquisitor Overhaul~ DESIGNATED 3003
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Inquisitor.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Undead Hunter Overhaul~ DESIGNATED 3011
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/UndeadHunter.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Blackguard Overhaul~ DESIGNATED 3004
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Blackguard.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Divine Champion Paladin Kit~ DESIGNATED 3001
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/divinechampion.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Mystic Fire Paladin Kit~ DESIGNATED 3002
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/MysticFire.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Martyr Paladin Kit~ DESIGNATED 3005
 GROUP ~Paladin Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Martyr.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Totemic Druid Overhaul~ DESIGNATED 5300
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/TotemicDruid.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Shapeshifter Overhaul~ DESIGNATED 5100
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Shapeshifter.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Shapeshifter Form Only~ DESIGNATED 5110
 SUBCOMPONENT ~Artisan's Kitpack: Shapeshifter Overhaul – Custom Werewolf Sprite~
@@ -1120,6 +1169,7 @@ GROUP ~Druid Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~5100~ ~The Shapeshifter Kit must be installed.~
 OUTER_SET werewolf_npc_sprite = 0
 INCLUDE ~%MOD_FOLDER%/lib/Shapeshifter-sprite.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Replace all NPC Werewolf Sprites~ DESIGNATED 5111
 SUBCOMPONENT ~Artisan's Kitpack: Shapeshifter Overhaul – Custom Werewolf Sprite~
@@ -1127,23 +1177,28 @@ GROUP ~Druid Kits~
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~5100~ ~The Shapeshifter Kit must be installed.~
 OUTER_SET werewolf_npc_sprite = 1
 INCLUDE ~%MOD_FOLDER%/lib/Shapeshifter-sprite.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Avenger Overhaul~ DESIGNATED 5200
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Avenger.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Elementalist Druid Kit~ DESIGNATED 5001
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Elementalist.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Hivemaster Druid Kit~ DESIGNATED 5002
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Hivemaster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Thief Overhaul~ DESIGNATED 7000
 GROUP ~Thief Kits~
 
 INCLUDE ~%MOD_FOLDER%/lib/Thief.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Assassin Overhaul~ DESIGNATED 7004
 GROUP ~Thief Kits~
@@ -1153,6 +1208,7 @@ INCLUDE ~%MOD_FOLDER%/effects/analyze.tpa~
 END
 
 INCLUDE ~%MOD_FOLDER%/lib/Assassin.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Bounty Hunter Overhaul~ DESIGNATED 7007
 GROUP ~Thief Kits~
@@ -1162,36 +1218,44 @@ INCLUDE ~%MOD_FOLDER%/effects/analyze.tpa~
 END
 
 INCLUDE ~%MOD_FOLDER%/lib/BountyHunter.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Swashbuckler Overhaul~ DESIGNATED 7006
 GROUP ~Thief Kits~
 
 INCLUDE ~%MOD_FOLDER%/lib/Swashbuckler.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Shadowdancer Overhaul~ DESIGNATED 7008
 GROUP ~Thief Kits~
 
 INCLUDE ~%MOD_FOLDER%/lib/Shadowdancer.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Rogue Archer Thief Kit~ DESIGNATED 7001
 GROUP ~Thief Kits~
 INCLUDE ~%MOD_FOLDER%/lib/adventurer.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Magekiller Thief Kit~ DESIGNATED 7002
 GROUP ~Thief Kits~
 INCLUDE ~%MOD_FOLDER%/lib/magekiller.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Trickster Thief Kit~ DESIGNATED 7003
 GROUP ~Thief Kits~
 INCLUDE ~%MOD_FOLDER%/lib/trickster.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Invisible Blade Thief Kit~ DESIGNATED 7005
 GROUP ~Thief Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Invisible_Blade.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Warhorn Shaman Kit~ DESIGNATED 9001
 GROUP ~Shaman Kits~
 INCLUDE ~%MOD_FOLDER%/lib/WarShaman.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Favored Soul (EEex only, under Shaman in chargen)~ DESIGNATED 30001
 REQUIRE_PREDICATE (MOD_IS_INSTALLED ~EEEX/EEEX.TP2~ ~0~) ~This component requires EEEx.~ //EEX required!
@@ -1200,3 +1264,4 @@ GROUP ~Other~
 INCLUDE ~%MOD_FOLDER%/eeex/profs_eeex.tpa~
 
 INCLUDE ~%MOD_FOLDER%/lib/FavoredSoul.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END

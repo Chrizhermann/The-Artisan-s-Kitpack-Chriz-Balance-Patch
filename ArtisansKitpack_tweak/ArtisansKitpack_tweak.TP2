@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/tweak~
 AUTHOR ~The Artisan~
-VERSION ~v4.81a-dev.85928f9-chriz.3~
+VERSION ~v4.81a-dev.85928f9-chriz.4~
 ALWAYS
   OUTER_SPRINT MOD_FOLDER ArtisansKitpack
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
@@ -13,6 +13,10 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/hla_actions.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
+  // Components of this installer that add a kit or replace or rewrite an
+  // ability table end with "LAF c0_add_c0pr_cl_to_ability_tables END"
+  // (eeex/class_weapon_grants.tpa), like every component of the main installer.
+  INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
@@ -441,6 +445,7 @@ INCLUDE ~%MOD_FOLDER%/lib/profs_eeex_patch.tpa~
 
 BEGIN ~Artisan's Kitpack: Dual-Classes Keep Kit Names in Character Record~ DESIGNATED 1020000
 INCLUDE ~%MOD_FOLDER%/lib/dual_kit_names.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Modal Abilities Menu (EEex)~ DESIGNATED 2000001
 REQUIRE_COMPONENT ~EEEX/EEEX.TP2~ ~0~ ~EEex must be installed.~

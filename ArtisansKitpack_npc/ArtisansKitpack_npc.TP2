@@ -1,6 +1,6 @@
 BACKUP ~weidu_external/backup/ArtisansKitpack/npcs~
 AUTHOR ~The Artisan~
-VERSION ~v4.81a-dev.85928f9-chriz.3~
+VERSION ~v4.81a-dev.85928f9-chriz.4~
 ALWAYS
   OUTER_SPRINT MOD_FOLDER ArtisansKitpack
   INCLUDE ~%MOD_FOLDER%/lib/alter_script.tpa~
@@ -13,6 +13,10 @@ ALWAYS
   INCLUDE ~%MOD_FOLDER%/lib/hla_actions.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/replace_multiline.tpa~
   INCLUDE ~%MOD_FOLDER%/lib/x_force.tph~
+  // Components of this installer that add a kit or replace or rewrite an
+  // ability table end with "LAF c0_add_c0pr_cl_to_ability_tables END"
+  // (eeex/class_weapon_grants.tpa), like every component of the main installer.
+  INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
@@ -554,6 +558,7 @@ END
 BEGIN ~Artisan's Kitpack: Rashemi Berserker Ranger Kit for Minsc~ DESIGNATED 2001
 REQUIRE_PREDICATE (GAME_IS ~BGEE BG2EE EET~) ~This mod must be installed on BG:EE, BG2EE or EET.~
 INCLUDE ~%MOD_FOLDER%/lib/berserkerminsc.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Give Ajantis the Divine Champion Kit~ DESIGNATED 3101
   REQUIRE_PREDICATE (GAME_IS ~bgee eet~) ~This component must be installed on BG:EE or EET.~
@@ -624,6 +629,7 @@ REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~5001~ ~The Elementalist Kit must 
 BEGIN ~Artisan's Kitpack: Red Wizard Mage Kit for Edwin~ DESIGNATED 5102
 REQUIRE_PREDICATE (GAME_IS ~BGEE BG2EE EET~) ~This mod must be installed on BG:EE, BG2EE or EET.~
 INCLUDE ~%MOD_FOLDER%/lib/redwizard.tpa~
+LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Rogue Archer~ DESIGNATED 7101
 SUBCOMPONENT ~Artisan's Kitpack: Make Imoen a~
