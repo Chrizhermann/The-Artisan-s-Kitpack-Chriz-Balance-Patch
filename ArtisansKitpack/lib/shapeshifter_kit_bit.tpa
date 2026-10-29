@@ -33,9 +33,13 @@
 //   bit of the item blocks that kit and the item's class flags allow its
 //   class. The bit goes, and every kit with the bit in KITLIST.2DA that is not
 //   freed gets an opcode 319 "not usable by" kit check (power 0, KIT.IDS,
-//   parameter1 its KITIDS value), unless another kit bit of the item still
-//   blocks it or the item has that check already. The Shapeshifter is a druid
-//   kit, so it keeps every item it could not use.
+//   parameter1 its KITIDS value) from this pass, also where another kit bit or
+//   another mod's check blocks it now: those may go later, the bit would not
+//   have. The Shapeshifter is a druid kit, so it keeps every item it could not
+//   use, and every changed item has at least its check.
+// - An item whose equipped effects end inside an ability's effects (the two
+//   lists overlap) stays as it is: no check could be added to the one without
+//   adding it to the other.
 // The checks carry the resource C0SHAPE_, which marks the items this pass
 // changed: a later call adds checks there for kits added since, so a druid kit
 // or the Dancer installed after the Invisible Blade is blocked where its own
@@ -56,6 +60,12 @@ DEFINE_PATCH_FUNCTION c0_ss_add_kit_check INT_VAR kit = 0 BEGIN
   READ_LONG  0x6a fx_off
   READ_SHORT 0x6e fx_idx
   READ_SHORT 0x70 fx_num
+  // Without equipped effects their index means nothing; they then start the
+  // table, where every ability's effects move one place down.
+  PATCH_IF (fx_num = 0) BEGIN
+    SET fx_idx = 0
+    WRITE_SHORT 0x6e 0
+  END
   SET at_index = fx_idx + fx_num
   SET at = fx_off + (at_index * 0x30)
   INSERT_BYTES at 0x30
@@ -132,11 +142,25 @@ DEFINE_ACTION_FUNCTION c0_free_borrowed_shapeshifter_bit BEGIN
     PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // protects against invalid files
       READ_ASCII 0x00 signature (8)
       READ_SHORT 0x1c item_type
+      READ_LONG  0x64 ab_off
+      READ_SHORT 0x68 ab_num
       READ_LONG  0x6a fx_off
       READ_SHORT 0x6e fx_idx
       READ_SHORT 0x70 fx_num
-      PATCH_IF (~%signature%~ STRING_EQUAL_CASE ~ITM V1  ~) AND (item_type != 2) AND
-               ((fx_off + ((fx_idx + fx_num) * 0x30)) <= SOURCE_SIZE) BEGIN
+      // Effect lists must lie inside the file; an empty list's index means
+      // nothing (c0_ss_add_kit_check resets the equipped one).
+      SET fx_end = (fx_num = 0) ? 0 : (fx_idx + fx_num)
+      SET layout_ok = ((ab_off + (ab_num * 0x38)) <= SOURCE_SIZE) AND
+                      ((fx_off + (fx_end * 0x30)) <= SOURCE_SIZE)
+      FOR (ab = 0; layout_ok AND (ab < ab_num); ab += 1) BEGIN
+        READ_SHORT (ab_off + (ab * 0x38) + 0x1e) ab_fx_num
+        READ_SHORT (ab_off + (ab * 0x38) + 0x20) ab_fx_idx
+        PATCH_IF ((ab_fx_num > 0) AND ((fx_off + ((ab_fx_idx + ab_fx_num) * 0x30)) > SOURCE_SIZE)) OR
+                 ((fx_num > 0) AND (ab_fx_idx < fx_end) AND ((ab_fx_idx + ab_fx_num) > fx_end)) BEGIN
+          SET layout_ok = 0
+        END
+      END
+      PATCH_IF (~%signature%~ STRING_EQUAL_CASE ~ITM V1  ~) AND (item_type != 2) AND layout_ok BEGIN
         READ_LONG 0x1e usability
         READ_BYTE 0x29 kits1
         READ_BYTE 0x2b kits2
@@ -169,15 +193,17 @@ DEFINE_ACTION_FUNCTION c0_free_borrowed_shapeshifter_bit BEGIN
               WRITE_BYTE 0x29 (kits1 BAND 0b11101111)
             END
             PHP_EACH c0_ss_kit_unusable AS kit => kit_unusable BEGIN
-              PATCH_IF (NOT $c0_ss_kit_freed(~%kit%~)) AND ((other_kits BAND kit_unusable) = 0) BEGIN
+              PATCH_IF (NOT $c0_ss_kit_freed(~%kit%~)) BEGIN
                 SET has_check = 0
                 READ_LONG  0x6a fx_off
                 READ_SHORT 0x6e fx_idx
                 READ_SHORT 0x70 fx_num
                 FOR (i = 0; i < fx_num; i += 1) BEGIN
                   SET fx = fx_off + ((fx_idx + i) * 0x30)
+                  READ_ASCII (fx + 0x14) fx_resource (8) NULL
                   PATCH_IF (SHORT_AT fx = 319) AND (BYTE_AT (fx + 0x03) = 0) AND
-                           (LONG_AT (fx + 0x04) = kit) AND (LONG_AT (fx + 0x08) = 9) BEGIN
+                           (LONG_AT (fx + 0x04) = kit) AND (LONG_AT (fx + 0x08) = 9) AND
+                           (~%fx_resource%~ STRING_EQUAL_CASE ~C0SHAPE_~) BEGIN
                     SET has_check = 1
                   END
                 END

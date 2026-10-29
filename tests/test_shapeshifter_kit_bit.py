@@ -49,6 +49,9 @@ ELEMENTALIST = 0x4044
 INVISIBLE_BLADE = 0x4048
 MIXED_THIEF = 0x4050  # a thief kit with the bit and the Assassin's bit
 SHAMAN_KIT = 0x4051  # a shaman kit with the bit: no shaman kits own item bits
+FIGHTER_KIT = 0x4060  # a fighter kit with only the bit
+FIGHTER_WILD = 0x4061  # a fighter kit with the bit and the Wild Mage's bit 31
+MAGE_WILD = 0x4062  # a mage kit with the bit and its own class's Wild Mage bit
 
 KITLIST_HEAD = (
     "2DA V1.0\r\n*\r\n"
@@ -64,12 +67,16 @@ KIT_ROWS = {
     INVISIBLE_BLADE: "72 C0_INVISIBLE_BLADE 1 2 3 C0INVBL 93 0x10000000 4 0x00004048",
     MIXED_THIEF: "80 C0_TEST_MIXED 1 2 3 C0TSTMX 94 0x10040000 4 0x00004050",
     SHAMAN_KIT: "81 C0_TEST_SHAMAN 1 2 3 C0TSTSH 95 0x10000000 21 0x00004051",
+    FIGHTER_KIT: "82 C0_TEST_FIGHTER 1 2 3 C0TSTFI 96 0x10000000 2 0x00004060",
+    FIGHTER_WILD: "83 C0_TEST_FIGHTER_WILD 1 2 3 C0TSTFW 97 0x90000000 2 0x00004061",
+    MAGE_WILD: "84 C0_TEST_MAGE_WILD 1 2 3 C0TSTMW 98 0x90000000 1 0x00004062",
 }
 VANILLA_KITS = (BERSERKER, SHAPESHIFTER, GRIZZLY_BEAR)
 
 
-def _kitlist(kits: tuple[int, ...]) -> bytes:
-    return (KITLIST_HEAD + "".join(f"{KIT_ROWS[kit]}\r\n" for kit in kits)).encode("ascii")
+def _kitlist(kits: tuple[int, ...], *, reserve: bool = True) -> bytes:
+    head = KITLIST_HEAD if reserve else KITLIST_HEAD[:KITLIST_HEAD.index("0        RESERVE")]
+    return (head + "".join(f"{KIT_ROWS[kit]}\r\n" for kit in kits)).encode("ascii")
 
 
 def _effect(opcode: int, *, target: int = 1, power: int = 0, parameter1: int = 0,
@@ -124,13 +131,46 @@ def _equipped(data: bytes) -> list[bytes]:
     return [data[offset + (first + i) * 0x30: offset + (first + i + 1) * 0x30] for i in range(count)]
 
 
-def _ability_effects(data: bytes) -> list[bytes]:
+def _layout_item(table: tuple[bytes, ...], equipped: tuple[int, int],
+                 abilities: tuple[tuple[int, int], ...], *, abilities_after: bool = False) -> bytes:
+    """A katana with any effect table: equipped (first, count), abilities [(first, count)]."""
+    header = bytearray(_item(20, 0x4004D780, 0x3F020000)[:0x72])
+    blocks = b""
+    for first, count in abilities:
+        block = bytearray(0x38)
+        block[0] = 1  # melee
+        struct.pack_into("<HH", block, 0x1E, count, first)
+        blocks += bytes(block)
+    effects = b"".join(table)
+    if abilities_after:
+        abilities_offset, effects_offset, body = 0x72 + len(effects), 0x72, effects + blocks
+    else:
+        abilities_offset, effects_offset, body = 0x72, 0x72 + len(blocks), blocks + effects
+    struct.pack_into("<IHIHH", header, 0x64, abilities_offset, len(abilities), effects_offset, *equipped)
+    return bytes(header) + body
+
+
+def _fx(number: int) -> bytes:
+    """An ability effect that says which one it is (opcode 12, parameter1)."""
+    return _effect(12, target=2, parameter1=number, timing=1)
+
+
+def _ability_effects(data: bytes) -> list[list[bytes]]:
     abilities, count, offset = struct.unpack_from("<IHI", data, 0x64)
-    blocks = []
+    lists = []
     for index in range(count):
         number, first = struct.unpack_from("<HH", data, abilities + index * 0x38 + 0x1E)
-        blocks += [data[offset + (first + i) * 0x30: offset + (first + i + 1) * 0x30] for i in range(number)]
-    return blocks
+        lists.append([data[offset + (first + i) * 0x30: offset + (first + i + 1) * 0x30] for i in range(number)])
+    return lists
+
+
+def _ability_blocks(data: bytes) -> list[bytes]:
+    """The ability headers without their first-effect index, which moves."""
+    abilities, count = struct.unpack_from("<IH", data, 0x64)
+    blocks = [bytearray(data[abilities + index * 0x38: abilities + (index + 1) * 0x38]) for index in range(count)]
+    for block in blocks:
+        block[0x20:0x22] = b"\0\0"
+    return [bytes(block) for block in blocks]
 
 
 def _kit_checks(data: bytes) -> list[int]:
@@ -147,34 +187,44 @@ def _kit_checks(data: bytes) -> list[int]:
     return checks
 
 
+# Kits with the bit that stay blocked when every kit above is in KITLIST.2DA:
+# each gets this pass's own check, also where another bit or check blocks it.
+BLOCKED = {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT, GRIZZLY_BEAR}
 ITEMS = {
     # name: (item bytes, kit bits afterwards, kit checks added) when every kit
     # above is in KITLIST.2DA before the Invisible Blade component runs.
-    "AKKATANA": (_item(20, 0x4004D780, 0x3F020000), 0x2F020000,
-                 {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
-    "AKSWEPT": (_item(20, 0x00000000, 0x3F020000, equipped=(_proficiency_gate(),)), 0x2F020000,
-                {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
+    "AKKATANA": (_item(20, 0x4004D780, 0x3F020000), 0x2F020000, BLOCKED),
+    "AKSWEPT": (_item(20, 0x00000000, 0x3F020000, equipped=(_proficiency_gate(),)), 0x2F020000, BLOCKED),
     # Rogue's Potion of Frost Giant Strength.
-    "AKPOTION": (_item(9, 0x6030FD80, 0xF803803A), 0xE803803A,
-                 {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
+    "AKPOTION": (_item(9, 0x6030FD80, 0xF803803A), 0xE803803A, BLOCKED),
     # A mage scroll as Spell Revisions and Kitpack's thief overhaul leave it:
     # the thief kits are blocked, so the Invisible Blade stays blocked too.
     "AKSCRLSR": (_item(11, 0x60625E80, 0x7F1F0100, equipped=(_effect(319, power=2, parameter2=554),)),
-                 0x6F1F0100, {SHAPESHIFTER, ELEMENTALIST, INVISIBLE_BLADE, SHAMAN_KIT}),
+                 0x6F1F0100, BLOCKED | {INVISIBLE_BLADE}),
     # The same scroll as BG2:EE ships it: thieves may not read it by class.
-    "AKSCRLVN": (_item(11, 0x60725E80, 0x78038238), 0x68038238,
-                 {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
-    # A kit check another mod put there already is not added twice.
+    "AKSCRLVN": (_item(11, 0x60725E80, 0x78038238), 0x68038238, BLOCKED),
+    # Another mod's check for the Shapeshifter stays; this pass adds its own,
+    # which marks the item for later calls.
     "AKSSGATE": (_item(20, 0x4004D780, 0x3F020000, equipped=(_effect(319, parameter1=SHAPESHIFTER,
                                                                      parameter2=9),)),
-                 0x2F020000, {ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
+                 0x2F020000, BLOCKED),
+    # The Wild Mage's bit 31 next to the Shapeshifter's.
+    "AKHIBIT": (_item(20, 0x00000000, 0x90000000), 0x80000000, BLOCKED),
     # Equipped effects before or after the ability's effects.
     "AKALTGL": (_item(20, 0x4004D780, 0x3F020000, equipped=(_proficiency_gate(),),
-                      ability=(_effect(12, target=2, parameter1=5, timing=1),), globals_first=True),
-                0x2F020000, {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
+                      ability=(_fx(5),), globals_first=True), 0x2F020000, BLOCKED),
     "AKALTAB": (_item(20, 0x4004D780, 0x3F020000, equipped=(_proficiency_gate(),),
-                      ability=(_effect(12, target=2, parameter1=5, timing=1),), globals_first=False),
-                0x2F020000, {SHAPESHIFTER, ELEMENTALIST, MIXED_THIEF, SHAMAN_KIT}),
+                      ability=(_fx(5),), globals_first=False), 0x2F020000, BLOCKED),
+    # Equipped effects between two abilities' effects.
+    "AKSPLIT": (_layout_item((_fx(1), _proficiency_gate(), _fx(2)), (1, 1), ((0, 1), (2, 1))),
+                0x2F020000, BLOCKED),
+    # No equipped effects, their index inside an ability's effects.
+    "AKEMPTYEQ": (_layout_item((_fx(1), _fx(2), _fx(3)), (1, 0), ((0, 3),)), 0x2F020000, BLOCKED),
+    # Empty lists whose indices point past the end of the file.
+    "AKJUNKIDX": (_layout_item((_fx(1), _fx(2)), (40, 0), ((0, 2), (90, 0))), 0x2F020000, BLOCKED),
+    # The abilities behind the effect table.
+    "AKABBEH": (_layout_item((_proficiency_gate(), _fx(1)), (0, 1), ((1, 1),), abilities_after=True),
+                0x2F020000, BLOCKED),
 }
 UNCHANGED = {
     # Body armor keeps the Shapeshifter's own rule.
@@ -186,11 +236,15 @@ UNCHANGED = {
     "AKNOBIT": _item(20, 0x4004D780, 0x2F020000),
     "AKSHORT": b"ITM V1  " + b"\x10" * 0x40,
     "AKV11": _item(20, 0x4004D780, 0x3F020000, signature=b"ITM V1.1"),
+    # The equipped effects end inside an ability's effects.
+    "AKOVERLAP": _layout_item((_proficiency_gate(), _fx(1), _fx(2)), (0, 2), ((1, 2),)),
+    # An ability's effects run past the end of the file.
+    "AKBADAB": _layout_item((_proficiency_gate(), _fx(1)), (0, 1), ((1, 4),)),
 }
 
 
 class KitBitGame:
-    def __init__(self, root: Path, kits: tuple[int, ...]) -> None:
+    def __init__(self, root: Path, kits: tuple[int, ...], *, reserve: bool = True) -> None:
         self.root = root
         self.override = root / "override"
         self.override.mkdir(parents=True)
@@ -199,7 +253,7 @@ class KitBitGame:
         for path in (root / "lang/en_us/dialog.tlk", root / "dialog.tlk"):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(ONE_EMPTY_STRING_TLK)
-        (self.override / "KITLIST.2DA").write_bytes(_kitlist(kits))
+        (self.override / "KITLIST.2DA").write_bytes(_kitlist(kits, reserve=reserve))
         for name, (data, _, _) in ITEMS.items():
             (self.override / f"{name}.ITM").write_bytes(data)
         for name, data in UNCHANGED.items():
@@ -265,10 +319,10 @@ def _harness() -> str:
 
 
 class ShapeshifterKitBitTestCase(unittest.TestCase):
-    def _game(self, kits: tuple[int, ...]) -> KitBitGame:
+    def _game(self, kits: tuple[int, ...], *, reserve: bool = True) -> KitBitGame:
         temporary = tempfile.TemporaryDirectory(prefix="akcb-sskit-")
         self.addCleanup(temporary.cleanup)
-        game = KitBitGame(Path(temporary.name) / "game", kits)
+        game = KitBitGame(Path(temporary.name) / "game", kits, reserve=reserve)
         (game.root / "harness.tp2").write_text(_harness(), encoding="utf-8", newline="\n")
         return game
 
@@ -283,12 +337,15 @@ class ShapeshifterKitBitTestCase(unittest.TestCase):
         self.assertEqual(kits, _kits(data))
         added = _kit_checks(data)
         self.assertEqual(sorted(checks), sorted(added), "one kit check per kit that stays blocked")
-        # Everything else stays as it was: the header but for byte 0x29 and
-        # the equipped effect count, the old effects, the ability's effects.
-        skip = {0x29, 0x70, 0x71}
+        # Everything else stays as it was: the header but for byte 0x29 and the
+        # table fields that move, the old equipped effects, every ability with
+        # its own effects.
+        skip = {0x29, *range(0x64, 0x68), 0x6E, 0x6F, 0x70, 0x71}
         self.assertEqual([b for i, b in enumerate(original[:0x72]) if i not in skip],
                          [b for i, b in enumerate(data[:0x72]) if i not in skip])
-        self.assertEqual(_equipped(original), [e for e in _equipped(data) if e[0x14:0x1C].rstrip(b"\0") != MARKER.encode()])
+        kept = [effect for effect in _equipped(data) if effect[0x14:0x1C].rstrip(b"\0") != MARKER.encode()]
+        self.assertEqual(_equipped(original), kept)
+        self.assertEqual(_ability_blocks(original), _ability_blocks(data))
         self.assertEqual(_ability_effects(original), _ability_effects(data))
 
 
@@ -345,7 +402,7 @@ class InstallOrderTests(ShapeshifterKitBitTestCase):
         self._install(game, 5001, 7005)
         katana = game.item("AKKATANA")
         self.assertEqual(0x2F020000, _kits(katana))
-        self.assertEqual({SHAPESHIFTER, ELEMENTALIST}, set(_kit_checks(katana)))
+        self.assertEqual({SHAPESHIFTER, ELEMENTALIST, GRIZZLY_BEAR}, set(_kit_checks(katana)))
         # Only the Dancer would gain the scroll: it stays as it was until then.
         self.assertEqual(ITEMS["AKSCRLSR"][0], game.item("AKSCRLSR"))
         self._install(game, 1005, 20)
@@ -356,10 +413,10 @@ class InstallOrderTests(ShapeshifterKitBitTestCase):
         self.assertEqual(katana, game.item("AKCLONE"))
         late = game.item("AKLATE")
         self.assertEqual(0x2F020000, _kits(late))
-        self.assertEqual({SHAPESHIFTER, ELEMENTALIST}, set(_kit_checks(late)))
+        self.assertEqual({SHAPESHIFTER, ELEMENTALIST, GRIZZLY_BEAR}, set(_kit_checks(late)))
         scroll = game.item("AKSCRLSR")
         self.assertEqual(0x6F1F0100, _kits(scroll))
-        self.assertEqual({SHAPESHIFTER, ELEMENTALIST, INVISIBLE_BLADE}, set(_kit_checks(scroll)))
+        self.assertEqual({SHAPESHIFTER, ELEMENTALIST, INVISIBLE_BLADE, GRIZZLY_BEAR}, set(_kit_checks(scroll)))
         after = _raw_tree(game.override)
         self._install(game, 7206)
         self.assertEqual(after, _raw_tree(game.override))
@@ -367,11 +424,25 @@ class InstallOrderTests(ShapeshifterKitBitTestCase):
     def test_a_druid_kit_added_after_the_invisible_blade_gets_its_kit_checks(self) -> None:
         game = self._game(VANILLA_KITS)
         self._install(game, 7005)
-        self.assertEqual([SHAPESHIFTER], _kit_checks(game.item("AKKATANA")))
+        self.assertEqual({SHAPESHIFTER, GRIZZLY_BEAR}, set(_kit_checks(game.item("AKKATANA"))))
         self._install(game, 5001)
-        for name in ("AKKATANA", "AKSWEPT", "AKPOTION", "AKALTAB"):
+        # AKSSGATE: another mod's Shapeshifter check did not keep the item from
+        # being marked, so the Elementalist added later gets its check there too.
+        for name in ("AKKATANA", "AKSWEPT", "AKPOTION", "AKALTAB", "AKEMPTYEQ", "AKSSGATE"):
             with self.subTest(item=name):
-                self.assertEqual({SHAPESHIFTER, ELEMENTALIST}, set(_kit_checks(game.item(name))))
+                self.assertEqual({SHAPESHIFTER, ELEMENTALIST, GRIZZLY_BEAR}, set(_kit_checks(game.item(name))))
+
+    def test_bit_31_and_a_kit_in_the_first_row(self) -> None:
+        # No RESERVE row: the mage kit with the Wild Mage's bit 31 comes first.
+        game = self._game((MAGE_WILD, BERSERKER, SHAPESHIFTER, FIGHTER_KIT, FIGHTER_WILD), reserve=False)
+        self._install(game, 7005)
+        # The fighter kits are freed (no fighter kit's bit on these items); the
+        # mage kit carries its own class's Wild Mage bit and stays blocked.
+        for name, kits in (("AKKATANA", 0x2F020000), ("AKHIBIT", 0x80000000)):
+            with self.subTest(item=name):
+                data = game.item(name)
+                self.assertEqual(kits, _kits(data))
+                self.assertEqual({SHAPESHIFTER, MAGE_WILD}, set(_kit_checks(data)))
 
     def test_without_kits_that_borrow_the_bit_nothing_changes(self) -> None:
         game = self._game(VANILLA_KITS)
