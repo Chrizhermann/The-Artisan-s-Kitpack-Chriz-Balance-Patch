@@ -15,12 +15,12 @@ This fork exists strictly because I wanted a few balance knobs turned differentl
 
 ## Version identity
 
-This release is **`v4.81a-dev.85928f9-chriz.4`**: the upstream
+This release is **`v4.81a-dev.85928f9-chriz.5`**: the upstream
 release and included development snapshot, followed by our patch revision.
 This replaces independent `chriz-v1.x` numbering for future releases. Published
 `chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
 See the [versioning rules](docs/fork-versioning.md)
-and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.4.md).
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.5.md).
 
 ## Installation
 
@@ -81,6 +81,21 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Invisible Blade and Dancer: katanas and rogue items** — the Invisible
+  Blade and Bardic Wonders' Dancer can use the katanas they may train, the
+  Rogue's Potion of Frost Giant Strength and, for the Dancer, the mage scrolls
+  other bards may read. They cannot wear armor because they borrow the
+  Shapeshifter's item usability bit, as the Elementalist does, and the item
+  files also set that bit wherever druids may not use an item, which locked
+  them out of every katana. Body armor keeps the bit, and the Shapeshifter,
+  the Elementalist, the other druid kits and every other kit with the bit stay
+  blocked through exact kit checks. The kit components free the items present
+  then; install the tweak `7205` ("Invisible Blade - Apply the Katana Fix to
+  Items and Kits Added Later") after mods that add katanas or such kits, as
+  Bardic Wonders, Tweaks Anthology's two-handed katanas or SCS do; the "Update
+  EEex-based Weapon Usability Changes" tweak does the same at its end. New
+  installations only.
 
 - **Monks and shamans: class weapons with EEex** — with the EEex-based weapon
   usability, monks can equip quarterstaves without proficiency pips after
