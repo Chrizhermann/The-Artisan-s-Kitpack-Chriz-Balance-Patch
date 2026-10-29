@@ -17,6 +17,7 @@ ALWAYS
   // ability table end with "LAF c0_add_c0pr_cl_to_ability_tables END"
   // (eeex/class_weapon_grants.tpa), like every component of the main installer.
   INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
+  INCLUDE ~%MOD_FOLDER%/lib/shapeshifter_kit_bit.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
@@ -303,6 +304,13 @@ INCLUDE ~%MOD_FOLDER%/lib/mystic_fire_spells.tpa~
 BEGIN ~Artisan's Kitpack: Trickster - Mimic Mod Kit Abilities (install this after other kits!)~ DESIGNATED 7203
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~7003~ ~The Trickster Kit must be installed.~
 INCLUDE ~%MOD_FOLDER%/lib/trickster-mods.tpa~
+
+// The Invisible Blade and Elementalist components free the katanas and the
+// other items present then; this does the same for items and kits that mods
+// installed later added, the Dancer of Bardic Wonders and SCS's drow katana
+// among them (lib/shapeshifter_kit_bit.tpa).
+BEGIN ~Artisan's Kitpack: Invisible Blade - Apply the Katana Fix to Items and Kits Added Later (install this after mods that add items or kits)~ DESIGNATED 7205
+LAF c0_free_borrowed_shapeshifter_bit END
 
 BEGIN ~Artisan's Kitpack: Arcane Trickster (Sorcerer) - Enable Thief Equipment~ DESIGNATED 8204
 REQUIRE_COMPONENT ~Setup-ArtisansKitpack.tp2~ ~8004~ ~The Arcane Trickster Sorcerer Kit must be installed.~

@@ -20,6 +20,9 @@ ALWAYS
   // widens narrower tables before every component, so each component puts
   // "AP_C0PR#CL" back at every level of every class and kit ability table.
   INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
+  // The components of kits that borrow the Shapeshifter's item usability bit
+  // call "LAF c0_free_borrowed_shapeshifter_bit END" (lib/shapeshifter_kit_bit.tpa).
+  INCLUDE ~%MOD_FOLDER%/lib/shapeshifter_kit_bit.tpa~
 END
 AUTO_TRA ~%MOD_FOLDER%/tra/%s~
 
@@ -1187,6 +1190,7 @@ LAF c0_add_c0pr_cl_to_ability_tables END
 BEGIN ~Artisan's Kitpack: Elementalist Druid Kit~ DESIGNATED 5001
 GROUP ~Druid Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Elementalist.tpa~
+LAF c0_free_borrowed_shapeshifter_bit END
 LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Hivemaster Druid Kit~ DESIGNATED 5002
@@ -1250,6 +1254,7 @@ LAF c0_add_c0pr_cl_to_ability_tables END
 BEGIN ~Artisan's Kitpack: Invisible Blade Thief Kit~ DESIGNATED 7005
 GROUP ~Thief Kits~
 INCLUDE ~%MOD_FOLDER%/lib/Invisible_Blade.tpa~
+LAF c0_free_borrowed_shapeshifter_bit END
 LAF c0_add_c0pr_cl_to_ability_tables END
 
 BEGIN ~Artisan's Kitpack: Warhorn Shaman Kit~ DESIGNATED 9001

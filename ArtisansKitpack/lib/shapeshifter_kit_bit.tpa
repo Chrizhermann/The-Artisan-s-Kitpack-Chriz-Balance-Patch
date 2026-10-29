@@ -1,0 +1,194 @@
+///////////////////////////////////////////////////////////////////////////
+// Kits that borrow the Shapeshifter's item usability bit                //
+///////////////////////////////////////////////////////////////////////////
+// The Invisible Blade and the Elementalist of this mod, and the Dancer of
+// Bardic Wonders, may not wear armor because KITLIST.2DA gives them the
+// Shapeshifter's UNUSABLE bit, 0x10000000 (item byte 0x29, bit 4): the
+// game's body armor carries it. Items carry that bit for another reason as
+// well: wherever druids may not use an item, the item files also set the bits
+// of the druid kits. So every katana, the Rogue's Potion of Frost Giant
+// Strength and some mage scrolls have it, next to the bits of the Totemic
+// Druid and the Avenger, and a kit that borrows the bit loses them all:
+// - the Invisible Blade could not equip a katana it may put proficiency points
+//   into, nor drink the potion made for thieves and bards;
+// - the Dancer could not equip katanas nor read those scrolls.
+// Copies that mods make of such items keep the bit: Tweaks Anthology's
+// two-handed katanas, SCS's drow katana and potion.
+//
+// c0_free_borrowed_shapeshifter_bit takes the bit off such items for the kits
+// that borrow it, and keeps blocking every kit the bit still has to block with
+// an exact kit check:
+// - Body armor (item type 2) keeps the bit: there it is the Shapeshifter's
+//   own rule, the one the kits borrowed it for.
+// - On any other item, a kit is freed from the bit when the item blocks none
+//   of the kits the game made for that kit's class (CLASS_KIT_BITS below):
+//   then the bit cannot be a restriction of that class, only one of the druid
+//   kits. Items that only a few kits may use block those kits as well, so
+//   there the bit keeps blocking.
+// - Druid kits are never freed, nor kits of a class that has no kits of its
+//   own in that list (shamans, multi-classes), nor kits that carry the bit of
+//   one of those kits besides the Shapeshifter's (the hidden GRIZZLY_BEAR kit
+//   carries every bit).
+// - An item changes only when one of the freed kits gains it: no other kit
+//   bit of the item blocks that kit and the item's class flags allow its
+//   class. The bit goes, and every kit with the bit in KITLIST.2DA that is not
+//   freed gets an opcode 319 "not usable by" kit check (power 0, KIT.IDS,
+//   parameter1 its KITIDS value), unless another kit bit of the item still
+//   blocks it or the item has that check already. The Shapeshifter is a druid
+//   kit, so it keeps every item it could not use.
+// The checks carry the resource C0SHAPE_, which marks the items this pass
+// changed: a later call adds checks there for kits added since, so a druid kit
+// or the Dancer installed after the Invisible Blade is blocked where its own
+// rule says so.
+//
+// The Elementalist and Invisible Blade components call it, and so do the
+// "Update EEex-based Weapon Usability Changes" tweak and the Invisible Blade
+// tweak for items that mods add after the kits. A second call without changes
+// in between changes nothing.
+
+// Appends an opcode 319 "not usable by" check for the kit with KITIDS value
+// `kit` to the item's equipped effects. Written out rather than through
+// ADD_ITEM_EQEFFECT: WeiDU 249 inserts that one at the wrong place when the
+// equipped effects do not come first in the effect table.
+DEFINE_PATCH_FUNCTION c0_ss_add_kit_check INT_VAR kit = 0 BEGIN
+  READ_LONG  0x64 ab_off
+  READ_SHORT 0x68 ab_num
+  READ_LONG  0x6a fx_off
+  READ_SHORT 0x6e fx_idx
+  READ_SHORT 0x70 fx_num
+  SET at_index = fx_idx + fx_num
+  SET at = fx_off + (at_index * 0x30)
+  INSERT_BYTES at 0x30
+  WRITE_SHORT at 319
+  WRITE_BYTE  (at + 0x02) 1   // target: self
+  WRITE_BYTE  (at + 0x03) 0   // power 0: not usable by
+  WRITE_LONG  (at + 0x04) kit
+  WRITE_LONG  (at + 0x08) 9   // KIT.IDS
+  WRITE_BYTE  (at + 0x0c) 2   // while equipped
+  WRITE_BYTE  (at + 0x12) 100 // probability
+  WRITE_ASCII (at + 0x14) ~C0SHAPE_~ #8
+  WRITE_SHORT 0x70 (fx_num + 1)
+  PATCH_IF (ab_num > 0) AND (ab_off >= at) BEGIN
+    WRITE_LONG 0x64 (ab_off + 0x30)
+    SET ab_off += 0x30
+  END
+  FOR (ab = 0; ab < ab_num; ab += 1) BEGIN
+    READ_SHORT (ab_off + (ab * 0x38) + 0x20) first
+    PATCH_IF (first >= at_index) BEGIN
+      WRITE_SHORT (ab_off + (ab * 0x38) + 0x20) (first + 1)
+    END
+  END
+END
+
+DEFINE_ACTION_FUNCTION c0_free_borrowed_shapeshifter_bit BEGIN
+  ACTION_CLEAR_ARRAY c0_ss_kit_unusable
+  ACTION_CLEAR_ARRAY c0_ss_kit_freeable
+  ACTION_CLEAR_ARRAY c0_ss_kit_class_kits
+  ACTION_CLEAR_ARRAY c0_ss_kit_class_flag
+  ACTION_CLEAR_ARRAY c0_ss_kit_freed
+
+  // Kits with the bit: KITIDS value => UNUSABLE value, whether the bit may
+  // be taken off for it, the bits of its class's own kits and its class flag.
+  COPY_EXISTING ~KITLIST.2DA~ ~override~
+    READ_2DA_ENTRIES_NOW c0_ss_kitlist 10
+    FOR (row = 0; row < c0_ss_kitlist; row += 1) BEGIN
+      READ_2DA_ENTRY_FORMER c0_ss_kitlist row 7 unusable
+      READ_2DA_ENTRY_FORMER c0_ss_kitlist row 8 class
+      READ_2DA_ENTRY_FORMER c0_ss_kitlist row 9 kit
+      PATCH_IF (IS_AN_INT unusable) AND (IS_AN_INT class) AND (IS_AN_INT kit) BEGIN
+        PATCH_IF ((unusable BAND 0x10000000) != 0) BEGIN
+          // CLASS_KIT_BITS: KITLIST.2DA CLASS => the bits of the kits the
+          // game made for it (0x4000 is shared by the Enhanced Edition kits:
+          // the Dwarven Defender, the Tyr and Tempus clerics, the
+          // Shadowdancer) and the class's item usability flag (offset 0x1e).
+          SET freeable = 1
+          PATCH_MATCH class WITH
+            1  BEGIN SET class_kits = 0x80003fc0 SET class_flag = 0x00040000 END // mage: Abjurer to Transmuter, Wild Mage
+            2  BEGIN SET class_kits = 0x40004007 SET class_flag = 0x00000800 END // fighter: Berserker, Wizard Slayer, Kensai, Barbarian, Dwarven Defender
+            3  BEGIN SET class_kits = 0x07004000 SET class_flag = 0x00000080 END // cleric: Talos, Helm, Lathander, Tyr, Tempus
+            4  BEGIN SET class_kits = 0x001c4000 SET class_flag = 0x00400000 END // thief: Assassin, Bounty Hunter, Swashbuckler, Shadowdancer
+            5  BEGIN SET class_kits = 0x00e00000 SET class_flag = 0x00000040 END // bard: Blade, Jester, Skald
+            6  BEGIN SET class_kits = 0x00000038 SET class_flag = 0x00100000 END // paladin: Cavalier, Inquisitor, Undead Hunter
+            12 BEGIN SET class_kits = 0x00038000 SET class_flag = 0x00200000 END // ranger: Archer, Stalker, Beastmaster
+            DEFAULT
+              SET freeable = 0
+              SET class_kits = 0
+              SET class_flag = 0
+          END
+          PATCH_IF ((unusable BAND class_kits) != 0) BEGIN
+            SET freeable = 0
+          END
+          SET kit_id = kit
+          SET $c0_ss_kit_unusable(~%kit_id%~) = unusable
+          SET $c0_ss_kit_freeable(~%kit_id%~) = freeable
+          SET $c0_ss_kit_class_kits(~%kit_id%~) = class_kits
+          SET $c0_ss_kit_class_flag(~%kit_id%~) = class_flag
+        END
+      END
+    END
+  BUT_ONLY
+
+  COPY_EXISTING_REGEXP GLOB ~^.+\.itm$~ ~override~
+    PATCH_IF (SOURCE_SIZE > 0x71) BEGIN // protects against invalid files
+      READ_ASCII 0x00 signature (8)
+      READ_SHORT 0x1c item_type
+      READ_LONG  0x6a fx_off
+      READ_SHORT 0x6e fx_idx
+      READ_SHORT 0x70 fx_num
+      PATCH_IF (~%signature%~ STRING_EQUAL_CASE ~ITM V1  ~) AND (item_type != 2) AND
+               ((fx_off + ((fx_idx + fx_num) * 0x30)) <= SOURCE_SIZE) BEGIN
+        READ_LONG 0x1e usability
+        READ_BYTE 0x29 kits1
+        READ_BYTE 0x2b kits2
+        READ_BYTE 0x2d kits3
+        READ_BYTE 0x2f kits4
+        SET has_bit = ((kits1 BAND 0b00010000) != 0)
+        SET other_kits = ((kits1 BAND 0b11101111) << 24) BOR (kits2 << 16) BOR (kits3 << 8) BOR kits4
+        SET marked = 0
+        FOR (i = 0; i < fx_num; i += 1) BEGIN
+          SET fx = fx_off + ((fx_idx + i) * 0x30)
+          PATCH_IF (SHORT_AT fx = 319) BEGIN
+            READ_ASCII (fx + 0x14) fx_resource (8) NULL
+            PATCH_IF (~%fx_resource%~ STRING_EQUAL_CASE ~C0SHAPE_~) BEGIN
+              SET marked = 1
+            END
+          END
+        END
+        PATCH_IF has_bit OR marked BEGIN
+          SET gains = 0
+          PHP_EACH c0_ss_kit_unusable AS kit => kit_unusable BEGIN
+            SET freed = ($c0_ss_kit_freeable(~%kit%~) AND ((other_kits BAND $c0_ss_kit_class_kits(~%kit%~)) = 0))
+            SET $c0_ss_kit_freed(~%kit%~) = freed
+            PATCH_IF freed AND ((other_kits BAND kit_unusable) = 0) AND
+                     ((usability BAND $c0_ss_kit_class_flag(~%kit%~)) = 0) BEGIN
+              SET gains = 1
+            END
+          END
+          PATCH_IF gains OR marked BEGIN
+            PATCH_IF has_bit BEGIN
+              WRITE_BYTE 0x29 (kits1 BAND 0b11101111)
+            END
+            PHP_EACH c0_ss_kit_unusable AS kit => kit_unusable BEGIN
+              PATCH_IF (NOT $c0_ss_kit_freed(~%kit%~)) AND ((other_kits BAND kit_unusable) = 0) BEGIN
+                SET has_check = 0
+                READ_LONG  0x6a fx_off
+                READ_SHORT 0x6e fx_idx
+                READ_SHORT 0x70 fx_num
+                FOR (i = 0; i < fx_num; i += 1) BEGIN
+                  SET fx = fx_off + ((fx_idx + i) * 0x30)
+                  PATCH_IF (SHORT_AT fx = 319) AND (BYTE_AT (fx + 0x03) = 0) AND
+                           (LONG_AT (fx + 0x04) = kit) AND (LONG_AT (fx + 0x08) = 9) BEGIN
+                    SET has_check = 1
+                  END
+                END
+                PATCH_IF NOT has_check BEGIN
+                  LPF c0_ss_add_kit_check INT_VAR kit END
+                END
+              END
+            END
+          END
+        END
+      END
+    END
+  BUT_ONLY
+END

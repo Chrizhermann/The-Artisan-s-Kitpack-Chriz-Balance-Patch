@@ -460,3 +460,10 @@ BUT_ONLY_IF_IT_CHANGES
 INCLUDE ~%MOD_FOLDER%/eeex/class_weapon_grants.tpa~
 LAF c0_build_class_weapon_grants END
 LAF c0_add_c0pr_cl_to_ability_tables END
+
+// Katanas and other items that mods installed after the Invisible Blade or the
+// Elementalist added, and kits such as the Dancer of Bardic Wonders, lose the
+// Shapeshifter's bit where it only stands for the druid kits
+// (lib/shapeshifter_kit_bit.tpa).
+INCLUDE ~%MOD_FOLDER%/lib/shapeshifter_kit_bit.tpa~
+LAF c0_free_borrowed_shapeshifter_bit END
