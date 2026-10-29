@@ -82,14 +82,14 @@ website above.
 
 ## Changes vs upstream
 
-- **Invisible Blade, Elementalist and Dancer: katanas and rogue items** — the
-  kits that cannot wear armor because they borrow the Shapeshifter's item
-  usability bit (the Invisible Blade, the Elementalist and Bardic Wonders'
-  Dancer) can use the katanas they may train, the Rogue's Potion of Frost
-  Giant Strength and, for the Dancer, the mage scrolls other bards may read.
-  The item files also set that bit wherever druids may not use an item, which
-  locked these kits out of every katana. Body armor keeps the bit, and the
-  Shapeshifter, the other druid kits and every other kit with the bit stay
+- **Invisible Blade and Dancer: katanas and rogue items** — the Invisible
+  Blade and Bardic Wonders' Dancer can use the katanas they may train, the
+  Rogue's Potion of Frost Giant Strength and, for the Dancer, the mage scrolls
+  other bards may read. They cannot wear armor because they borrow the
+  Shapeshifter's item usability bit, as the Elementalist does, and the item
+  files also set that bit wherever druids may not use an item, which locked
+  them out of every katana. Body armor keeps the bit, and the Shapeshifter,
+  the Elementalist, the other druid kits and every other kit with the bit stay
   blocked through exact kit checks. The kit components free the items present
   then; install the tweak `7205` ("Invisible Blade - Apply the Katana Fix to
   Items and Kits Added Later") after mods that add katanas or such kits, as
