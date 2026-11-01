@@ -15,12 +15,12 @@ This fork exists strictly because I wanted a few balance knobs turned differentl
 
 ## Version identity
 
-This release is **`v4.81a-dev.85928f9-chriz.5`**: the upstream
+This release is **`v4.81a-dev.85928f9-chriz.6`**: the upstream
 release and included development snapshot, followed by our patch revision.
 This replaces independent `chriz-v1.x` numbering for future releases. Published
 `chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
 See the [versioning rules](docs/fork-versioning.md)
-and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.5.md).
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.6.md).
 
 ## Installation
 
@@ -81,6 +81,17 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Shapeshifter white and greater white werewolf: no empty attack 1 directions** (components
+  5110/5111) — `werewolf_white/C0W2A1.BAM` and
+  `werewolf_greater_white/C0W5A1.BAM` were byte for byte copies of their `A1E`
+  files, so attack 1 (the overhand swing) had no frames in the five base
+  directions. BG2:EE 2.7.3.0 then builds the sprite's FX rectangle from
+  uninitialized values, and near a wall polygon the wall clipping fill crashes
+  the game or corrupts memory. Both files are now copies of the same fur's
+  attack 2 file: in those five directions attack 1 shows the same werewolf's
+  attack 2, the three east directions are unchanged. A test checks every
+  werewolf BAM for empty direction cycles. New installations only.
 
 - **Invisible Blade and Dancer: katanas and rogue items** — the Invisible
   Blade and Bardic Wonders' Dancer can use the katanas they may train, the
