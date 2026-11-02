@@ -1,3 +1,9 @@
+> [!NOTE]
+> **This Chriz edition is frozen: it gets no further balance changes.**
+> It stays in Chriz Easy BG until our own replacement mod is ready.
+> Please report problems with this edition here, in this repository's
+> [issues](https://github.com/Chrizhermann/The-Artisan-s-Kitpack-Chriz-Balance-Patch/issues), not to the original author, Artemius_I. Credit for The Artisan's Kitpack stays with the original author (see below).
+
 # The Artisan's Kitpack — Chriz Balance Patch
 
 A personal balance-patch fork of **The Artisan's Kitpack** by **Artemius_I** (also known as **The Artisan** / **AionZ**). All kits, art, design, and mod architecture are the original author's work; this fork only adds balance tweaks and bug fixes on top of upstream.
