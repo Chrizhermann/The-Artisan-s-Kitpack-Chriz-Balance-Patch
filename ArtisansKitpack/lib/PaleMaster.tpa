@@ -281,3 +281,6 @@ ACTION_IF (FILE_EXISTS_IN_GAME ~qdtnb05.qd~) THEN BEGIN //arcane crafting check 
           COPY_EXISTING ~PMaster.2da~ ~override~
                         INSERT_2DA_ROW 3 0 ~ARCNCRFT   ****	     ****          ****          ****       GA_B_BREW1    ****          ****          ****          ****       GA_B_WAND1  ****       ****          ****          ****       GA_B_RECH1    ****          ****       ****       ****       ****          ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****       ****~
 END
+
+INCLUDE ~%MOD_FOLDER%/lib/passive_projectile.tpa~
+LAF c0ak_passive_projectile STR_VAR profile = ~C0AKSVA~ spell = ~PMPASS8B~ END

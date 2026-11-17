@@ -512,3 +512,6 @@ SET_2DA_ENTRY 1 5 50 ~****      ~
 PRETTY_PRINT_2DA
 	
 END
+
+INCLUDE ~%MOD_FOLDER%/lib/passive_projectile.tpa~
+LAF c0ak_passive_projectile STR_VAR profile = ~C0AKSVA~ spell = ~C0HIVEI2~ END

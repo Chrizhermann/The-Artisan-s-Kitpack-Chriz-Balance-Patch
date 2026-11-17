@@ -1,0 +1,24 @@
+// Always rebuild the three pulses, even when the shared Tracking setup already ran.
+ADD_PROJECTILE ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP01.PRO~ ~C0 Tracking 800~
+COPY ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP01.PRO~ ~override~
+COPY ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP01.PRO~ ~override/C0TRKP02.PRO~
+  WRITE_SHORT 0x204 1200
+  WRITE_SHORT 0x206 1200
+ADD_PROJECTILE ~override/C0TRKP02.PRO~ ~C0 Tracking 1200~
+COPY ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP01.PRO~ ~override/C0TRKP03.PRO~
+  WRITE_SHORT 0x204 1600
+  WRITE_SHORT 0x206 1600
+ADD_PROJECTILE ~override/C0TRKP03.PRO~ ~C0 Tracking 1600~
+
+COPY ~%MOD_FOLDER%/Spells/tracking/SPCL922f.SPL~ ~override~
+  LPF ALTER_SPELL_HEADER INT_VAR projectile = C0TRKP01 END
+COPY ~%MOD_FOLDER%/Spells/tracking/SPCL922G.SPL~ ~override~
+  LPF ALTER_SPELL_HEADER INT_VAR projectile = C0TRKP02 END
+COPY ~%MOD_FOLDER%/Spells/tracking/SPCL922H.SPL~ ~override~
+  LPF ALTER_SPELL_HEADER INT_VAR projectile = C0TRKP03 END
+
+// Older Stalker effects can still name the legacy 2000-unit pulse.
+ADD_PROJECTILE ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP04.PRO~ ~C0 Tracking 2000~
+COPY ~%MOD_FOLDER%/Spells/tracking/projectile/C0TRKP04.PRO~ ~override~
+COPY ~%MOD_FOLDER%/Spells/tracking/C0STK01B.SPL~ ~override~
+  LPF ALTER_SPELL_HEADER INT_VAR projectile = C0TRKP04 END

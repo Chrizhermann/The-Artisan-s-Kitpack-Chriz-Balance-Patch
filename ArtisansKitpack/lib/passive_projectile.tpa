@@ -1,0 +1,10 @@
+// Canonical projectile profiles for kit pulses using vanilla area geometry.
+DEFINE_ACTION_FUNCTION c0ak_passive_projectile
+  STR_VAR profile = "" spell = ""
+BEGIN
+  ADD_PROJECTILE ~%MOD_FOLDER%/Spells/save_projectiles/%profile%.PRO~
+  COPY ~%MOD_FOLDER%/Spells/save_projectiles/%profile%.PRO~ ~override~
+  OUTER_SET pulse_projectile = EVAL "%profile%"
+  COPY_EXISTING ~%spell%.SPL~ ~override~
+    LPF ALTER_SPELL_HEADER INT_VAR projectile = pulse_projectile END
+END

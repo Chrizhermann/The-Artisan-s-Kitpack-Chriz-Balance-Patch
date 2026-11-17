@@ -110,5 +110,131 @@ class SaveProjectileTests(unittest.TestCase):
                 self.assertEqual(before, _raw_tree(override))
 
 
+    def test_preseeded_tracking_gets_canonical_pulses_and_keeps_ids(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            game = Path(tmp)
+            override = game / "override"
+            override.mkdir()
+            _write_marker_key_and_bif(game)
+            (game / "dialog.tlk").write_bytes(ONE_EMPTY_STRING_TLK)
+            (game / "WeiDU.log").write_text("")
+            (game / "lang/en_US").mkdir(parents=True)
+            (game / "lang/en_US/dialog.tlk").write_bytes(ONE_EMPTY_STRING_TLK)
+            tracking = MOD / "Spells"
+            dest = game / "ArtisansKitpack/Spells"
+            shutil.copytree(tracking / "tracking", dest / "tracking")
+            for name in ("tracking.tpa", "tracking_projectiles.tpa"):
+                shutil.copy2(tracking / name, dest / name)
+            shutil.copy2(tracking / "tracking/C0CL922.SPL", override)
+            donor = (tracking / "tracking/projectile/C0TRKP01.PRO").read_bytes()
+            stale = bytearray(donor)
+            stale[0x0C] &= ~0x40
+            for profile in range(1, 4):
+                (override / f"C0TRKP0{profile}.PRO").write_bytes(stale)
+            (override / "PROJECTL.IDS").write_text(
+                "IDS V1.0\n718 C0TRKP01\n726 C0TRKP02\n733 C0TRKP03\n"
+            )
+            (override / "MISSILE.IDS").write_text("IDS V1.0\n0 NONE\n")
+            (game / "test.tp2").write_text(
+                "BACKUP ~backup~\nAUTHOR ~test~\nBEGIN ~Tracking mutation~\n"
+                "OUTER_SPRINT MOD_FOLDER ~ArtisansKitpack~\n"
+                "INCLUDE ~ArtisansKitpack/Spells/tracking.tpa~\n"
+            )
+            for name in ("SPCL922f", "SPCL922G", "SPCL922H"):
+                (override / f"{name}.SPL").write_bytes((tracking / "tracking" / f"{name}.SPL").read_bytes())
+            before = _raw_tree(override)
+            for operation in ("install", "uninstall"):
+                result = subprocess.run(
+                    [str(WEIDU), "test.tp2", "--no-auto-tp2", "--game", str(game),
+                     "--use-lang", "en_US", "--language", "0", "--no-exit-pause", f"--force-{operation}-list", "0"],
+                    cwd=game, text=True, capture_output=True, timeout=60,
+                )
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                if operation == "install":
+                    for i, (radius, number, spell) in enumerate(
+                        ((800, 719, "SPCL922F"), (1200, 727, "SPCL922G"), (1600, 734, "SPCL922H")), 1
+                    ):
+                        expected = bytearray(donor)
+                        struct.pack_into("<HH", expected, 0x204, radius, radius)
+                        actual = (override / f"C0TRKP0{i}.PRO").read_bytes()
+                        self.assertEqual(expected, actual)
+                        self.assertTrue(actual[0x0C] & 0x40)
+                        headers = Spell((override / f"{spell}.SPL").read_bytes()).headers
+                        self.assertEqual({number}, {struct.unpack_from("<H", h, 0x26)[0] for h in headers})
+                else:
+                    self.assertEqual(before, _raw_tree(override))
+
+
+    def test_conditional_and_repeating_aura_producers_overwrite_projectile_fields(self):
+        auras = (
+            ("PaleMaster", "PMPASS8B", "C0AKSVA"),
+            ("Cavalier", "C0CAV02B", "C0AKSVA"),
+            ("Hivemaster", "C0HIVEI2", "C0AKSVA"),
+            ("Shapeshifter", "C0SS-HLB", "C0AKSVA"),
+            ("Kensai", "C0KN#03A", "C0AKSVN"),
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            game = Path(tmp)
+            override = game / "override"
+            override.mkdir()
+            _write_marker_key_and_bif(game)
+            (game / "dialog.tlk").write_bytes(ONE_EMPTY_STRING_TLK)
+            (game / "lang/en_US").mkdir(parents=True)
+            (game / "lang/en_US/dialog.tlk").write_bytes(ONE_EMPTY_STRING_TLK)
+            (game / "WeiDU.log").write_text("")
+            (override / "PROJECTL.IDS").write_text("IDS V1.0\n443 C0AKSVA\n510 C0AKSVN\n")
+            (override / "MISSILE.IDS").write_text("IDS V1.0\n0 NONE\n")
+            addon = game / "ArtisansKitpack"
+            (addon / "lib").mkdir(parents=True)
+            shutil.copy2(MOD / "lib/passive_projectile.tpa", addon / "lib")
+            shutil.copytree(MOD / "Spells/save_projectiles", addon / "Spells/save_projectiles")
+            for profile in ("C0AKSVA", "C0AKSVN"):
+                data = bytearray((addon / f"Spells/save_projectiles/{profile}.PRO").read_bytes())
+                data[0x0C] &= ~0x40
+                data[0x2C] |= 0x40
+                (override / f"{profile}.PRO").write_bytes(data)
+
+            calls = []
+            expected = {}
+            for producer, spell, profile in auras:
+                line = next(line for line in (MOD / f"lib/{producer}.tpa").read_text().splitlines()
+                            if line.startswith("LAF c0ak_passive_projectile"))
+                calls.append(line)
+                donor = next(path for path in MOD.rglob("*.SPL")
+                             if path.stem.upper() == spell)
+                data = bytearray(donor.read_bytes())
+                offset, count = struct.unpack_from("<IH", data, 0x64)
+                for index in range(count):
+                    struct.pack_into("<H", data, offset + index * 0x28 + 0x26, 1745)
+                (override / f"{spell}.SPL").write_bytes(data)
+                for index in range(count):
+                    struct.pack_into("<H", data, offset + index * 0x28 + 0x26,
+                                     444 if profile == "C0AKSVA" else 511)
+                expected[spell] = bytes(data)
+            (game / "test.tp2").write_text(
+                "BACKUP ~backup~\nAUTHOR ~test~\nBEGIN ~Passive player abilities~\n"
+                "OUTER_SPRINT MOD_FOLDER ~ArtisansKitpack~\n"
+                "INCLUDE ~ArtisansKitpack/lib/passive_projectile.tpa~\n"
+                + "\n".join(calls) + "\n"
+            )
+            before = _raw_tree(override)
+            for operation in ("install", "uninstall"):
+                result = subprocess.run(
+                    [str(WEIDU), "test.tp2", "--no-auto-tp2", "--game", str(game),
+                     "--use-lang", "en_US", "--language", "0", "--no-exit-pause",
+                     f"--force-{operation}-list", "0"],
+                    cwd=game, text=True, capture_output=True, timeout=60,
+                )
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                if operation == "install":
+                    for spell, desired in expected.items():
+                        self.assertEqual(desired, (override / f"{spell}.SPL").read_bytes())
+                    for profile in ("C0AKSVA", "C0AKSVN"):
+                        self.assertEqual((addon / f"Spells/save_projectiles/{profile}.PRO").read_bytes(),
+                                         (override / f"{profile}.PRO").read_bytes())
+                else:
+                    self.assertEqual(before, _raw_tree(override))
+
+
 if __name__ == "__main__":
     unittest.main()

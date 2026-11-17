@@ -122,3 +122,6 @@ The user marks a targeted creature with a Challenge, reducing both the target's 
 END
 
 END
+
+INCLUDE ~%MOD_FOLDER%/lib/passive_projectile.tpa~
+LAF c0ak_passive_projectile STR_VAR profile = ~C0AKSVA~ spell = ~C0CAV02B~ END

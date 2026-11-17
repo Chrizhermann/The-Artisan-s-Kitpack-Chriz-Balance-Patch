@@ -60,7 +60,9 @@ LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Spirit: Wolf~) STR_VA
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Spirit: Lion~) STR_VAR bam_file = C0D2_I3 RET C0D2_I3 = icon END
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Spirit: Snake~) STR_VAR bam_file = C0D2_I4 RET C0D2_I4 = icon END
 
+// The guardian's selected spirit runs this pulse continuously.
 ADD_PROJECTILE ~%MOD_FOLDER%/Druid/TotemicDruid/projectile/C0D2_P1.PRO~ ~C0 Totemic Projectile One Target~
+COPY ~%MOD_FOLDER%/Druid/TotemicDruid/projectile/C0D2_P1.PRO~ ~override~
 
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~C0 Instant Area Allies~
 COPY ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~override~

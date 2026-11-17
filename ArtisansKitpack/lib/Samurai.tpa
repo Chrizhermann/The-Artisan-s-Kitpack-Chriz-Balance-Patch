@@ -467,7 +467,9 @@ END
 LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Bushido~) STR_VAR bam_file = C0SAMI01 RET C0SAMI01 = icon END
 
 ADD_PROJECTILE ~%MOD_FOLDER%/Fighter/Samurai/pro/C0SAM02P.PRO~ ~C0 Samurai Bushido~
+COPY ~%MOD_FOLDER%/Fighter/Samurai/pro/C0SAM02P.PRO~ ~override~
 ADD_PROJECTILE ~%MOD_FOLDER%/Fighter/Samurai/pro/C0SAM02X.PRO~ ~C0 Samurai Bushido2~
+COPY ~%MOD_FOLDER%/Fighter/Samurai/pro/C0SAM02X.PRO~ ~override~
 COPY_EXISTING ~C0SAM02A.spl~ ~override~
   LPF ALTER_SPELL_HEADER
 	INT_VAR
