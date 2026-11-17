@@ -102,6 +102,7 @@ SAY UNIDENTIFIED_DESC ~Smite Evil
 The paladin's next successful attack deals 1d6 + 1d6 additional damage for every 3 levels of the paladin to an evil-aligned creature.~
 	
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~C0 Instant Area Allies~
+COPY ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~override~
 
 COPY_EXISTING ~C0PAL04A.SPL~ OVERRIDE
   LPF ALTER_SPELL_HEADER

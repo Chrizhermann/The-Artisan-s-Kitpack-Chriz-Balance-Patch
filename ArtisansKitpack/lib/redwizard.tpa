@@ -161,6 +161,7 @@ COPY_EXISTING_REGEXP GLOB ~EDWIN.BCS~ ~override~
   END
 
 ADD_PROJECTILE ~ArtisansKitpack/spells/C0INAREL.PRO~ ~C0 Instant Area Enemies Large~
+COPY ~ArtisansKitpack/spells/C0INAREL.PRO~ ~override~
 
 COPY_EXISTING ~C0REDW1.SPL~ OVERRIDE
   LPF ALTER_SPELL_HEADER

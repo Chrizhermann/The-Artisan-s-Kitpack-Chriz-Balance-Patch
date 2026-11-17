@@ -107,10 +107,13 @@ COPY ~%MOD_FOLDER%/lua/m_c0pal2.lua~      ~override~ // Lua file read by EEex, p
 END
 
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~C0 Instant Area Allies~
+COPY ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~override~
 
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREE.PRO~ ~C0 Instant Area Enemies~
+COPY ~%MOD_FOLDER%/spells/C0INAREE.PRO~ ~override~
 
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREL.PRO~ ~C0 Instant Area Enemies Large~
+COPY ~%MOD_FOLDER%/spells/C0INAREL.PRO~ ~override~
 
 COPY_EXISTING ~C0INQ01A.SPL~ OVERRIDE
   LPF ALTER_SPELL_HEADER

@@ -63,6 +63,7 @@ LAF cd_new_portrait_icon INT_VAR string = RESOLVE_STR_REF(~Spirit: Snake~) STR_V
 ADD_PROJECTILE ~%MOD_FOLDER%/Druid/TotemicDruid/projectile/C0D2_P1.PRO~ ~C0 Totemic Projectile One Target~
 
 ADD_PROJECTILE ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~C0 Instant Area Allies~
+COPY ~%MOD_FOLDER%/spells/C0INAREP.PRO~ ~override~
 
 COPY_EXISTING ~C0D2_A1A.SPL~ OVERRIDE
   LPF ALTER_SPELL_HEADER
