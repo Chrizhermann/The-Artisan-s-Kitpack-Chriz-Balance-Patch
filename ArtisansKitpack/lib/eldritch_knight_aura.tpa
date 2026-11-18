@@ -1,0 +1,5 @@
+// Awareness keeps the same area and enemy targeting as INAREANP.
+ADD_PROJECTILE ~%MOD_FOLDER%/MultiKit/Eldritch_Knight/projectiles/C0EK1P.PRO~ ~Eldritch Knight Awareness~
+COPY ~%MOD_FOLDER%/MultiKit/Eldritch_Knight/projectiles/C0EK1P.PRO~ ~override~
+COPY ~%MOD_FOLDER%/MultiKit/Eldritch_Knight/spells/c0ek1.spl~ ~override~
+  LPF ALTER_SPELL_HEADER INT_VAR projectile = C0EK1P END

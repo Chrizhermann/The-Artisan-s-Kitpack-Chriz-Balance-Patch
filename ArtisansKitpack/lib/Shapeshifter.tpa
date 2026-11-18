@@ -283,3 +283,6 @@ SAY NAME1 ~Fury: Acidhide~
 COPY ~%MOD_FOLDER%/Druid/Shapeshifter/spells/C0SS-HLH.spl~ ~override~
 LPF ALTER_EFFECT INT_VAR match_opcode = 142 parameter2 = C0SS-ELI END
 SAY NAME1 ~Fury: Stormclaw~
+
+INCLUDE ~%MOD_FOLDER%/lib/passive_projectile.tpa~
+LAF c0ak_passive_projectile STR_VAR profile = ~C0AKSVA~ spell = ~C0SS-HLB~ END

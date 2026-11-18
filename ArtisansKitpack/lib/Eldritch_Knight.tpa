@@ -1,6 +1,8 @@
 COPY ~%MOD_FOLDER%/MultiKit/Eldritch_Knight/2das~ ~override~
 COPY ~%MOD_FOLDER%/MultiKit/Eldritch_Knight/spells~ ~override~
 
+INCLUDE ~%MOD_FOLDER%/lib/eldritch_knight_aura.tpa~
+
 LAF ADD_KIT_EX
   INT_VAR
     // Mage	= 1

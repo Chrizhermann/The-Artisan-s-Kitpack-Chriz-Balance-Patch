@@ -213,3 +213,6 @@ SAY NAME1 ~Devastating Critical~
 SAY UNIDENTIFIED_DESC ~The Kensai's critical hits kill the target instantly on a failed Saving Throw vs. Death. Creatures with 8 or lower HD die with no save.
 
 Requires: Second Wind~
+
+INCLUDE ~%MOD_FOLDER%/lib/passive_projectile.tpa~
+LAF c0ak_passive_projectile STR_VAR profile = ~C0AKSVN~ spell = ~C0KN#03A~ END
