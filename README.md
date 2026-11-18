@@ -21,12 +21,12 @@ This fork exists strictly because I wanted a few balance knobs turned differentl
 
 ## Version identity
 
-This release is **`v4.81a-dev.85928f9-chriz.6`**: the upstream
+This release is **`v4.81a-dev.85928f9-chriz.7`**: the upstream
 release and included development snapshot, followed by our patch revision.
 This replaces independent `chriz-v1.x` numbering for future releases. Published
 `chriz-v1.6.0` assets remain unchanged. CEBG updates its pinned artifact separately.
 See the [versioning rules](docs/fork-versioning.md)
-and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.6.md).
+and [release notes](docs/releases/v4.81a-dev.85928f9-chriz.7.md).
 
 ## Installation
 
@@ -87,6 +87,11 @@ redistribution should credit Artemius_I first and link to the current
 website above.
 
 ## Changes vs upstream
+
+- **Saving and resting during passive kit effects** — recurring auras, Combat
+  Casting, Tracking, Totemic Guardian and the Samurai's Bushido proximity
+  check use save-compatible projectile profiles. The affected kits and
+  installer checks are listed in the [release notes](docs/releases/v4.81a-dev.85928f9-chriz.7.md).
 
 - **Shapeshifter white and greater white werewolf: no empty attack 1 directions** (components
   5110/5111) — `werewolf_white/C0W2A1.BAM` and
